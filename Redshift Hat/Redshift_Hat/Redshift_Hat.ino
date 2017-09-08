@@ -47,6 +47,7 @@ const uint16_t colors[] = {
   matrix.Color(255, 0, 0), matrix.Color(0, 255, 0), matrix.Color(0, 0, 255) };
 
 void setup() {
+  Serial.begin(9600);
   matrix.begin();
   matrix.setTextWrap(false);
   matrix.setBrightness(10);
@@ -56,21 +57,38 @@ int Wh=matrix.Color(255,255,255);
 int Re=colors[0];
 int Bl=matrix.Color(0,0,0);
 int x;//    = matrix.width();
+int y;
+int z;
+int scrollVar = 0;
+int testVar1;
+int newX;
 int pass = 0;
-int color[]={Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re,
-Wh, Wh, Wh, Bl, Re, Wh, Wh, Wh, Bl, Wh, Wh, Bl, Re, Wh, Wh, Wh, Bl, Wh, Bl, Wh, Bl, Wh, Wh, Wh, Bl, Wh, Wh, Wh, Wh, Wh, Wh, Bl,
-Wh, Bl, Bl, Wh, Bl, Wh, Bl, Bl, Bl, Wh, Bl, Wh, Bl, Wh, Bl, Bl, Bl, Wh, Bl, Wh, Bl, Bl, Wh, Bl, Bl, Wh, Bl, Bl, Bl, Wh, Bl, Bl,
-Wh, Bl, Re, Wh, Bl, Wh, Wh, Bl, Re, Wh, Bl, Wh, Bl, Wh, Wh, Wh, Bl, Wh, Wh, Wh, Bl, Re, Wh, Bl, Re, Wh, Wh, Bl, Re, Wh, Bl, Re,
-Wh, Wh, Wh, Bl, Re, Wh, Bl, Bl, Re, Wh, Re, Wh, Bl, Bl, Bl, Wh, Bl, Wh, Bl, Wh, Bl, Re, Wh, Bl, Re, Wh, Bl, Bl, Re, Wh, Bl, Re,
-Wh, Bl, Bl, Wh, Bl, Wh, Wh, Wh, Bl, Wh, Wh, Bl, Bl, Wh, Wh, Wh, Bl, Wh, Bl, Wh, Bl, Wh, Wh, Wh, Bl, Wh, Bl, Re, Re, Wh, Bl, Re,
-Wh, Bl, Re, Bl, Wh, Bl, Bl, Bl, Bl, Bl, Bl, Bl, Re, Bl, Bl, Bl, Bl, Bl, Bl, Bl, Bl, Bl, Bl, Bl, Bl, Bl, Re, Re, Re, Bl, Bl, Re,
-Bl, Bl, Re, Re, Bl, Bl, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re};
+int colorMatrix[]={Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re,
+Wh, Wh, Wh, Re, Re, Wh, Wh, Wh, Re, Wh, Wh, Re, Re, Wh, Wh, Wh, Re, Wh, Re, Wh, Re, Wh, Wh, Wh, Re, Wh, Wh, Wh, Wh, Wh, Wh, Re,
+Wh, Re, Re, Wh, Re, Wh, Re, Re, Re, Wh, Re, Wh, Re, Wh, Re, Re, Re, Wh, Re, Wh, Re, Re, Wh, Re, Re, Wh, Re, Re, Re, Wh, Re, Re,
+Wh, Re, Re, Wh, Re, Wh, Wh, Re, Re, Wh, Re, Wh, Re, Wh, Wh, Wh, Re, Wh, Wh, Wh, Re, Re, Wh, Re, Re, Wh, Wh, Re, Re, Wh, Re, Re,
+Wh, Wh, Wh, Re, Re, Wh, Re, Re, Re, Wh, Re, Wh, Re, Re, Re, Wh, Re, Wh, Re, Wh, Re, Re, Wh, Re, Re, Wh, Re, Re, Re, Wh, Re, Re,
+Wh, Re, Re, Wh, Re, Wh, Wh, Wh, Re, Wh, Wh, Re, Re, Wh, Wh, Wh, Re, Wh, Re, Wh, Re, Wh, Wh, Wh, Re, Wh, Re, Re, Re, Wh, Re, Re,
+Wh, Re, Re, Re, Wh, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re,
+Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re,};
 void loop() {
-  Serial.begin(9600);
-  Serial.print(Re);
-  matrix.fillScreen(0);
-  for(x=0;x<=255;x++){
-    matrix.setPixelColor(x, color[x]);
+  matrix.fillScreen(Re);
+  if(scrollVar>31){
+    scrollVar=0;
+  }
+  z=0;
+  for(y=0; y<=7; y++) {
+    for(x=0; x<=31; x++) {
+      //testVar1=((y*32)+(x-32));
+      newX= x+scrollVar;
+      if(newX<=31){
+        matrix.drawPixel(newX,y, colorMatrix[z]);
+      }else{
+        matrix.drawPixel((newX-32),y, colorMatrix[z]);
+      }
+      //Serial.print(x);
+      z=z+1;
+    }
   }
   matrix.show();
 //  matrix.setCursor(x, 0);
@@ -81,5 +99,6 @@ void loop() {
 //    matrix.setTextColor(colors[pass]);
 //  }
 //  matrix.show();
+scrollVar=scrollVar+1;
   delay(100);
 }
