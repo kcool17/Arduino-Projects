@@ -41,7 +41,10 @@ NEO_MATRIX_TOP + NEO_MATRIX_LEFT +
 NEO_MATRIX_COLUMNS + NEO_MATRIX_ZIGZAG,
 NEO_GRB + NEO_KHZ800);
 
-
+const int OUTDOOR_BRIGHTNESS= 60;
+const int INDOOR_BRIGHTNESS = 30;
+const int LOW_BRIGHTNESS = 10;
+const int VERY_LOW_BRIGHTNESS = 5;
 
 const uint16_t colors[] = {
   matrix.Color(255, 0, 0), matrix.Color(0, 255, 0), matrix.Color(0, 0, 255) };
@@ -50,7 +53,7 @@ void setup() {
   Serial.begin(9600);
   matrix.begin();
   matrix.setTextWrap(false);
-  matrix.setBrightness(10);
+  matrix.setBrightness(OUTDOOR_BRIGHTNESS);
   matrix.setTextColor(colors[0]);
 }
 int Wh=matrix.Color(255,255,255);
@@ -59,7 +62,7 @@ int Bl=matrix.Color(0,0,0);
 int x;//    = matrix.width();
 int y;
 int z;
-int scrollVar = 0;
+int scrollVar = 31;
 int testVar1;
 int newX;
 int pass = 0;
@@ -73,8 +76,8 @@ Wh, Re, Re, Re, Wh, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, 
 Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re,};
 void loop() {
   matrix.fillScreen(Re);
-  if(scrollVar>31){
-    scrollVar=0;
+  if(scrollVar<0){
+    scrollVar=31;
   }
   z=0;
   for(y=0; y<=7; y++) {
@@ -99,6 +102,6 @@ void loop() {
 //    matrix.setTextColor(colors[pass]);
 //  }
 //  matrix.show();
-scrollVar=scrollVar+1;
+  scrollVar=scrollVar-1;
   delay(100);
 }
