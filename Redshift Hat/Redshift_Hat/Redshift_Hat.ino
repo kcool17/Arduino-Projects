@@ -49,6 +49,23 @@ const int VERY_LOW_BRIGHTNESS = 5;
 const uint16_t colors[] = {
   matrix.Color(255, 0, 0), matrix.Color(0, 255, 0), matrix.Color(0, 0, 255) };
 
+
+//Image #1 declaration; put Python output inside array
+int colorMatrix1[]={
+  matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), 
+matrix.Color(255, 255, 255), matrix.Color(255, 255, 255), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 255, 255), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 255, 255), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 255, 255), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 255, 255), matrix.Color(255, 255, 255), matrix.Color(255, 255, 255), matrix.Color(255, 255, 255), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), 
+matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), 
+matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 255, 255), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 255, 255), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), 
+matrix.Color(255, 255, 255), matrix.Color(255, 255, 255), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), 
+matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 255, 255), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 255, 255), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 255, 255), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), 
+matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), 
+matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0),
+  };
+
+
+
+
+
 void setup() {
   Serial.begin(9600);
   matrix.begin();
@@ -66,14 +83,6 @@ int scrollVar = 31;
 int testVar1;
 int newX;
 int pass = 0;
-int colorMatrix[]={Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re,
-Wh, Wh, Wh, Re, Re, Wh, Wh, Wh, Re, Wh, Wh, Re, Re, Wh, Wh, Wh, Re, Wh, Re, Wh, Re, Wh, Wh, Wh, Re, Wh, Wh, Wh, Wh, Wh, Wh, Re,
-Wh, Re, Re, Wh, Re, Wh, Re, Re, Re, Wh, Re, Wh, Re, Wh, Re, Re, Re, Wh, Re, Wh, Re, Re, Wh, Re, Re, Wh, Re, Re, Re, Wh, Re, Re,
-Wh, Re, Re, Wh, Re, Wh, Wh, Re, Re, Wh, Re, Wh, Re, Wh, Wh, Wh, Re, Wh, Wh, Wh, Re, Re, Wh, Re, Re, Wh, Wh, Re, Re, Wh, Re, Re,
-Wh, Wh, Wh, Re, Re, Wh, Re, Re, Re, Wh, Re, Wh, Re, Re, Re, Wh, Re, Wh, Re, Wh, Re, Re, Wh, Re, Re, Wh, Re, Re, Re, Wh, Re, Re,
-Wh, Re, Re, Wh, Re, Wh, Wh, Wh, Re, Wh, Wh, Re, Re, Wh, Wh, Wh, Re, Wh, Re, Wh, Re, Wh, Wh, Wh, Re, Wh, Re, Re, Re, Wh, Re, Re,
-Wh, Re, Re, Re, Wh, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re,
-Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re, Re,};
 void loop() {
   matrix.fillScreen(Re);
   if(scrollVar<0){
@@ -85,9 +94,9 @@ void loop() {
       //testVar1=((y*32)+(x-32));
       newX= x+scrollVar;
       if(newX<=31){
-        matrix.drawPixel(newX,y, colorMatrix[z]);
+        matrix.drawPixel(newX,y, colorMatrix1[z]);
       }else{
-        matrix.drawPixel((newX-32),y, colorMatrix[z]);
+        matrix.drawPixel((newX-32),y, colorMatrix1[z]);
       }
       //Serial.print(x);
       z=z+1;
