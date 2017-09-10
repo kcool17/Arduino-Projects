@@ -7,8 +7,26 @@
 #ifndef PSTR
  #define PSTR // Make Arduino Due happy
 #endif
-
+#include <Keypad.h>
+#include <TimedAction.h>
 #define PIN 6
+
+//KEYPAD DECLARATION
+const byte ROWS = 4; //four rows
+const byte COLS = 4; //four columns
+//define the cymbols on the buttons of the keypads
+char hexaKeys[ROWS][COLS] = {
+  {'1','2','3','A'},
+  {'4','5','6','B'},
+  {'7','8','9','C'},
+  {'*','0','#','D'}
+};
+byte rowPins[ROWS] = {9, 8, 7, 6}; //connect to the row pinouts of the keypad
+byte colPins[COLS] = {5, 4, 3, 2}; //connect to the column pinouts of the keypad
+
+//initialize an instance of class NewKeypad
+Keypad customKeypad = Keypad( makeKeymap(hexaKeys), rowPins, colPins, ROWS, COLS); 
+
 
 // MATRIX DECLARATION:
 // Parameter 1 = width of NeoPixel matrix
@@ -88,7 +106,7 @@ void setup() {
   Serial.begin(9600);
   matrix.begin();
   matrix.setTextWrap(false);
-  matrix.setBrightness(INDOOR_BRIGHTNESS);
+  matrix.setBrightness(OUTDOOR_BRIGHTNESS);
   matrix.setTextColor(colors[0]);
 }
 int Wh=matrix.Color(255,255,255);
@@ -101,10 +119,12 @@ int scrollVar = 31;
 int testVar1;
 int newX;
 int pass = 0;
+int mode =1;
 
 
-void loop() {
-  matrix.fillScreen(0);
+
+/*Functions*/
+void scrollImage(){
   if(SCROLLING_IMAGE_BACKWARD){
     if(scrollVar<0){
       scrollVar=31;
@@ -116,30 +136,7 @@ void loop() {
   }else{
     scrollVar=0;
   }
-  z=0;
-  for(y=0; y<=7; y++) {
-    for(x=0; x<=31; x++) {
-      //testVar1=((y*32)+(x-32));
-      newX= x+scrollVar;
-      if(newX<=31){
-        matrix.drawPixel(newX,y, logoMatrix1[z]);
-      }else{
-        matrix.drawPixel((newX-32),y, logoMatrix1[z]);
-      }
-      //Serial.print(x);
-      z=z+1;
-    }
-  }
-  matrix.show();
-//  matrix.setCursor(x, 0);
-//  matrix.print(F("Howdy"));
-//  if(--x < -36) {
-//    x = matrix.width();
-//    if(++pass >= 3) pass = 0;
-//    matrix.setTextColor(colors[pass]);
-//  }
-//  matrix.show();
-if(SCROLLING_IMAGE_BACKWARD){
+  if(SCROLLING_IMAGE_BACKWARD){
     scrollVar=scrollVar-1;
   }else if(SCROLLING_IMAGE_FORWARD){
     scrollVar=scrollVar+1;
@@ -147,5 +144,45 @@ if(SCROLLING_IMAGE_BACKWARD){
     scrollVar=0;
   }
   
-  delay(100);
+}
+void animateImage(){
+  matrix.fillScreen(0);
+  z=0;
+  for(y=0; y<=7; y++) {
+    for(x=0; x<=31; x++) {
+      newX= x+scrollVar;
+      if(newX<=31){
+        matrix.drawPixel(newX,y, logoMatrix1[z]);
+      }else{
+        matrix.drawPixel((newX-32),y, logoMatrix1[z]);
+      }
+      z=z+1;
+    }
+  }
+  matrix.show();
+}
+
+TimedAction scrollThread = TimedAction(100,scrollImage);
+TimedAction animateThread = TimedAction(20,animateImage);
+
+void loop() {
+  animateThread.check();
+  scrollThread.check();
+  /*char customKey = customKeypad.getKey();
+  if(customKey="D"){
+    mode=4;
+  }
+  if(customKey="C"){
+    mode=3;
+  }
+  if(customKey="B"){
+    mode=2;
+  }
+  if(customKey="A"){
+    mode=1;
+  }
+  delay(10);*/
+  
+  
+  
 }
