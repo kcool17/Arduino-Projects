@@ -46,6 +46,10 @@ const int INDOOR_BRIGHTNESS = 30;
 const int LOW_BRIGHTNESS = 10;
 const int VERY_LOW_BRIGHTNESS = 5;
 
+//Change these if you want the image to scroll forward, backward, or not at all. Can also be changed in program
+bool SCROLLING_IMAGE_FORWARD =  0;
+bool SCROLLING_IMAGE_BACKWARD = 1;
+
 const uint16_t colors[] = {
   matrix.Color(255, 0, 0), matrix.Color(0, 255, 0), matrix.Color(0, 0, 255) };
 
@@ -83,10 +87,20 @@ int scrollVar = 31;
 int testVar1;
 int newX;
 int pass = 0;
+
+
 void loop() {
-  matrix.fillScreen(Re);
-  if(scrollVar<0){
-    scrollVar=31;
+  matrix.fillScreen(0);
+  if(SCROLLING_IMAGE_BACKWARD){
+    if(scrollVar<0){
+      scrollVar=31;
+    }
+  }else if(SCROLLING_IMAGE_FORWARD){
+    if(scrollVar>31){
+      scrollVar=0;
+    }
+  }else{
+    scrollVar=0;
   }
   z=0;
   for(y=0; y<=7; y++) {
@@ -111,6 +125,13 @@ void loop() {
 //    matrix.setTextColor(colors[pass]);
 //  }
 //  matrix.show();
-  scrollVar=scrollVar-1;
+if(SCROLLING_IMAGE_BACKWARD){
+    scrollVar=scrollVar-1;
+  }else if(SCROLLING_IMAGE_FORWARD){
+    scrollVar=scrollVar+1;
+  }else{
+    scrollVar=0;
+  }
+  
   delay(100);
 }
