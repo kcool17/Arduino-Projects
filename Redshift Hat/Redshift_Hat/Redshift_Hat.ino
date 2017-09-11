@@ -21,8 +21,8 @@ char hexaKeys[ROWS][COLS] = {
   {'7','8','9','C'},
   {'*','0','#','D'}
 };
-byte rowPins[ROWS] = {9, 8, 7, 6}; //connect to the row pinouts of the keypad
-byte colPins[COLS] = {5, 4, 3, 2}; //connect to the column pinouts of the keypad
+byte rowPins[ROWS] = {29, 28, 27, 26}; //connect to the row pinouts of the keypad
+byte colPins[COLS] = {25, 24, 23, 22}; //connect to the column pinouts of the keypad
 
 //initialize an instance of class NewKeypad
 Keypad customKeypad = Keypad( makeKeymap(hexaKeys), rowPins, colPins, ROWS, COLS); 
@@ -72,7 +72,7 @@ const uint16_t colors[] = {
   matrix.Color(255, 0, 0), matrix.Color(0, 255, 0), matrix.Color(0, 0, 255) };
 
 //8x32 Redshift Logo #1 declaration; put Python output inside array
-int logoMatrix1[]={
+uint16_t logoMatrix1[]={
 matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), 
 matrix.Color(255, 255, 255), matrix.Color(255, 255, 255), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 255, 255), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 255, 255), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 255, 255), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 255, 255), matrix.Color(255, 255, 255), matrix.Color(255, 255, 255), matrix.Color(255, 255, 255), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), 
 matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 255, 255), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), 
@@ -85,7 +85,7 @@ matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matrix.Color(255, 0, 0), matri
   
 };
 //8x32 Test Image #1 
-int testMatrix1[]={
+uint16_t testMatrix1[]={
 matrix.Color(0, 0, 0), matrix.Color(0, 0, 0), matrix.Color(0, 0, 0), matrix.Color(0, 0, 0), matrix.Color(0, 0, 0), matrix.Color(0, 0, 0), matrix.Color(0, 0, 0), matrix.Color(0, 0, 0), matrix.Color(0, 0, 0), matrix.Color(99, 161, 247), matrix.Color(0, 0, 0), matrix.Color(0, 0, 0), matrix.Color(0, 0, 0), matrix.Color(0, 0, 0), matrix.Color(0, 0, 0), matrix.Color(0, 0, 0), matrix.Color(0, 0, 0), matrix.Color(0, 0, 0), matrix.Color(0, 0, 0), matrix.Color(0, 0, 0), matrix.Color(0, 0, 0), matrix.Color(0, 0, 0), matrix.Color(0, 0, 0), matrix.Color(254, 254, 254), matrix.Color(254, 254, 254), matrix.Color(0, 0, 0), matrix.Color(0, 0, 0), matrix.Color(0, 0, 0), matrix.Color(0, 0, 0), matrix.Color(0, 0, 0), matrix.Color(0, 0, 0), matrix.Color(0, 0, 0), 
 matrix.Color(0, 0, 0), matrix.Color(254, 127, 0), matrix.Color(254, 127, 0), matrix.Color(254, 127, 0), matrix.Color(254, 127, 0), matrix.Color(254, 127, 0), matrix.Color(0, 0, 0), matrix.Color(0, 0, 0), matrix.Color(0, 0, 0), matrix.Color(99, 161, 247), matrix.Color(0, 0, 254), matrix.Color(0, 0, 254), matrix.Color(0, 0, 254), matrix.Color(0, 0, 254), matrix.Color(0, 0, 254), matrix.Color(0, 0, 254), matrix.Color(0, 0, 0), matrix.Color(0, 0, 0), matrix.Color(0, 0, 0), matrix.Color(0, 0, 0), matrix.Color(0, 0, 0), matrix.Color(0, 0, 0), matrix.Color(0, 0, 0), matrix.Color(0, 254, 254), matrix.Color(0, 254, 254), matrix.Color(0, 0, 0), matrix.Color(0, 0, 0), matrix.Color(0, 0, 0), matrix.Color(0, 0, 0), matrix.Color(0, 0, 0), matrix.Color(254, 245, 2), matrix.Color(0, 0, 0), 
 matrix.Color(0, 0, 0), matrix.Color(254, 127, 0), matrix.Color(254, 245, 2), matrix.Color(254, 245, 2), matrix.Color(254, 245, 2), matrix.Color(254, 245, 2), matrix.Color(0, 0, 0), matrix.Color(0, 0, 0), matrix.Color(0, 0, 0), matrix.Color(99, 161, 247), matrix.Color(0, 0, 254), matrix.Color(0, 0, 254), matrix.Color(0, 0, 254), matrix.Color(0, 0, 254), matrix.Color(0, 0, 254), matrix.Color(0, 0, 254), matrix.Color(0, 254, 254), matrix.Color(0, 254, 254), matrix.Color(0, 254, 254), matrix.Color(0, 254, 254), matrix.Color(0, 254, 254), matrix.Color(0, 254, 254), matrix.Color(0, 254, 254), matrix.Color(0, 254, 254), matrix.Color(0, 254, 254), matrix.Color(254, 254, 254), matrix.Color(0, 0, 0), matrix.Color(254, 127, 0), matrix.Color(0, 0, 0), matrix.Color(254, 254, 254), matrix.Color(254, 245, 2), matrix.Color(254, 245, 2), 
@@ -106,7 +106,7 @@ void setup() {
   Serial.begin(9600);
   matrix.begin();
   matrix.setTextWrap(false);
-  matrix.setBrightness(OUTDOOR_BRIGHTNESS);
+  matrix.setBrightness(INDOOR_BRIGHTNESS);
   matrix.setTextColor(colors[0]);
 }
 int Wh=matrix.Color(255,255,255);
@@ -168,20 +168,21 @@ TimedAction animateThread = TimedAction(20,animateImage);
 void loop() {
   animateThread.check();
   scrollThread.check();
-  /*char customKey = customKeypad.getKey();
-  if(customKey="D"){
+  char customKey = customKeypad.getKey();
+  if(customKey=="D"){
     mode=4;
   }
-  if(customKey="C"){
+  if(customKey=="C"){
     mode=3;
   }
-  if(customKey="B"){
+  if(customKey=="B"){
     mode=2;
   }
-  if(customKey="A"){
+  if(customKey=="A"){
     mode=1;
   }
-  delay(10);*/
+  Serial.print(customKey);
+  delay(10);
   
   
   
