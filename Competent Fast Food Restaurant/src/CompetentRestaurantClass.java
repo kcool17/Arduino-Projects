@@ -33,34 +33,34 @@ public class CompetentRestaurantClass {
 		Scanner input= new Scanner(System.in);
 		double total=0.00;
 		int userOrder=0;
-		printMenu();
 		while(true) {//Order loop
-			System.out.println("What do you want to buy? (Type 'None' if you're done)");
+			printMenu();
+			System.out.println("What do you want to buy? (Type 'None'/'Done' if you're done, and replace spaces with '_')");
 			String answer=(input.next()).toLowerCase();
-			if (answer=="none") {
+			if (answer.equals("none")|| answer.equals("done")) {
 				break;
-			}else if (answer=="hamburger") {
+			}else if (answer.equals("hamburger")) {
 				userOrder=0;
-			}else if (answer=="french fries" || answer=="fries") {
+			}else if (answer.equals("french fries") || answer.equals("fries")) {
 				userOrder=1;
-			}else if (answer=="salad") {
+			}else if (answer.equals("salad")) {
 				userOrder=2;
-			}else if (answer=="ice cream") {
+			}else if (answer.equals("ice_cream")) {
 				userOrder=3;
-			}else if (answer=="drink") {
+			}else if (answer.equals("drink")) {
 				userOrder=4;
 			}else{
 				userOrder=-1;
 			}
 			if(userOrder!=-1) {
 				total=total+ menuCost[userOrder];
-				System.out.printf("%-7s$%5.2f\n", "Total= ",total);
+				System.out.printf("%-7s$%5.2f\n", "Current Total= ",total);
 			}else{
 				System.out.println("Invalid Input, please try again.");
-				System.out.println(answer);
+				
 			}
 		}
-		System.out.println("Done");
+		System.out.printf("Final Total: $%5.2f",(total*6.25));
 		
 	}
 
