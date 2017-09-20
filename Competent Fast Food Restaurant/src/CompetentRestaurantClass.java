@@ -89,6 +89,7 @@ public class CompetentRestaurantClass {
 	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
+		
 		Scanner input= new Scanner(System.in);
 		double total=0.00;
 		int userOrder=0;
@@ -99,12 +100,12 @@ public class CompetentRestaurantClass {
 			printMenu();
 			numFood=0;
 			if (loop2) {
-				System.out.println("Anything else? (Type 'None'/'Done' if you're done, and replace spaces with '_')");
+				System.out.println("Anything else? (Type 'None'/'Done' if you're done)");
 			}else {
-				System.out.println("What do you want to buy? (Type 'None'/'Done' if you're done, and replace spaces with '_')");
+				System.out.println("What do you want to buy? (Type 'None'/'Done' if you're done)");
 			}
 			loop2=true;
-			String answer=(input.next()).toLowerCase();
+			String answer=(input.nextLine()).toLowerCase();
 			if (answer.equals("none")|| answer.equals("done")) {
 				break;
 			}else if (answer.equals("hamburger")) {
@@ -113,7 +114,7 @@ public class CompetentRestaurantClass {
 				userOrder=1;
 			}else if (answer.equals("salad")) {
 				userOrder=2;
-			}else if (answer.equals("ice_cream")) {
+			}else if (answer.equals("ice cream")) {
 				userOrder=3;
 			}else if (answer.equals("drink")) {
 				userOrder=4;
