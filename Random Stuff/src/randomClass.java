@@ -5,8 +5,8 @@ public class randomClass {
 		double b=4;
 		double a=4;
 		double c =1;
-		double x = (-b + Math.sqrt(Math.pow(b, 2)-(4*a*c)))/(2*a);
-		System.out.println(x);
+		double z = Math.abs(b-a);
+		System.out.println(z);
 	}
 
 }
