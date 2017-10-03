@@ -9,6 +9,7 @@ player1 = Player(15, 2)
 #Do a battle
 myBattle = Battle(player1, "Test_Enemy")
 myBattle.doBattle()
-print player1.hitPoints
+
+
 
 
