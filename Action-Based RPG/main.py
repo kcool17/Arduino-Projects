@@ -14,6 +14,7 @@ clock = pygame.time.Clock()
 image_library = {}
 #Image retriever
 def get_image(path):
+        global image_library
         image = image_library.get(path)
         if image == None:
                 canonicalized_path = path.replace('/', os.sep).replace('\\', os.sep)
