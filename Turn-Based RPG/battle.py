@@ -2,7 +2,12 @@
 from player import Player
 from enemy import Enemy
 
+#Battle Menu Dictionary- This is what the player chooses from to attack, defend, use an item, etc.
+battle_menu = {
+    
 
+
+    }
 #Enemy Dictionary- Contains all of the info about the enemies in the game, to be input into the class
 #Format: "Enemy_Name: [healthPoints, attackPower]"
 enemy_dictionary = {
