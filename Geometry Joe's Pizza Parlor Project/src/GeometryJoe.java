@@ -22,16 +22,16 @@ public class GeometryJoe {
 		final double SMALL_PIZZA_DIAMETER = 10;
 		
 		/*Customer's order choices (Pizza #1)*/
-		final double CUSTOMER_PIZZA_DIAMETER_1 = LARGE_PIZZA_DIAMETER; //Change these for different customer orders
-		final int REGULAR_TOPPINGS_AMOUNT_1 = 2;
+		final double CUSTOMER_PIZZA_DIAMETER_1 = MEDIUM_PIZZA_DIAMETER; //Change these for different customer orders
+		final int REGULAR_TOPPINGS_AMOUNT_1 = 0;
 		final int PREMIUM_TOPPINGS_AMOUNT_1 = 0;
-		final int NUM_PIZZA_1 = 8; //Number of this type of pizza
+		final int NUM_PIZZA_1 = 1; //Number of this type of pizza
 		
 		/*Customer's order choices (Pizza #2)*/
 		final double CUSTOMER_PIZZA_DIAMETER_2 = LARGE_PIZZA_DIAMETER; //Change these for different customer orders
 		final int REGULAR_TOPPINGS_AMOUNT_2 = 6;
 		final int PREMIUM_TOPPINGS_AMOUNT_2 = 4;
-		final int NUM_PIZZA_2 = 16; //Number of this type of pizza
+		final int NUM_PIZZA_2 = 1; //Number of this type of pizza
 		
 		/*Customer's order choices (Pizza #3)*/
 		final double CUSTOMER_PIZZA_DIAMETER_3 = SMALL_PIZZA_DIAMETER; //Change these for different customer orders
