@@ -46,25 +46,39 @@ class Player(object):
     def move_sprite(self):
         if self.isMoving:
             global iteration
-            """self.change_sprite('move-' + str(iteration) + '-'+self.direction_set(self.direction))
-            if iteration == 2:
-                iteration = 1
-            else:
-                iteration = iteration + 1
-            for i in range(200):
-                if self.isMoving == False:
-                    print "Stop"
-                    break
+            if iteration < 10:
+                if self.direction == UP:
+                    if self.yPos - 4 <0:
+                        foo = 0
+                    else:
+                        self.yPos = self.yPos-4
+                        
+                elif self.direction == RIGHT:
+                    if self.xPos + 4 > 979:
+                        foo = 0
+                    else:
+                        self.xPos = self.xPos+4
+                elif self.direction == DOWN:
+                    if self.yPos + 4 > 528:
+                        foo = 0
+                    else:
+                        self.yPos = self.yPos+4
+                elif self.direction == LEFT:
+                    if self.xPos + 4 < 0:
+                        foo = 0
+                    else:
+                        self.xPos = self.xPos-4
                 else:
-                    pygame.time.wait(1)"""
-            if iteration <10:
+                    print "You failed. Computering is hard! (Self.direction was set to something invalid, imbecile.)"
+            
+
+            if iteration <5:
                 self.change_sprite('move-1-'+self.direction_set(self.direction))
-            elif iteration <20:
+            elif iteration <10:
                 self.change_sprite('move-2-'+self.direction_set(self.direction))
             else:
                 iteration = 0
             iteration = iteration + 1
-            print iteration
             pygame.time.wait(1)
         else:
             global iteration

@@ -7,6 +7,7 @@ from player import Player
 import threading
 
 
+    
 #Constants
 
 
@@ -26,6 +27,11 @@ size = (1024, 576)
 screen = pygame.display.set_mode(size)
 done = False
 clock = pygame.time.Clock()
+
+#Variables
+keyPressed = pygame.key.get_pressed()
+global keyPressed
+
 
 #Image Dictionary
 image_library = {}
@@ -134,43 +140,27 @@ def move_function():
 move_thread = threading.Thread(target=move_function)
 move_thread.daemon = True
 
-#Infinitely updating menu thread (pause menu opening, ALT-F4, fullscreen, etc.
-def menu_function():
-    while not killAll:
-        #Ends the program if the window is closed
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                thread.exit()
-                kill_all()
-        #Checks what keys are pressed, and toggles fullscreen/ALT+F4
-        keyPressed = pygame.key.get_pressed()
-        global keyPressed
-        if (keyPressed[pygame.K_LALT] or keyPressed[pygame.K_RALT]) and keyPressed[pygame.K_RETURN]:
-            if screen.get_flags() & pygame.FULLSCREEN:
-                pygame.display.set_mode(size)
-            else:
-                pygame.display.set_mode(size, pygame.FULLSCREEN)
-        if (keyPressed[pygame.K_LALT] or keyPressed[pygame.K_RALT]) and keyPressed[pygame.K_F4]:
-            thread.exit()
-            kill_all()
-    
-    
-menu_thread = threading.Thread(target=menu_function)
-menu_thread.daemon = True
-
-
 
 
 #Starts Threads
-menu_thread.start()
 move_thread.start()
 
 #Forever loop in which the program runs
 while not killAll:
-    #Prevents "Not Responding"
+    #Kills program if window is closed
     for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 kill_all()
+
+    #Checks what keys are pressed, and toggles fullscreen/ALT+F4
+    keyPressed = pygame.key.get_pressed()
+    if (keyPressed[pygame.K_LALT] or keyPressed[pygame.K_RALT]) and keyPressed[pygame.K_RETURN]:
+        if screen.get_flags() & pygame.FULLSCREEN:
+            pygame.display.set_mode(size)
+        else:
+            pygame.display.set_mode(size, pygame.FULLSCREEN)
+    if (keyPressed[pygame.K_LALT] or keyPressed[pygame.K_RALT]) and keyPressed[pygame.K_F4]:
+        kill_all()
 
     #For Testing Purposes
 
