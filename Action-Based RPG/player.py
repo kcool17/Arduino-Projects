@@ -11,6 +11,7 @@ LEFT = 'l'
 RIGHT = 'r'
 
 #Other Variables
+global iteration
 iteration = 1
 
 class Player(object):
@@ -81,7 +82,6 @@ class Player(object):
             iteration = iteration + 1
             pygame.time.wait(1)
         else:
-            global iteration
             iteration = 0
             self.change_sprite('idle-'+self.direction_set(self.direction))
     

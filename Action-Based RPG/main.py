@@ -29,8 +29,9 @@ done = False
 clock = pygame.time.Clock()
 
 #Variables
-keyPressed = pygame.key.get_pressed()
 global keyPressed
+keyPressed = pygame.key.get_pressed()
+
 
 
 #Image Dictionary
@@ -59,6 +60,7 @@ player.visible = True
     
 #Infinitely updating movement thread
 def move_function():
+    global keyPressed
     exitVar = False
     #Makes sure it doesn't change the direction if you press 2 keys at once
     continueVarUp = False
