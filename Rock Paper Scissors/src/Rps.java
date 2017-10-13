@@ -133,6 +133,20 @@ public class Rps extends JFrame
     } else {
     	System.out.print("You can't even Java.");
     }
+    /*
+    if (playerMove == computerMove) {
+    	result = 0;
+    }else {
+    	if (playerMove == PAPER && computerMove == SCISSORS) {
+    		result = 1;
+    	}else if (playerMove == PAPER && computerMove == ROCK) {
+    		result = -1;
+    	}else if (playerMove == SCISSORS && computerMove == PAPER) {
+    		result = -1;
+    	}else if (playerMove == SCISSORS && computerMove == ROCK) {
+    		result = 1;
+    	}
+    }*/
   
     return result;
   }
