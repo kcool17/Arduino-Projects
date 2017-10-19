@@ -9,9 +9,7 @@ public class DeathByMSPaint {
 			 
 	        try
 	        {
-	            runtime.exec("mspaint.exe");        //opens new notepad instance
-	 
-	            //OR runtime.exec("notepad");
+	            runtime.exec("mspaint.exe");       
 	        }
 	        catch (IOException e)
 	        {
