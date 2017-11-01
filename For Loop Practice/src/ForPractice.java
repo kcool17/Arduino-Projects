@@ -1,36 +1,29 @@
 import java.util.Scanner;
-public final class WhilePractice {
+public final class ForPractice {
 	
 	public static int While1(int start, int end, boolean evenOdd, boolean square, boolean digitCount, int digit) {
-		int step = start;
 		int total = 0;
-		boolean quit = false;
 		if (evenOdd==true) {
-			while(step<=end) {
-				total = total + step;
-				step= step+2;
+			for(int x = start; x<=end; x=x+2) {
+				total = total + x;
 			}
 		}else if (square) {
-			while(quit!=true) {
-				if (Math.pow(step, 2)>end) {
-					quit = true;
+			for(int x = start; x<=end; x++) {
+				if(Math.pow(x, 2)<=end) {
+					total = total+(int)Math.pow(x, 2);
 				}else {
-					total = total + (int)Math.pow(step, 2);
+					break;
 				}
-				step++;
 			}
 		}else if (digitCount) {
 			int digitLength = String.valueOf(digit).length();
-			int i =1;
-			while(i<=digitLength) {
+			for(int i=1; i<=digitLength; i+=2) {
 				int digitNum = (int) Math.pow(10, (i-1));
 				total= total+((digit%(digitNum*10))/digitNum);
-				i+=2;
 			}
 		}else {
-			while(step<=end) {
-				total = total + step;
-				step++;
+			for(int x = start; x<=end;x++) {
+				System.out.println(x*3);
 			}
 		}
 		return total;
@@ -38,7 +31,7 @@ public final class WhilePractice {
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		Scanner input = new Scanner(System.in);
-		System.out.println(While1(1, 100, false, false, true, 56921));
+		System.out.println(While1(1, 100, false, false, true, 365038812));
 		input.close();
 	}
 
