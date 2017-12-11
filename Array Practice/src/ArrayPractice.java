@@ -92,7 +92,47 @@ public class ArrayPractice {
 		System.out.print(stuff[9]+", ");
 		System.out.println();
 	}
-	
+	public static void p6_4(int lengthArray) {
+		int[] stuff = new int[lengthArray];
+		int newSum=0;
+		System.out.print("Original Array: ");
+		for (int x =0; x<stuff.length; x++) {
+			stuff[x] = ((int)(Math.random()*20))+1;
+			System.out.print(stuff[x]+", ");
+		}
+		
+		for (int x =0; x<stuff.length; x++) {
+			if(x%2==0)newSum=newSum+stuff[x];
+			else newSum=newSum-stuff[x];
+		}
+		System.out.println();
+		System.out.print("Alternating Sum: "+ newSum);
+	}
+	public static void p6_5(int lengthArray) {
+		int[] stuff = new int[lengthArray];
+		int[] newStuff = new int[lengthArray];
+		int z=0;
+		System.out.print("Original Array: ");
+		for (int x =0; x<stuff.length; x++) {
+			stuff[x] = ((int)(Math.random()*20))+1;
+			System.out.print(stuff[x]+", ");
+		}
+		for (int x =newStuff.length-1; x>=0; x--) {
+			newStuff[x] = stuff[z];
+			z++;
+			
+		}
+		
+		
+		System.out.println();
+		System.out.print("New Array: ");
+		for (int x =0; x<newStuff.length; x++) {
+			System.out.print(newStuff[x]+", ");
+			
+		}
+	}
+		
+		
 	public static int p6_6(int lengthArray) {
 		int[] stuff = new int[lengthArray];
 		System.out.print("Original Array: ");
@@ -152,6 +192,14 @@ public class ArrayPractice {
 		System.out.println();
 		System.out.println("Problem P6.1: ");
 		p6_1();
+		System.out.println();
+		System.out.println("Problem P6.4: ");
+		p6_4(10);
+		System.out.println();
+		System.out.println();
+		System.out.println("Problem P6.5: ");
+		p6_5(10);
+		System.out.println();
 		System.out.println();
 		System.out.println("Problem P6.6: ");
 		System.out.print(p6_6(30));
