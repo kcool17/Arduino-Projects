@@ -34,7 +34,7 @@ def returnRGB(image_path):
     image = Image.composite(image, Image.new('RGB', image.size, 'white'), image)
     for x in range(width):
         for y in range(height):
-            print(str(image.getpixel((x, y))), end=', ')
+            print("strip.setPixelColor(x, Color("+str(image.getpixel((x, y))))
 
     print("\n\n\n")
     
