@@ -28,24 +28,33 @@ def processImage(infile):
         pass # end of sequence
 
 
-def returnRGB(image_path):
+def matrixWireAdjust(x, y): #Change depending on how the matrix's pixels are labeled
+    if x%2==0:
+        return y + (x*8)
+    else:
+        return ((x+1)*8) - (y + 1)
+    
+def returnRGB(image_path, frame_delay): #Frame delay in ms
     image = Image.open(image_path)
     width, height = image.size
     image = Image.composite(image, Image.new('RGB', image.size, 'white'), image)
+    z = 0
     for x in range(width):
         for y in range(height):
-            print("strip.setPixelColor(x, Color("+str(image.getpixel((x, y))))
+            z = matrixWireAdjust(x, y)
+            print("strip.setPixelColor("+ str(z) +", Color"+str(image.getpixel((x, y)))+")")
+            
+    print("time.sleep("+str(frame_delay/1000.0)+")")
+    print("strip.show()")
+    
+    
 
-    print("\n\n\n")
     
     
-    
-    
-    
-def processGif(image_path):
+def processGif(image_path, frame_delay):
     processImage(image_path)
     for x in range(0, frameNum):
-        returnRGB('process\image'+str(x)+'.png')
+        returnRGB('process\image'+str(x)+'.png' ,frame_delay)
 
-processGif('image.gif')
+processGif('image.gif', 100)
 
