@@ -39,13 +39,13 @@ def returnRGB(image_path, frame_delay): #Frame delay in ms
     width, height = image.size
     image = Image.composite(image, Image.new('RGB', image.size, 'white'), image)
     z = 0
-    for y in range(height):
-        for x in range(width):
-            z = x + y
-            print("matrix.drawPixel("+ str(x) + ", " + str(y) +", matrix.Color"+str(image.getpixel((x, y)))+");")
+    for x in range(width):
+        for y in range(height):
+            z = matrixWireAdjust(x, y)
+            print("strip.setPixelColor("+ str(z) +", Color"+str(image.getpixel((x, y)))+")")
             
-    print("delay("+str(frame_delay)+");")
-    print("matrix.show();")
+    print("time.sleep("+str(frame_delay/1000.0)+")")
+    print("strip.show()")
     
     
 
@@ -57,4 +57,3 @@ def processGif(image_path, frame_delay):
         returnRGB('process\image'+str(x)+'.png' ,frame_delay)
 
 processGif('image.gif', 100)
-
