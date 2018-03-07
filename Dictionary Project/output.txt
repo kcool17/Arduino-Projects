@@ -1,0 +1,20 @@
+Number of Words in Dictionary: 234936
+Number of Five-Letter Words in Dictionary: 9987
+Words with no vowels: crypt, Cymry, dryly, dryth, glyph, Gypsy, gypsy, lymph, lynch, myrrh, nymph, psych, Pygmy, pygmy, rhymy, Scyld, Scyth, shyly, slyly, smyth, sylph, synch, thymy, tryst, wryly, xylyl, Number of Five Letter Words with Five Vowels in Dictionary: 0
+Number of Five Letter Words with Four Vowels in Dictionary: 34
+Number of Five Letter Words with Three Vowels in Dictionary: 1495
+Number of Five Letter Words with Two Vowels in Dictionary: 6128
+Number of Five Letter Words with One Vowel in Dictionary: 2304
+Number of Five Letter Words with No Vowels in Dictionary: 26
+The Longest Word's Length is: 24
+The Shortest Word's Length is: 1
+Words containing 'Java'
+aJAVA
+JAVA
+JAVAhai
+JAVAli
+JAVAn
+JAVAnee
+JAVAnese
+ZaviJAVA
+The number of words containing 'java' is: 8
