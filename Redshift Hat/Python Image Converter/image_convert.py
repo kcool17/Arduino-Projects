@@ -46,6 +46,9 @@ def returnRGB(image_path, frame_delay): #Frame delay in ms
             
     print("time.sleep("+str(frame_delay/1000.0)+")")
     print("strip.show()")
+    print("if mode_change == True:")
+    print("    mode_change = False")
+    print("    return 0")
     
     
 
