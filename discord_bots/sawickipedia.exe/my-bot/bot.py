@@ -24,7 +24,6 @@ CRIMELOSE = ["You crimed. You lost. Oof.", "Criminal scum; you lost money.", "Yo
 ROBWIN = ["You succeeded at robbing!", "You stole some money. Nice.", "As your victim looked the other way, you stole his wallet! It was in his hand, too. Impressive.", "You broke into your victim's house late at night, and stole money from their safe. Why do they even have a safe?", "You put ransomware on your victim's Mac. They are *not* immune to viruses.", "Your victim got tricked into calling you, \"Windows\", after you froze their PC. You sold them fake AV software, and took their money.", "You tried to break into your victim's bank vault. It didn't work, so you turned around and grabbed their wallet instead. Yes, they were behind you the whole time. Pretty stupid. At least you had a mask..."]
 ROBLOSE = ["You failed at robbing!", "You were fined. Oops.", "You put on your best robber outfit, and went to your victim's house. Why'd you wear a robber outfit!?", "You took the wallet out of your victim's back pocket, and tried to run away. You tripped. They took their wallet back, *and* your wallet. Don't rob the robber.", "You tried to rob your victim as they were pulled over. By a police car. Are you ok?", "Seriously, stop robbing. You got caught. Again. Be better next time."]
 
-
 #Get Images
 with urllib.request.urlopen('https://cdn.glitch.com/b62dbbb6-5065-4db0-ac88-ce2ffbf2c18f%2Fpaged.gif?1526252261731') as url:
     with open('paged.gif', 'wb') as f:
@@ -508,6 +507,16 @@ async def findid(ctx, arg="noArg"):
     await bot.say("Channel: " + str(ctx.message.channel.id))
 
 
+@bot.command(pass_context = True, description="Dev-only. Debug bot token stuff.")
+async def settoken(ctx):
+    """Dev-only. Repeats what you say."""
+    global DEVS
+    toToken = ""
+    if ctx.message.author.id in DEVS:
+        if toToken != "":
+            pickle.dump(toToken, open("token.p", "wb"))
+        else:
+            await bot.say("toToken var empty. Please input a token in source.")
 
 
 
@@ -2233,4 +2242,4 @@ async def trivia(ctx, arg = "noArg", arg2 = "noArg"):
 
 
 bot.loop.create_task(background_task())
-bot.run('NDIxMDE1MDkyODMwNjY2NzU0.DYHKEQ.HiA3xy9V48brzYB7e1SolZUMXJc')
+bot.run(pickle.load(open("token.p", "rb")))
