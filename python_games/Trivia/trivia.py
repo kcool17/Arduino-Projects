@@ -72,7 +72,7 @@ if rawType == 'multiple':
         guess = input().lower()
         while guess !="1" and guess !="2" and guess !="3" and guess !="4" and guess !="a" and guess !="b" and guess !="c" and guess !="d":
             print("Guess again! That's not a valid input!")
-            guess = input()
+            guess = input().lower()
         if guess == "a":
             guess = "1"
         elif guess == "b":
@@ -103,7 +103,7 @@ elif rawType == 'boolean': # True/False
     guess = input().lower()
     while guess !="1" and guess !="2" and guess !="t" and guess !="f" and guess !="true" and guess != "false" and guess !="a" and guess != "b":
         print("Guess again! That's not a valid input!")
-        guess = input()
+        guess = input().lower()
     if guess == "1" or guess == "t" or guess == "true" or guess == "a":
         guess = "true"
     else:
