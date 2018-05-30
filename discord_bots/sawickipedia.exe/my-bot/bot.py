@@ -317,15 +317,18 @@ async def on_message(message):
 
     #Give money per message:
     try:
-        currentMoney = pickle.load(open("servers" + os.sep + str(message.server.id) + os.sep + str(message.author.id) + os.sep + "money.p", "rb"))
+        try:
+            currentMoney = pickle.load(open("servers" + os.sep + str(message.server.id) + os.sep + str(message.author.id) + os.sep + "money.p", "rb"))
+        except:
+            currentMoney = 0
+        currentMoney += random.choice([0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 3, 5])
+        pickle.dump(currentMoney, open("servers" + os.sep + str(message.server.id) + os.sep + str(message.author.id) + os.sep + "money.p","wb"))
     except:
-        currentMoney = 0
-    currentMoney += random.choice([0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 3, 5])
-    pickle.dump(currentMoney, open("servers" + os.sep + str(message.server.id) + os.sep + str(message.author.id) + os.sep + "money.p","wb"))
+        pass
     #Get DMs
     if message.channel.is_private and message.author.id != "357953549738573835":
-        toChannel = bot.get_server("393925787021213696").get_channel("450742846954274856")
-        await bot.send_message(toChannel, "Message from " + str(message.author) + ": " + str(message.content))
+        toChannel = await bot.get_user_info("357953549738573835")
+        await bot.send_message(toChannel, "**Message from " + str(message.author) + "[*" + str(message.author.id) + "*]:** " + str(message.content))
     #Being paged
     if message.content == "<@421015092830666754>" or message.content == "<@!421015092830666754>":
         msg1 = 'Somebody page me?'.format(message)
@@ -2200,14 +2203,6 @@ async def trivia(ctx, arg = "noArg", arg2 = "noArg"):
             except IndexError:
                 member = ""
                 
-            try:
-                numCorrect = pickle.load(open("servers" + os.sep + str(server) + os.sep + str(member) + os.sep + "numCorrect.p", "rb"))
-            except:
-                numCorrect = 0
-            try:
-                numGuessed = pickle.load(open("servers" + os.sep + str(server) + os.sep + str(member) + os.sep + "numGuessed.p", "rb"))
-            except:
-                numGuessed = 0
         if bot.get_server(server).get_member(member) is None:
             findList, findIDList = getUsers(ctx, arg2)
             theID = ""
@@ -2229,6 +2224,14 @@ async def trivia(ctx, arg = "noArg", arg2 = "noArg"):
         if bot.get_server(server).get_member(member) is None:
             await bot.say("Not a valid user, please try again.")
         else:
+            try:
+                numCorrect = pickle.load(open("servers" + os.sep + str(server) + os.sep + str(member) + os.sep + "numCorrect.p", "rb"))
+            except:
+                numCorrect = 0
+            try:
+                numGuessed = pickle.load(open("servers" + os.sep + str(server) + os.sep + str(member) + os.sep + "numGuessed.p", "rb"))
+            except:
+                numGuessed = 0
             scoreTrivEmbed = discord.Embed(title=str(bot.get_server(server).get_member(member)), color=0x000099)
             scoreTrivEmbed.add_field(name="# Correct: ", value=numCorrect, inline=True)
             scoreTrivEmbed.add_field(name="# Guessed: ", value=numGuessed, inline=True)
