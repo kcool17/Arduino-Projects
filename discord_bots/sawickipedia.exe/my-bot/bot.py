@@ -100,6 +100,7 @@ async def on_ready():
 async def background_task(): #Runs every 1 second, constantly.
     await bot.wait_until_ready()
     presenceCount = 0
+    waitSal = 0
     global GAMES
     while not bot.is_closed:
         #"Playing" Status
@@ -131,10 +132,21 @@ async def background_task(): #Runs every 1 second, constantly.
         #Salary
         for server in myServers:
             try:
-                salCount = pickle.load(open("servers" + os.sep + str(server.id) + os.sep + "salCount.p", "rb"))
+                waitSal = pickle.load(open("servers" + os.sep + str(server.id) + os.sep  + "waitSal.p", "rb"))
             except:
-                salCount = 0
-            if salCount >86400:
+                waitSal = 0
+            try:
+                salHour = pickle.load(open("servers" + os.sep + str(server.id) + os.sep  + "salHour.p", "rb"))
+                salMinute = pickle.load(open("servers" + os.sep + str(server.id) + os.sep  + "salMinute.p", "rb"))
+            except:
+                salHour = 0
+                salMinute = 0
+            now = datetime.datetime.now()
+            now = int((datetime.timedelta(hours=24) - (now - now.replace(hour=salHour, minute=salMinute, second=0, microsecond=0))).total_seconds() % (24 * 3600))
+            print(now)
+            if now <=5 and waitSal <=0:
+                waitSal = 10
+                pickle.dump(waitSal, open("servers" + os.sep + str(server.id) + os.sep  + "waitSal.p", "wb"))
                 try:
                     toChannel = pickle.load(open("servers" + os.sep + str(server.id) + os.sep  + "channel.p", "rb"))
                 except:
@@ -155,16 +167,17 @@ async def background_task(): #Runs every 1 second, constantly.
                                         currentMoney = 0
                                     currentMoney+=currentSal
                                     pickle.dump(currentMoney, open("servers" + os.sep + str(server.id) + os.sep + str(member.id) + os.sep + "money.p", "wb"))
-                        toSay = str(role) + " got their salary of $" + str(currentSal)
+                        toSay = str(role) + " got their salary of $" + "{:,}".format(currentSal)
                         if toSay[0] == "@":
                             await bot.send_message(toChannel, toSay[1:])
                         else:
                             await bot.send_message(toChannel, toSay)
-                salCount = 0
-            salCount += 1
-            pickle.dump(salCount, open("servers" + os.sep + str(server.id) + os.sep +  "salCount.p", "wb"))
-            if salCount >100000:
-                salCount = 100000
+            else:
+                waitSal -= 1
+                if waitSal <= -1:
+                    waitSal = -1
+                pickle.dump(waitSal, open("servers" + os.sep + str(server.id) + os.sep  + "waitSal.p", "wb"))
+
 
         #Roulette
         for server in myServers:
@@ -238,7 +251,7 @@ async def background_task(): #Runs every 1 second, constantly.
                                     winMoney =  rouletteBet * rouletteMultiplier
                                     currentMoney += winMoney
                                     someoneWon = True
-                                    await bot.send_message(rouChannel, str(member) + " won $" + str(winMoney) + "!")
+                                    await bot.send_message(rouChannel, str(member) + " won $" + "{:,}".format(winMoney) + "!")
                                     
                             except:
                                 pass
@@ -301,6 +314,7 @@ async def background_task(): #Runs every 1 second, constantly.
                     pickle.dump(trivCool, open("servers" + os.sep + str(server.id) + os.sep + str(member.id) + os.sep + "trivCool.p", "wb"))
         #Other counts
         presenceCount += 1
+        
         await asyncio.sleep(1)
 
     
@@ -369,6 +383,8 @@ async def botsay(ctx, serverid = "display", channelarg = "noArg", *arg : str):
         elif channelarg.upper() == "DM":
             for item in arg:
                 newStr = newStr  + str(item) + " "
+            newStr = newStr.replace("{", "<")
+            newStr = newStr.replace("}", ">")
             human = await bot.get_user_info(serverid)
             await bot.send_message(human, newStr)
             await bot.say("Success!")
@@ -379,6 +395,8 @@ async def botsay(ctx, serverid = "display", channelarg = "noArg", *arg : str):
                         if channelarg == str(channel):
                             for item in arg:
                                 newStr = newStr  + str(item) + " "
+                            newStr = newStr.replace("{", "<")
+                            newStr = newStr.replace("}", ">")
                             await bot.send_message(channel, newStr)
                             success = True
                             await bot.say("Success!")
@@ -447,9 +465,13 @@ async def admintest(ctx):
         await bot.say("You are *not* an administrator/developer. How sad.")
 
 @bot.command(pass_context=True, description = "Mentions the user based on input")
-async def mentionuser(ctx, arg="noArg"):
+async def mentionuser(ctx, *theArg : str):
     """Mentions the user based on input"""
     #USE THIS IN OTHER FUNCTIONS
+    arg = ""
+    for item in theArg:
+        arg = arg + item + " "
+    arg = arg[:len(arg)-1]
     findList, findIDList = getUsers(ctx, arg)
     theID = ""
     if len(findIDList)==1:
@@ -470,12 +492,16 @@ async def mentionuser(ctx, arg="noArg"):
             
 
 @bot.command(pass_context=True, description = "Returns server ID and user ID.")
-async def findid(ctx, arg="noArg"):
+async def findid(ctx, *theArg : str):
     """Returns server ID and user ID."""
     server = ctx.message.server.id
     member = ctx.message.author.id
+    arg = ""
+    for item in theArg:
+        arg = arg + item + " "
+    arg = arg[:len(arg)-1]
     theID = ""
-    if arg != "noArg":
+    if arg != "":
         try:
             if arg[2] == "!":
                 member = arg[3:(len(arg)-1)]
@@ -533,12 +559,15 @@ async def settoken(ctx):
 #
 #################################################################
 @bot.command(pass_context=True, aliases=["bal", "mon"], description = 'Displays the amount of money either you have, or the person you paged. Format: "?money @person".')
-async def money(ctx, arg="noArg"):
+async def money(ctx, *theArg : str):
     """Displays the amount of money either you have, or the person you paged. Format: "?money @person"."""
     server = ctx.message.server.id
     member = ctx.message.author.id
-
-    if arg == "noArg":
+    arg = ""
+    for item in theArg:
+        arg = arg + item + " "
+    arg = arg[:len(arg)-1]
+    if arg == "":
         try:
             currentMoney = pickle.load(open("servers" + os.sep + str(server) + os.sep + str(member) + os.sep + "money.p", "rb"))
         except:
@@ -584,16 +613,21 @@ async def money(ctx, arg="noArg"):
         except:
             currentBank = 0
         balanceEmbed = discord.Embed(title=str(bot.get_server(server).get_member(member)) + "'s Money", color=0x00FF00)
-        balanceEmbed.add_field(name="On Hand", value="$" + str(currentMoney), inline=True)
-        balanceEmbed.add_field(name="Bank", value="$" + str(currentBank), inline=True)
-        balanceEmbed.add_field(name="Total", value="$" + str(currentBank + currentMoney), inline=True)
+        balanceEmbed.add_field(name="On Hand", value="$" + str("{:,}".format(currentMoney)), inline=True)
+        balanceEmbed.add_field(name="Bank", value="$" + str("{:,}".format(currentBank)), inline=True)
+        balanceEmbed.add_field(name="Total", value="$" + str("{:,}".format(currentMoney + currentBank)), inline=True)
         await bot.say(embed=balanceEmbed)
 
-@bot.command(pass_context=True, aliases=["money-adjust", "mon-adj", "money-adj", "moneyadj"], description = 'Admin-only. Adjusts the amount of money on hand of the person paged. Format: "?money-adjust @person amount".')
-async def moneyadjust(ctx, arg = "noArg", arg2 = "noArg"):
-    """Admin-only. Adjusts the amount of money on hand of the person paged. Format: "?money-adjust @person amount"."""
+@bot.command(pass_context=True, aliases=["money-adjust", "mon-adj", "money-adj", "moneyadj"], description = 'Admin-only. Adjusts the amount of money on hand of the person paged. Format: "?money-adjust amount @person".')
+async def moneyadjust(ctx, arg2 = "noArg", *theArg : str):
+    """Admin-only. Adjusts the amount of money on hand of the person paged. Format: "?money-adjust amount @person"."""
     server = ctx.message.server.id
     member = ctx.message.author.id
+    arg = ""
+    for item in theArg:
+        arg = arg + item + " "
+    arg = arg[:len(arg)-1]
+    arg2 = arg2.replace(',', '')
     ADMINS = pickle.load(open("servers" + os.sep + str(ctx.message.server.id) + os.sep + "ADMINS.p", "rb"))
     if member in ADMINS:
         try:
@@ -634,9 +668,9 @@ async def moneyadjust(ctx, arg = "noArg", arg2 = "noArg"):
                 currentMoney += int(arg2)
                 pickle.dump(currentMoney, open("servers" + os.sep + str(server) + os.sep + str(member) + os.sep + "money.p", "wb"))
                 if int(arg2)>0:
-                    giveEmbed = discord.Embed(title="$" + arg2 + " given to " + str(bot.get_server(server).get_member(member).display_name) + " by " + str(ctx.message.author.display_name) + ".", color=0x00FF00)
+                    giveEmbed = discord.Embed(title="$" + str("{:,}".format(int(arg2))) + " given to " + str(bot.get_server(server).get_member(member).display_name) + " by " + str(ctx.message.author.display_name) + ".", color=0x00FF00)
                 elif int(arg2)<0:
-                    giveEmbed = discord.Embed(title="$" + str(abs(int(arg2))) + " taken from " + str(bot.get_server(server).get_member(member).display_name) + " by " + str(ctx.message.author.display_name) + ".", color=0x00FF00)
+                    giveEmbed = discord.Embed(title="$" + str("{:,}".format(abs(int(arg2)))) + " taken from " + str(bot.get_server(server).get_member(member).display_name) + " by " + str(ctx.message.author.display_name) + ".", color=0x00FF00)
                 else:
                     giveEmbed = discord.Embed(title="No money given.", color=0x00FF00)
                 await bot.say(embed=giveEmbed)
@@ -647,10 +681,15 @@ async def moneyadjust(ctx, arg = "noArg", arg2 = "noArg"):
         await bot.send_file(ctx.message.channel, 'nopower.gif')
 
 @bot.command(pass_context=True, aliases=["bank-adjust", "bank-adj", "bankadj"], description = 'Admin-only. Same as ?money-adjust, but for the bank instead.')
-async def bankadjust(ctx, arg = "noArg", arg2 = "noArg"):
+async def bankadjust(ctx, arg2 = "noArg", *theArg : str):
     """Admin-only. Same as ?money-adjust, but for the bank instead."""
     server = ctx.message.server.id
     member = ctx.message.author.id
+    arg = ""
+    for item in theArg:
+        arg = arg + item + " "
+    arg = arg[:len(arg)-1]
+    arg2 = arg2.replace(',', '')
     ADMINS = pickle.load(open("servers" + os.sep + str(ctx.message.server.id) + os.sep + "ADMINS.p", "rb"))
     if member in ADMINS:
         try:
@@ -691,9 +730,9 @@ async def bankadjust(ctx, arg = "noArg", arg2 = "noArg"):
                 currentMoney += int(arg2)
                 pickle.dump(currentMoney, open("servers" + os.sep + str(server) + os.sep + str(member) + os.sep + "bank.p", "wb"))
                 if int(arg2)>0:
-                    giveEmbed = discord.Embed(title="$" + arg2 + " given to " + str(bot.get_server(server).get_member(member).display_name) + "'s bank by " + str(ctx.message.author.display_name) + ".", color=0x00FF00)
+                    giveEmbed = discord.Embed(title="$" + "{:,}".format(int(arg2)) + " given to " + str(bot.get_server(server).get_member(member).display_name) + "'s bank by " + str(ctx.message.author.display_name) + ".", color=0x00FF00)
                 elif int(arg2)<0:
-                    giveEmbed = discord.Embed(title="$" + str(abs(int(arg2))) + " taken from " + str(bot.get_server(server).get_member(member).display_name) + " by " + str(ctx.message.author.display_name) + ".", color=0x00FF00)
+                    giveEmbed = discord.Embed(title="$" + str("{:,}".format(abs(int(arg2)))) + " taken from " + str(bot.get_server(server).get_member(member).display_name) + " by " + str(ctx.message.author.display_name) + ".", color=0x00FF00)
                 else:
                     giveEmbed = discord.Embed(title="No money given.", color=0x00FF00)
                 await bot.say(embed=giveEmbed)
@@ -716,13 +755,13 @@ async def deposit(ctx, arg = "noArg"):
         currentBank = pickle.load(open("servers" + os.sep + str(server) + os.sep + str(member) + os.sep + "bank.p", "rb"))
     except:
         currentBank = 0
-
+    arg = arg.replace(',', '')
     if arg =="all":
         if currentMoney <= 0:
             await bot.say("You have nothing to deposit.")
         else:
             currentBank += currentMoney
-            depEmbed = discord.Embed(title="$" + str(currentMoney) + " deposited!", color = 0x00FF00)
+            depEmbed = discord.Embed(title="$" + "{:,}".format(currentMoney) + " deposited!", color = 0x00FF00)
             await bot.say(embed=depEmbed)
             currentMoney = 0
     else:
@@ -734,7 +773,7 @@ async def deposit(ctx, arg = "noArg"):
             else:
                 currentBank += int(arg)
                 currentMoney -= int(arg)
-                depEmbed = discord.Embed(title="$" + arg + " deposited!", color = 0x00FF00)
+                depEmbed = discord.Embed(title="$" + "{:,}".format(int(arg)) + " deposited!", color = 0x00FF00)
                 await bot.say(embed=depEmbed)
         except TypeError:
            await bot.say("Invalid input, use `?dep amount`.")
@@ -754,13 +793,13 @@ async def withdraw(ctx, arg = "noArg"):
         currentBank = pickle.load(open("servers" + os.sep + str(server) + os.sep + str(member) + os.sep + "bank.p", "rb"))
     except:
         currentBank = 0
-
+    arg = arg.replace(',', '')
     if arg =="all":
         if currentBank <= 0:
             await bot.say("You have nothing in your bank. Sad, really.")
         else:
             currentMoney += currentBank
-            withEmbed = discord.Embed(title="$" + str(currentBank) + " withdrawn!", color = 0x00FF00)
+            withEmbed = discord.Embed(title="$" + "{:,}".format(currentBank) + " withdrawn!", color = 0x00FF00)
             await bot.say(embed=withEmbed)
             currentBank = 0
     else:
@@ -772,7 +811,7 @@ async def withdraw(ctx, arg = "noArg"):
             else:
                 currentBank -= int(arg)
                 currentMoney += int(arg)
-                withEmbed = discord.Embed(title="$" + arg + " withdrawn!", color = 0x00FF00)
+                withEmbed = discord.Embed(title="$" + "{:,}".format(int(arg)) + " withdrawn!", color = 0x00FF00)
                 await bot.say(embed = withEmbed)
         except TypeError:
            await bot.say("Invalid input, use `?with amount`.")
@@ -780,11 +819,16 @@ async def withdraw(ctx, arg = "noArg"):
     pickle.dump(currentBank, open("servers" + os.sep + str(server) + os.sep + str(member) + os.sep + "bank.p", "wb"))
 
 
-@bot.command(pass_context=True, description = 'Gives money from your On Hand to someone else. Format: "?give @person amount".')
-async def give(ctx, arg = "noArg", arg2 = "noArg"):
-    """Gives money from your On Hand to someone else. Format: "?give @person amount"."""
+@bot.command(pass_context=True, description = 'Gives money from your On Hand to someone else. Format: "?give amount @person".')
+async def give(ctx, arg2 = "noArg", *theArg : str):
+    """Gives money from your On Hand to someone else. Format: "?give amount @person"."""
     server = ctx.message.server.id
     member = ctx.message.author.id
+    arg = ""
+    for item in theArg:
+        arg = arg + item + " "
+    arg = arg[:len(arg)-1]
+    arg2 = arg2.replace(',', '')
     try:
         giverMoney = pickle.load(open("servers" + os.sep + str(server) + os.sep + str(member) + os.sep + "money.p", "rb"))
     except:
@@ -838,7 +882,7 @@ async def give(ctx, arg = "noArg", arg2 = "noArg"):
                 pickle.dump(receiverMoney, open("servers" + os.sep + str(server) + os.sep + str(member) + os.sep + "money.p", "wb"))
                 pickle.dump(giverMoney, open("servers" + os.sep + str(server) + os.sep + str(ctx.message.author.id) + os.sep + "money.p", "wb"))
                 if int(arg2)>0:
-                    giveEmbed = discord.Embed(title="$" + arg2 + " given to " + str(bot.get_server(server).get_member(member).display_name) + " by " + str(ctx.message.author.display_name) + ". How kind.", color=0x00FF00)
+                    giveEmbed = discord.Embed(title="$" + "{:,}".format(int(arg2)) + " given to " + str(bot.get_server(server).get_member(member).display_name) + " by " + str(ctx.message.author.display_name) + ". How kind.", color=0x00FF00)
                 elif int(arg2)<0:
                     giveEmbed = discord.Embed(title="This isn't robbery. This is giving.", color=0x00FF00)
                 else:
@@ -900,10 +944,10 @@ async def leaderboard(ctx, arg="1"):
     y = 0
     while x <= endIn:
         try:
-            lbEmbed.add_field(name= str(x+1) + ": " + str(newMembers[y]) + " | $" + str(newMoney[y]), value=str(x+2) + ": " + str(newMembers[y + 1]) + " | $" + str(newMoney[y + 1]), inline=False)
+            lbEmbed.add_field(name= str(x+1) + ": " + str(newMembers[y]) + " | $" + "{:,}".format(newMoney[y]), value=str(x+2) + ": " + str(newMembers[y + 1]) + " | $" + "{:,}".format(newMoney[y + 1]), inline=False)
         except IndexError:
             try:
-                lbEmbed.add_field(name= str(x+1) + ": " + str(newMembers[y]) + " | $" + str(newMoney[y]), value="\u200b", inline=False)
+                lbEmbed.add_field(name= str(x+1) + ": " + str(newMembers[y]) + " | $" + "{:,}".format(newMoney[y]), value="\u200b", inline=False)
             except IndexError:
                 break
         x+=2
@@ -943,6 +987,7 @@ async def givetoall(ctx, arg="noArg"):
     server = ctx.message.server.id
     ADMINS = pickle.load(open("servers" + os.sep + str(ctx.message.server.id) + os.sep + "ADMINS.p", "rb"))
     errorThing = False
+    arg = arg.replace(',', '')
     if ctx.message.author.id in ADMINS:
         for member in ctx.message.server.members:
             try:
@@ -975,6 +1020,7 @@ async def setsalary(ctx, arg="noArg", arg2 = "noArg"):
     server = ctx.message.server.id
     member = ctx.message.author.id
     ADMINS = pickle.load(open("servers" + os.sep + str(ctx.message.server.id) + os.sep + "ADMINS.p", "rb"))
+    arg2 = arg2.replace(',', '')
     if member in ADMINS:
         if arg[2] == "&":
                 role = arg[3:(len(arg)-1)]
@@ -999,9 +1045,9 @@ async def setsalary(ctx, arg="noArg", arg2 = "noArg"):
 
 
         
-@bot.command( pass_context=True, aliases=["give-salary", "give-sal", "givesal"], description='Admin-only. Distributes salary, even if it\'s not midnight.')
+@bot.command( pass_context=True, aliases=["give-salary", "give-sal", "givesal"], description='Admin-only. Distributes salary, even if it\'s not the right time.')
 async def givesalary(ctx):
-    """Admin-only. Distributes salary, even if it\'s not midnight."""
+    """Admin-only. Distributes salary, even if it\'s not the right time."""
     server = ctx.message.server.id
     ADMINS = pickle.load(open("servers" + os.sep + str(ctx.message.server.id) + os.sep + "ADMINS.p", "rb"))
     if ctx.message.author.id in ADMINS:
@@ -1022,7 +1068,7 @@ async def givesalary(ctx):
                             currentMoney+=currentSal
                             
                             pickle.dump(currentMoney, open("servers" + os.sep + str(server) + os.sep + str(member.id) + os.sep + "money.p", "wb"))
-                toSay = str(role) + " got their salary of $" + str(currentSal)
+                toSay = str(role) + " got their salary of $" + "{:,}".format(currentSal)
                 if toSay[0] == "@":
                     await bot.say(toSay[1:])
                 else:
@@ -1044,7 +1090,7 @@ async def salary(ctx):
         except:
             currentMoney = 0
         if currentMoney != 0:
-            salEmbed.add_field(name=str(role), value="$" +str(currentMoney), inline=False)
+            salEmbed.add_field(name=str(role), value="$" +"{:,}".format(currentMoney), inline=False)
     salEmbed.add_field(name="Other Roles:", value="$0", inline=False)
     await bot.say(embed=salEmbed)
 
@@ -1122,14 +1168,14 @@ async def work(ctx):
         randomMoney = random.randint(minWork, maxWork)
         
         workEmbed=discord.Embed(title=str(ctx.message.author) + "'s Work", description=randomWork, color=0x00FF00)
-        workEmbed.add_field(name="Earned:", value= "$" + str(randomMoney), inline=True)
+        workEmbed.add_field(name="Earned:", value= "$" + "{:,}".format(randomMoney), inline=True)
         currentMoney += randomMoney
         pickle.dump(currentMoney, open("servers" + os.sep + str(server) + os.sep + str(member) + os.sep + "money.p", "wb"))
         await bot.say(embed=workEmbed)
         workCooldown = coolWork
         pickle.dump(workCooldown, open("servers" + os.sep + str(server) + os.sep + str(member) + os.sep + "workCooldown.p", "wb"))
     else:
-        await bot.say("Please wait " + str(workCooldown) + " seconds before working again!")
+        await bot.say("Please wait " + "{:,}".format(workCooldown) + " seconds before working again!")
 
 @bot.command(pass_context=True, aliases=["set-work"], description = 'Admin-only. Set max, min, and cooldown values of ?work.')
 async def setwork(ctx, myMin ="noArg", myMax="noArg", coolDown = "noArg"):
@@ -1153,9 +1199,9 @@ async def setwork(ctx, myMin ="noArg", myMax="noArg", coolDown = "noArg"):
     if member in ADMINS:
         if myMin == "noArg" or myMax == "noArg" or coolDown == "noArg":
             workEmbed=discord.Embed(title="Work Settings", description= 'Use "?setwork min max cooldown" to set the values.', color=0x00FF00)
-            workEmbed.add_field(name="Max:", value= "$" + str(maxWork), inline=True)
-            workEmbed.add_field(name="Min:", value= "$" + str(minWork), inline=True)
-            workEmbed.add_field(name="Cooldown:", value=str(coolWork) + " Seconds", inline=True)
+            workEmbed.add_field(name="Max:", value= "$" + "{:,}".format(int(maxWork)), inline=True)
+            workEmbed.add_field(name="Min:", value= "$" + "{:,}".format(int(minWork)), inline=True)
+            workEmbed.add_field(name="Cooldown:", value="{:,}".format(int(coolWork)) + " Seconds", inline=True)
             await bot.say(embed=workEmbed)
         else:
             try:
@@ -1168,17 +1214,17 @@ async def setwork(ctx, myMin ="noArg", myMax="noArg", coolDown = "noArg"):
                 await bot.say("Done!")
             except TypeError:
                 workEmbed=discord.Embed(title="Work Settings", description= 'Use "?setwork min max cooldown" to set the values.', color=0x00FF00)
-                workEmbed.add_field(name="Max:", value= "$" + str(maxWork), inline=True)
-                workEmbed.add_field(name="Min:", value= "$" + str(minWork), inline=True)
-                workEmbed.add_field(name="Cooldown:", value=str(coolWork) + " Seconds", inline=True)
+                workEmbed.add_field(name="Max:", value= "$" + "{:,}".format(int(maxWork)), inline=True)
+                workEmbed.add_field(name="Min:", value= "$" + "{:,}".format(int(minWork)), inline=True)
+                workEmbed.add_field(name="Cooldown:", value="{:,}".format(int(coolWork)) + " Seconds", inline=True)
                 await bot.say(embed=workEmbed)
 
             
     else:
         workEmbed=discord.Embed(title="Work Settings", description= 'These are the stats for the work command. You\'re not an admin, so this command does nothing else. Sucks for you.', color=0x00FF00)
-        workEmbed.add_field(name="Max:", value= "$" + str(maxWork), inline=True)
-        workEmbed.add_field(name="Min:", value= "$" + str(minWork), inline=True)
-        workEmbed.add_field(name="Cooldown:", value=str(coolWork) + " Seconds", inline=True)
+        workEmbed.add_field(name="Max:", value= "$" + "{:,}".format(int(maxWork)), inline=True)
+        workEmbed.add_field(name="Min:", value= "$" + "{:,}".format(int(minWork)), inline=True)
+        workEmbed.add_field(name="Cooldown:", value="{:,}".format(int(coolWork)) + " Seconds", inline=True)
         await bot.say(embed=workEmbed)
 
 
@@ -1250,13 +1296,13 @@ async def crime(ctx):
         
         if didSucceed==1:
             crimeEmbed=discord.Embed(title=str(ctx.message.author) + "'s Crimes", description=randomCrime, color=0x00FF00)
-            crimeEmbed.add_field(name="Earned:", value= "$" + str(randomMoney), inline=True)
+            crimeEmbed.add_field(name="Earned:", value= "$" + "{:,}".format(randomMoney), inline=True)
             currentMoney += randomMoney
             pickle.dump(currentMoney, open("servers" + os.sep + str(server) + os.sep + str(member) + os.sep + "money.p", "wb"))
             await bot.say(embed=crimeEmbed)
         else:
             crimeEmbed=discord.Embed(title=str(ctx.message.author) + "'s Crimes", description=randomCrime, color=0xFF0000)
-            crimeEmbed.add_field(name="Lost:", value= "$" + str(randomMoney), inline=True)
+            crimeEmbed.add_field(name="Lost:", value= "$" + "{:,}".format(randomMoney), inline=True)
             currentMoney -= randomMoney
             pickle.dump(currentMoney, open("servers" + os.sep + str(server) + os.sep + str(member) + os.sep + "money.p", "wb"))
             await bot.say(embed=crimeEmbed)
@@ -1265,7 +1311,7 @@ async def crime(ctx):
         crimeCooldown = coolCrime
         pickle.dump(crimeCooldown, open("servers" + os.sep + str(server) + os.sep + str(member) + os.sep + "crimeCooldown.p", "wb"))
     else:
-        await bot.say("Please wait " + str(crimeCooldown) + " seconds before being a criminal again!")
+        await bot.say("Please wait " + "{:,}".format(crimeCooldown) + " seconds before being a criminal again!")
 
 @bot.command(pass_context=True, aliases=["set-crime"], description = 'Admin-only. Set max, min, winrate, and cooldown values of ?crime. Losing = you lose a number between min and max. Winning = gaining that number.')
 async def setcrime(ctx, myMin ="noArg", myMax="noArg", winRate = "noArg", coolDown = "noArg"):
@@ -1293,10 +1339,10 @@ async def setcrime(ctx, myMin ="noArg", myMax="noArg", winRate = "noArg", coolDo
     if member in ADMINS:
         if myMin == "noArg" or myMax == "noArg" or coolDown == "noArg" or winRate == "noArg":
             workEmbed=discord.Embed(title="Crime Settings", description= 'Use "?setcrime min max chance% cooldown" to set the values. Note: For every $1,000 above 0$, chance goes down by 1%. For every $10 below 0$, it goes up by 1%.', color=0x00FF00)
-            workEmbed.add_field(name="Max:", value= "$" + str(maxCrime), inline=True)
-            workEmbed.add_field(name="Min:", value= "$" + str(minCrime), inline=True)
-            workEmbed.add_field(name="Crimerate:", value=str(crimeRate) + "%", inline=True)
-            workEmbed.add_field(name="Cooldown:", value=str(coolCrime) + " Seconds", inline=True)
+            workEmbed.add_field(name="Max:", value= "$" + "{:,}".format(maxCrime), inline=True)
+            workEmbed.add_field(name="Min:", value= "$" + "{:,}".format(minCrime), inline=True)
+            workEmbed.add_field(name="Crimerate:", value="{:,}".format(crimeRate) + "%", inline=True)
+            workEmbed.add_field(name="Cooldown:", value="{:,}".format(coolCrime) + " Seconds", inline=True)
             await bot.say(embed=workEmbed)
         else:
             try:
@@ -1315,26 +1361,30 @@ async def setcrime(ctx, myMin ="noArg", myMax="noArg", winRate = "noArg", coolDo
                 await bot.say("Done!")
             except TypeError:
                 workEmbed=discord.Embed(title="Crime Settings", description= 'Use "?setcrime min max chance% cooldown" to set the values. Note: For every $1,000 above 0$, chance goes down by 1%. For every $10 below 0$, it goes up by 1%.', color=0x00FF00)
-                workEmbed.add_field(name="Max:", value= "$" + str(maxCrime), inline=True)
-                workEmbed.add_field(name="Min:", value= "$" + str(minCrime), inline=True)
-                workEmbed.add_field(name="Crimerate:", value=str(crimeRate) + "%", inline=True)
-                workEmbed.add_field(name="Cooldown:", value=str(coolCrime) + " Seconds", inline=True)
+                workEmbed.add_field(name="Max:", value= "$" + "{:,}".format(maxCrime), inline=True)
+                workEmbed.add_field(name="Min:", value= "$" + "{:,}".format(minCrime), inline=True)
+                workEmbed.add_field(name="Crimerate:", value="{:,}".format(crimeRate) + "%", inline=True)
+                workEmbed.add_field(name="Cooldown:", value="{:,}".format(coolCrime) + " Seconds", inline=True)
                 await bot.say(embed=workEmbed)
 
             
     else:
         workEmbed=discord.Embed(title="Crime Settings", description= 'You\'re no admin. Anyway, here\'s the stats.. Note: For every $1,000 above 0$, chance goes down by 1%. For every $10 below 0$, it goes up by 1%.', color=0x00FF00)
-        workEmbed.add_field(name="Max:", value= "$" + str(maxCrime), inline=True)
-        workEmbed.add_field(name="Min:", value= "$" + str(minCrime), inline=True)
-        workEmbed.add_field(name="Crimerate:", value=str(crimeRate) + "%", inline=True)
-        workEmbed.add_field(name="Cooldown:", value=str(coolCrime) + " Seconds", inline=True)
+        workEmbed.add_field(name="Max:", value= "$" + "{:,}".format(maxCrime), inline=True)
+        workEmbed.add_field(name="Min:", value= "$" + "{:,}".format(minCrime), inline=True)
+        workEmbed.add_field(name="Crimerate:", value="{:,}".format(crimeRate) + "%", inline=True)
+        workEmbed.add_field(name="Cooldown:", value="{:,}".format(coolCrime) + " Seconds", inline=True)
         await bot.say(embed=workEmbed)
 
 @bot.command(pass_context=True, aliases=["steal"], description = 'Rob money from a member\'s On Hand. It may fail, and you\'ll lose instead.')
-async def rob(ctx, arg="noArg"):
+async def rob(ctx, *theArg : str):
     """Rob money from a member\'s On Hand. It may fail, and you\'ll lose instead."""
     server = ctx.message.server.id
     member = ctx.message.author.id
+    arg = ""
+    for item in theArg:
+        arg = arg + item + " "
+    arg = arg[:len(arg)-1]
     global ROBWIN
     global ROBLOSE
     try:
@@ -1433,13 +1483,13 @@ async def rob(ctx, arg="noArg"):
             
             if robbedMoney<=0:
                 robEmbed=discord.Embed(title=str(ctx.message.author) + "'s Robbery of " + str(bot.get_server(server).get_member(member)), description="They didn't even have enough money to rob! Idiot.", color=0xFF0000)
-                robEmbed.add_field(name="Fined:", value= "$" + str(randomMoney), inline=True)
+                robEmbed.add_field(name="Fined:", value= "$" + "{:,}".format(randomMoney), inline=True)
                 robberMoney -= randomMoney
                 pickle.dump(robberMoney, open("servers" + os.sep + str(server) + os.sep + str(ctx.message.author.id) + os.sep + "money.p", "wb"))
                 await bot.say(embed=robEmbed)
             elif didSucceed==1:
                 robEmbed=discord.Embed(title=str(ctx.message.author) + "'s Robbery of " + str(bot.get_server(server).get_member(member)), description=randomRob, color=0x00FF00)
-                robEmbed.add_field(name="Stolen:", value= "$" + str(randomMoney), inline=True)
+                robEmbed.add_field(name="Stolen:", value= "$" + "{:,}".format(randomMoney), inline=True)
                 robberMoney += randomMoney
                 robbedMoney -= randomMoney
                 pickle.dump(robberMoney, open("servers" + os.sep + str(server) + os.sep + str(ctx.message.author.id) + os.sep + "money.p", "wb"))
@@ -1447,7 +1497,7 @@ async def rob(ctx, arg="noArg"):
                 await bot.say(embed=robEmbed)
             else:
                 robEmbed=discord.Embed(title=str(ctx.message.author) + "'s Robbery of " + str(bot.get_server(server).get_member(member)), description=randomRob, color=0xFF0000)
-                robEmbed.add_field(name="Fined:", value= "$" + str(randomMoney), inline=True)
+                robEmbed.add_field(name="Fined:", value= "$" + "{:,}".format(randomMoney), inline=True)
                 robberMoney -= randomMoney
                 pickle.dump(robberMoney, open("servers" + os.sep + str(server) + os.sep + str(ctx.message.author.id) + os.sep + "money.p", "wb"))
                 await bot.say(embed=robEmbed)
@@ -1456,7 +1506,7 @@ async def rob(ctx, arg="noArg"):
             robCooldown = coolRob
             pickle.dump(robCooldown, open("servers" + os.sep + str(server) + os.sep + str(ctx.message.author.id) + os.sep + "robCooldown.p", "wb"))
         else:
-            await bot.say("Please wait " + str(robCooldown) + " seconds before trying to rob again!")
+            await bot.say("Please wait " + "{:,}".format(robCooldown) + " seconds before trying to rob again!")
 
 @bot.command(pass_context=True, aliases=["set-rob", "set-steal", "setsteal"], description = 'Admin-only. Set max, min, winrate, and cooldown values of ?crime. Losing = you lose a number between min and max. Winning = rob around 85% of the person\'s On Hand.')
 async def setrob(ctx, myMin ="noArg", myMax="noArg", winRate = "noArg", coolDown = "noArg"):
@@ -1484,10 +1534,10 @@ async def setrob(ctx, myMin ="noArg", myMax="noArg", winRate = "noArg", coolDown
     if member in ADMINS:
         if myMin == "noArg" or myMax == "noArg" or coolDown == "noArg" or winRate == "noArg":
             workEmbed=discord.Embed(title="Rob Settings", description= 'Use "?setrob min max chance% cooldown" to set the values. Note: For every $1,000 above 0$, chance goes down by 1%. For every $10 below 0$, it goes up by 1%.', color=0x00FF00)
-            workEmbed.add_field(name="Max:", value= "$" + str(maxRob), inline=True)
-            workEmbed.add_field(name="Min:", value= "$" + str(minRob), inline=True)
-            workEmbed.add_field(name="Robrate:", value=str(robRate) + "%", inline=True)
-            workEmbed.add_field(name="Cooldown:", value=str(coolRob) + " Seconds", inline=True)
+            workEmbed.add_field(name="Max:", value= "$" + "{:,}".format(maxRob), inline=True)
+            workEmbed.add_field(name="Min:", value= "$" + "{:,}".format(minRob), inline=True)
+            workEmbed.add_field(name="Robrate:", value="{:,}".format(robRate) + "%", inline=True)
+            workEmbed.add_field(name="Cooldown:", value="{:,}".format(coolRob) + " Seconds", inline=True)
             await bot.say(embed=workEmbed)
         else:
             try:
@@ -1506,47 +1556,62 @@ async def setrob(ctx, myMin ="noArg", myMax="noArg", winRate = "noArg", coolDown
                 await bot.say("Done!")
             except TypeError:
                 workEmbed=discord.Embed(title="Rob Settings", description= 'Use "?setrob min max chance% cooldown" to set the values. Note: For every $1,000 above 0$, chance goes down by 1%. For every $10 below 0$, it goes up by 1%.', color=0x00FF00)
-                workEmbed.add_field(name="Max:", value= "$" + str(maxRob), inline=True)
-                workEmbed.add_field(name="Min:", value= "$" + str(minRob), inline=True)
-                workEmbed.add_field(name="Robrate:", value=str(robRate) + "%", inline=True)
-                workEmbed.add_field(name="Cooldown:", value=str(coolRob) + " Seconds", inline=True)
+                workEmbed.add_field(name="Max:", value= "$" + "{:,}".format(maxRob), inline=True)
+                workEmbed.add_field(name="Min:", value= "$" + "{:,}".format(minRob), inline=True)
+                workEmbed.add_field(name="Robrate:", value="{:,}".format(robRate) + "%", inline=True)
+                workEmbed.add_field(name="Cooldown:", value="{:,}".format(coolRob) + " Seconds", inline=True)
                 await bot.say(embed=workEmbed)
 
             
     else:
         workEmbed=discord.Embed(title="Rob Settings", description= 'Rob stats! No admin for you, though, so you can\'t do anything with this command. Note: For every $1,000 above 0$, chance goes down by 1%. For every $10 below 0$, it goes up by 1%.', color=0x00FF00)
-        workEmbed.add_field(name="Max:", value= "$" + str(maxRob), inline=True)
-        workEmbed.add_field(name="Min:", value= "$" + str(minRob), inline=True)
-        workEmbed.add_field(name="Robrate:", value=str(robRate) + "%", inline=True)
-        workEmbed.add_field(name="Cooldown:", value=str(coolRob) + " Seconds", inline=True)
+        workEmbed.add_field(name="Max:", value= "$" + "{:,}".format(maxRob), inline=True)
+        workEmbed.add_field(name="Min:", value= "$" + "{:,}".format(minRob), inline=True)
+        workEmbed.add_field(name="Robrate:", value="{:,}".format(robRate) + "%", inline=True)
+        workEmbed.add_field(name="Cooldown:", value="{:,}".format(coolRob) + " Seconds", inline=True)
         await bot.say(embed=workEmbed)
 
 
-@bot.command(pass_context=True, aliases=["set-salary-time", "setsaltime", "set-sal-time"], description = 'Admin-only. Gives everyone salary, and sets the salary giving time to now.')
-async def setsalarytime(ctx, arg="noArg"):
-    """Admin-only. Gives everyone salary, and sets the salary giving time to now."""
+@bot.command(pass_context=True, aliases=["set-salary-time", "setsaltime", "set-sal-time"], description = 'Admin-only. Sets the salary giving time to what is said. Please use military time. Format: "?set-salary-time hour minute".')
+async def setsalarytime(ctx, hour = "noArg", minute = "noArg"):
+    """Admin-only. Sets the salary giving time to what is said. Please use military time. Format: "?set-salary-time hour minute"."""
     server = ctx.message.server.id
     ADMINS = pickle.load(open("servers" + os.sep + str(ctx.message.server.id) + os.sep + "ADMINS.p", "rb"))
     if ctx.message.author.id in ADMINS:
-        pickle.dump(86400, open("servers" + os.sep + str(server) + os.sep +  "salCount.p", "wb"))
-        await bot.say("Done!")
+        try:
+            hour = int(hour)
+            minute = int(minute)
+            if hour < 24 and hour >= 0 and minute <60 and minute >= 0:
+                pickle.dump(hour, open("servers" + os.sep + str(server) + os.sep +  "salHour.p", "wb"))
+                pickle.dump(minute, open("servers" + os.sep + str(server) + os.sep +  "salMinute.p", "wb"))
+                await bot.say("Done!")
+            else:
+                await bot.say("Please input a valid time! (Military time)")
+        except:
+            await bot.say("Invalid input! Please use the format `?set-salary-time hour minute`, using military time.")
     else:
         await bot.send_file(ctx.message.channel, 'nopower.gif')
 
 
-@bot.command(pass_context=True, aliases=["get-salary-time", "getsaltime", "get-sal-time", "saltime", "sal-time"], description = 'This command tells you how long until the salaries will be given.')
+@bot.command(pass_context=True, aliases=["get-salary-time", "getsaltime", "get-sal-time", "saltime", "sal-time"], description = 'This command tells you when the salaries will be given.')
 async def getsalarytime(ctx):
-    """This command tells you how long until the salaries will be given."""
+    """This command tells you when the salaries will be given."""
     server = ctx.message.server.id
     try:
-        salCount = pickle.load(open("servers" + os.sep + str(ctx.message.server.id) + os.sep + "salCount.p", "rb"))
+        salHour = pickle.load(open("servers" + os.sep + str(ctx.message.server.id) + os.sep + "salHour.p", "rb"))
+        salMinute = pickle.load(open("servers" + os.sep + str(ctx.message.server.id) + os.sep + "salMinute.p", "rb"))
     except:
-        salCount = 0
-    salCount = 86400 - salCount
-    salHours = math.floor(salCount / 3600)
-    salMinutes = math.floor(salCount / 60) - (salHours * 60)
-    salSeconds = salCount - (salMinutes * 60) - (salHours * 3600)
-    await bot.say("The salaries will be given in " + str(salHours) + " hours, " + str(salMinutes) + " minutes, and " + str(salSeconds) + " seconds.")
+        salHour = 0
+        salMinute = 0
+    thePM = "A.M."
+    if salHour == 0:
+        salHour = 12
+    if salHour > 12:
+        salHour = salHour-12
+        thePM = "P.M."
+    if salMinute < 10:
+        salMinute = "0" + str(salMinute)
+    await bot.say("The salaries will be given at " + str(salHour) + ":" + str(salMinute) + " " + thePM)
         
         
 
@@ -1601,6 +1666,7 @@ async def blackjack(ctx, arg = "noArg"):
     """Blackjack! Use "?bj about" for details."""
     server = ctx.message.server.id
     member = ctx.message.author.id
+    arg = arg.replace(',', '')
     bjCards = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "J", "Q", "K"]
     try:
         currentMoney = pickle.load(open("servers" + os.sep + str(server) + os.sep + str(member) + os.sep + "money.p", "rb"))
@@ -1836,7 +1902,7 @@ async def blackjack(ctx, arg = "noArg"):
     if playStatus == -3:
         playStatus = -1
     if playStatus == 1:
-        bjEmbed=discord.Embed(title=str(ctx.message.author)+"'s Blackjack game", description="Player Wins $" + str(betBJ), color = 0x00FF00)
+        bjEmbed=discord.Embed(title=str(ctx.message.author)+"'s Blackjack game", description="Player Wins $" + "{:,}".format(betBJ), color = 0x00FF00)
         currentMoney += 2* betBJ
         pickle.dump(int(currentMoney), open("servers" + os.sep + str(server) + os.sep + str(member) + os.sep + "money.p", "wb"))
         playingBJ = False
@@ -1861,7 +1927,7 @@ async def blackjack(ctx, arg = "noArg"):
         if totalCards == 21:
             totalDealerCards = "Blackjack"
         if totalPlayerCards != totalDealerCards:
-            bjEmbed=discord.Embed(title=str(ctx.message.author)+"'s Blackjack game", description="Player Wins $" + str(int(1.5 *betBJ)), color = 0x00FF00)
+            bjEmbed=discord.Embed(title=str(ctx.message.author)+"'s Blackjack game", description="Player Wins $" + "{:,}".format(int(1.5 *betBJ)), color = 0x00FF00)
             currentMoney += betBJ + int(1.5*betBJ)
             pickle.dump(int(currentMoney), open("servers" + os.sep + str(server) + os.sep + str(member) + os.sep + "money.p", "wb"))
             playingBJ = False
@@ -1871,7 +1937,7 @@ async def blackjack(ctx, arg = "noArg"):
             pickle.dump(int(currentMoney), open("servers" + os.sep + str(server) + os.sep + str(member) + os.sep + "money.p", "wb"))
             playingBJ = False
     elif playStatus == -1:
-        bjEmbed=discord.Embed(title=str(ctx.message.author)+"'s Blackjack game", description="Player Loses $" + str(betBJ), color = 0xFF0000)
+        bjEmbed=discord.Embed(title=str(ctx.message.author)+"'s Blackjack game", description="Player Loses $" + "{:,}".format(betBJ), color = 0xFF0000)
         playingBJ = False
     elif playStatus == 2:
         bjEmbed=discord.Embed(title=str(ctx.message.author)+"'s Blackjack game", description="Push, money back", color = 0xFF8000)
@@ -1879,7 +1945,7 @@ async def blackjack(ctx, arg = "noArg"):
         pickle.dump(int(currentMoney), open("servers" + os.sep + str(server) + os.sep + str(member) + os.sep + "money.p", "wb"))
         playingBJ = False
     else:
-        bjEmbed=discord.Embed(title=str(ctx.message.author)+"'s Blackjack game", description="Use `?bj hit` to draw another card, and `?bj stand` to end your turn. Use `?bj double` to double down (draw one card more, and double your bet). This game is for $" + str(betBJ)+".", color = 0x0000FF)
+        bjEmbed=discord.Embed(title=str(ctx.message.author)+"'s Blackjack game", description="Use `?bj hit` to draw another card, and `?bj stand` to end your turn. Use `?bj double` to double down (draw one card more, and double your bet). This game is for $" + "{:,}".format(betBJ)+".", color = 0x0000FF)
     playerCardString = ""
     for card in playerCards:
         playerCardString = playerCardString + "|"
@@ -1903,6 +1969,7 @@ async def roulette(ctx, bet = "noArg", place = "noArg"):
     """Roulette! Use "?roulette about" for details."""
     server = ctx.message.server.id
     member = ctx.message.author.id
+    bet = bet.replace(',', '')
     if bet == "about":
         rouEmbed = discord.Embed(title="Roulette Rules", color=0x0000FF)
         rouEmbed.add_field(name = "This is Roulette! Try and guess what the ball will land on! You have 30 seconds.", value= "Use the format \"?roulette bet guess\".", inline=False)
@@ -2006,7 +2073,7 @@ async def roulette(ctx, bet = "noArg", place = "noArg"):
     
 
 @bot.command(pass_context=True, aliases=["triv"], description ='A Trivia Game! Use "?trivia about" for details.')
-async def trivia(ctx, arg = "noArg", arg2 = "noArg"):
+async def trivia(ctx, arg = "noArg", *theArg : str):
     """A Trivia Game! Use "?trivia about" for details."""
     server = ctx.message.server.id
     member = ctx.message.author.id
@@ -2152,8 +2219,8 @@ async def trivia(ctx, arg = "noArg", arg2 = "noArg"):
                 
             guess = int(guess)
             if guess == correctLoc:
-                await bot.say("Correct! You got $150!")
-                currentMoney += 150
+                await bot.say("Correct! You got $75!")
+                currentMoney += 75
                 pickle.dump(currentMoney, open("servers" + os.sep + str(server) + os.sep + str(member) + os.sep + "money.p", "wb"))
                 numCorrect += 1
                 numGuessed += 1
@@ -2178,8 +2245,8 @@ async def trivia(ctx, arg = "noArg", arg2 = "noArg"):
                 guess = "false"
             #Determine if user is right
             if guess == rawCorrect.lower():
-                await bot.say("Correct! You got $100!")
-                currentMoney += 100
+                await bot.say("Correct! You got $50!")
+                currentMoney += 50
                 pickle.dump(currentMoney, open("servers" + os.sep + str(server) + os.sep + str(member) + os.sep + "money.p", "wb"))
                 numCorrect += 1
                 numGuessed += 1
@@ -2194,7 +2261,11 @@ async def trivia(ctx, arg = "noArg", arg2 = "noArg"):
         else:
             await bot.say("Hey, hold on! Ask a question first! (Or if you did, wait for *all* answers to appear).")
     elif arg == "score":
-        if arg2 != "noArg":
+        arg2 = ""
+        for item in theArg:
+            arg2 = arg2 + item + " "
+        arg2 = arg2[:len(arg2)-1]
+        if arg2 != "":
             try:
                 if arg2[2] == "!":
                     member = arg2[3:(len(arg2)-1)]
@@ -2233,8 +2304,8 @@ async def trivia(ctx, arg = "noArg", arg2 = "noArg"):
             except:
                 numGuessed = 0
             scoreTrivEmbed = discord.Embed(title=str(bot.get_server(server).get_member(member)), color=0x000099)
-            scoreTrivEmbed.add_field(name="# Correct: ", value=numCorrect, inline=True)
-            scoreTrivEmbed.add_field(name="# Guessed: ", value=numGuessed, inline=True)
+            scoreTrivEmbed.add_field(name="# Correct: ", value="{:,}".format(numCorrect), inline=True)
+            scoreTrivEmbed.add_field(name="# Guessed: ", value="{:,}".format(numGuessed), inline=True)
             if numGuessed !=0:
                 scoreTrivEmbed.add_field(name="Percentage: ", value=str(int((numCorrect/numGuessed)*100)) + "%", inline=True)
             await bot.say(embed=scoreTrivEmbed)
