@@ -14,6 +14,13 @@ import collections
 import os
 import datetime
 
+import inspect
+import io
+import textwrap
+import traceback
+import aiohttp
+from contextlib import redirect_stdout
+
 
 #Constants
 DEVS = ["357953549738573835"]
@@ -143,7 +150,6 @@ async def background_task(): #Runs every 1 second, constantly.
                 salMinute = 0
             now = datetime.datetime.now()
             now = int((datetime.timedelta(hours=24) - (now - now.replace(hour=salHour, minute=salMinute, second=0, microsecond=0))).total_seconds() % (24 * 3600))
-            print(now)
             if now <=5 and waitSal <=0:
                 waitSal = 10
                 pickle.dump(waitSal, open("servers" + os.sep + str(server.id) + os.sep  + "waitSal.p", "wb"))
@@ -370,7 +376,7 @@ async def on_message(message):
 
 
 #Simple bot commands (no saving) 
-@bot.command(pass_context = True, description="Dev-only. Repeats what you say.")
+@bot.command(pass_context = True, hidden=True)
 async def botsay(ctx, serverid = "display", channelarg = "noArg", *arg : str):
     """Dev-only. Repeats what you say."""
     global DEVS
@@ -411,6 +417,18 @@ async def botsay(ctx, serverid = "display", channelarg = "noArg", *arg : str):
             return
         if not ctx.message.channel.is_private:
             await bot.say('This is in public. Don\'t try that here.')
+
+
+@bot.command(pass_context=True, aliases=["raw-eval", "eval", "py-eval"], hidden=True)
+async def raweval(ctx, *, body):
+    """Evaluates code."""
+    global DEVS
+    if ctx.message.author.id in DEVS:
+        pass
+    else:
+        await bot.send_file(ctx.message.channel, 'nopower.gif')
+
+    
             
 @bot.command(description = 'Adds stuff together. Use "?add num1 num2".')
 async def add(left : int, right : int):
