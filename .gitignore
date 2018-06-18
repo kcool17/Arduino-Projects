@@ -1,1 +1,5 @@
 discord_bots/sawickipedia.exe/my-bot/token.p
+discord_bots/sawickipedia.exe/my-bot/servers/
+discord_bots/sawickipedia.exe/my-bot/modules/developer.py
+discord_bots/sawickipedia.exe/my-bot/modules/pre-rewrite/developer.py
+*.pyc
