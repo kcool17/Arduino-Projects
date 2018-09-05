@@ -11,9 +11,9 @@ class Settings():
     def __init__(self, bot):
         self.bot = bot
 
-    @commands.command(aliases=['set-prefix', 'prefix'])
+    @commands.group(aliases=['set-prefix', 'prefix'])
     async def setprefix(self, ctx, prefix: str):
-        '''Sets the prefix for the bot.'''
+        'Sets the prefix for the bot.'
         pickle.dump(prefix, open(((('servers' + os.sep) + str(ctx.guild.id)) + os.sep) + 'prefix.p', 'wb'))
         await ctx.send('Prefix set!')
 
