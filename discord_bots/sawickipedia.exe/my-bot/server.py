@@ -106,35 +106,30 @@ async def background_task(): #Runs every 1 second, constantly.
                 try:
                     toChannel = pickle.load(open(((('servers' + os.sep) + str(guild.id)) + os.sep) + 'channel.p', 'rb'))  #Admin Permission
                     toChannel = bot.get_channel(int(toChannel))
+                    salEmbed = discord.Embed(title='Salary Pay', color=65280)
+                    for role in bot.get_guild(guild.id).roles:
+                        try:
+                            currentSal = pickle.load(open(((((('servers' + os.sep) + str(guild.id)) + os.sep) + str(role.id)) + os.sep) + 'salary.p','rb'))
+                        except:
+                            currentSal = 0
+                        if currentSal != 0:  
+                            for member in guild.members:
+                                for item in member.roles:
+                                    if item.id == role.id:
+                                        try:
+                                            currentMoney = pickle.load(
+                                                open(((((('servers' + os.sep) + str(guild.id)) + os.sep) + str(member.id)) +os.sep) + 'money.p', 'rb'))
+                                        except:
+                                            currentMoney = 0
+                                        currentMoney += currentSal
+                                        pickle.dump(currentMoney,open(((((('servers' + os.sep) + str(guild.id)) + os.sep) + str(member.id)) + os.sep)+ 'money.p', 'wb'))
+                            toSay = (str(role) + ' got their salary of $') + '{:,}'.format(currentSal)
+                            if toSay[0] == '@':
+                                await toChannel.send(toSay[1:])
+                            else:
+                                await toChannel.send(toSay)
                 except:
-                    toChannel = guild.default_channel
-                salEmbed = discord.Embed(title='Salary Pay', color=65280)
-                for role in bot.get_guild(guild.id).roles:
-                    try:
-                        currentSal = pickle.load(open(((((('servers' + os.sep) + str(guild.id)) + os.sep) + str(role.id)) + os.sep) + 'salary.p','rb'))
-                    except:
-                        currentSal = 0
-                    if currentSal != 0:  
-                        for member in guild.members:
-                            for item in member.roles:
-                                if item.id == role.id:
-                                    try:
-                                        currentMoney = pickle.load(
-                                            open(((((('servers' + os.sep) + str(guild.id)) + os.sep) + str(member.id)) +
-                                                  os.sep) + 'money.p', 'rb'))
-                                    except:
-                                        currentMoney = 0
-                                    currentMoney += currentSal
-                                    pickle.dump(
-                                        currentMoney,
-                                        open(((((
-                                            ('servers' + os.sep) + str(guild.id)) + os.sep) + str(member.id)) + os.sep)
-                                             + 'money.p', 'wb'))
-                        toSay = (str(role) + ' got their salary of $') + '{:,}'.format(currentSal)
-                        if toSay[0] == '@':
-                            await toChannel.send(toSay[1:])
-                        else:
-                            await toChannel.send(toSay)
+                    pass
             else:
                 waitSal -= 1
                 if waitSal <= (-1):
@@ -148,13 +143,11 @@ async def background_task(): #Runs every 1 second, constantly.
                 rouletteOn = False
             if rouletteOn:
                 try:
-                    rouletteBegun = pickle.load(
-                        open(((('servers' + os.sep) + str(guild.id)) + os.sep) + 'rouletteBegun.p', 'rb'))
+                    rouletteBegun = pickle.load(open(((('servers' + os.sep) + str(guild.id)) + os.sep) + 'rouletteBegun.p', 'rb'))
                 except:
                     rouletteBegun = False
                 try:
-                    rouChannel = pickle.load(
-                        open(((('servers' + os.sep) + str(guild.id)) + os.sep) + 'rouChannel.p', 'rb'))
+                    rouChannel = pickle.load(open(((('servers' + os.sep) + str(guild.id)) + os.sep) + 'rouChannel.p', 'rb'))
                     rouChannel = bot.get_channel(int(rouChannel))
                 except:
                     rouChannel = guild.default_channel
@@ -176,32 +169,20 @@ async def background_task(): #Runs every 1 second, constantly.
                     someoneWon = False  
                     for member in guild.members:
                         try:
-                            playingRoulette = pickle.load(
-                                open(((((('servers' + os.sep) + str(guild.id)) + os.sep) + str(member.id)) + os.sep) +
-                                     'playingRoulette.p', 'rb'))
+                            playingRoulette = pickle.load(open(((((('servers' + os.sep) + str(guild.id)) + os.sep) + str(member.id)) + os.sep) +'playingRoulette.p', 'rb'))
                         except:
                             playingRoulette = False
                         if playingRoulette:
                             try:
-                                currentMoney = pickle.load(
-                                    open(((((('servers' + os.sep) + str(guild.id)) + os.sep) + str(member.id)) + os.sep)
-                                         + 'money.p', 'rb'))
+                                currentMoney = pickle.load(open(((((('servers' + os.sep) + str(guild.id)) + os.sep) + str(member.id)) + os.sep)+ 'money.p', 'rb'))
                             except:
                                 currentMoney = 0
                             try:
                                 didWin = False
-                                rouletteMultiplier = pickle.load(
-                                    open(((((('servers' + os.sep) + str(guild.id)) + os.sep) + str(member.id)) + os.sep)
-                                         + 'rouletteMultiplier.p', 'rb'))
-                                rouletteGuessType = pickle.load(
-                                    open(((((('servers' + os.sep) + str(guild.id)) + os.sep) + str(member.id)) + os.sep)
-                                         + 'rouletteGuessType.p', 'rb'))
-                                rouletteGuess = pickle.load(
-                                    open(((((('servers' + os.sep) + str(guild.id)) + os.sep) + str(member.id)) + os.sep)
-                                         + 'rouletteGuess.p', 'rb'))
-                                rouletteBet = pickle.load(
-                                    open(((((('servers' + os.sep) + str(guild.id)) + os.sep) + str(member.id)) + os.sep)
-                                         + 'rouletteBet.p', 'rb'))
+                                rouletteMultiplier = pickle.load(open(((((('servers' + os.sep) + str(guild.id)) + os.sep) + str(member.id)) + os.sep)+ 'rouletteMultiplier.p', 'rb'))
+                                rouletteGuessType = pickle.load(open(((((('servers' + os.sep) + str(guild.id)) + os.sep) + str(member.id)) + os.sep)+ 'rouletteGuessType.p', 'rb'))
+                                rouletteGuess = pickle.load(open(((((('servers' + os.sep) + str(guild.id)) + os.sep) + str(member.id)) + os.sep)+ 'rouletteGuess.p', 'rb'))
+                                rouletteBet = pickle.load(open(((((('servers' + os.sep) + str(guild.id)) + os.sep) + str(member.id)) + os.sep)+ 'rouletteBet.p', 'rb'))
                                 if rouletteGuessType == 'numbers':
                                     if rouletteGuess == winNum:
                                         didWin = True
@@ -227,77 +208,49 @@ async def background_task(): #Runs every 1 second, constantly.
                                     await rouChannel.send(((str(member) + ' won $') + '{:,}'.format(winMoney)) + '!')
                             except:
                                 pass
-                            pickle.dump(
-                                False,
-                                open(((((('servers' + os.sep) + str(guild.id)) + os.sep) + str(member.id)) + os.sep) +
-                                     'playingRoulette.p', 'wb'))
-                            pickle.dump(
-                                currentMoney,
-                                open(((((('servers' + os.sep) + str(guild.id)) + os.sep) + str(member.id)) + os.sep) +
-                                     'money.p', 'wb'))
+                            pickle.dump(False,open(((((('servers' + os.sep) + str(guild.id)) + os.sep) + str(member.id)) + os.sep) +'playingRoulette.p', 'wb'))
+                            pickle.dump(currentMoney,open(((((('servers' + os.sep) + str(guild.id)) + os.sep) + str(member.id)) + os.sep) +'money.p', 'wb'))
                     if (not someoneWon):
                         await rouChannel.send('**No winners...**')
                     rouletteBegun = False
                     pickle.dump(False, open(((('servers' + os.sep) + str(guild.id)) + os.sep) + 'rouletteOn.p', 'wb'))
-                pickle.dump(rouletteBegun,
-                            open(((('servers' + os.sep) + str(guild.id)) + os.sep) + 'rouletteBegun.p', 'wb'))
+                pickle.dump(rouletteBegun,open(((('servers' + os.sep) + str(guild.id)) + os.sep) + 'rouletteBegun.p', 'wb'))
                 pickle.dump(rouCount, open(((('servers' + os.sep) + str(guild.id)) + os.sep) + 'rouCount.p', 'wb'))
         #Cooldowns
         for guild in myGuilds:
             for member in guild.members:
                 try:
-                    workCooldown = pickle.load(
-                        open(((((('servers' + os.sep) + str(guild.id)) + os.sep) + str(member.id)) + os.sep) +
-                             'workCooldown.p', 'rb'))
+                    workCooldown = pickle.load(open(((((('servers' + os.sep) + str(guild.id)) + os.sep) + str(member.id)) + os.sep) + 'workCooldown.p', 'rb'))
                 except:
                     workCooldown = 0
                 workCooldown -= 1
                 if workCooldown < (-60):
                     workCooldown = (-60)
                 pickle.dump(
-                    workCooldown,
-                    open(((((
-                        ('servers' + os.sep) + str(guild.id)) + os.sep) + str(member.id)) + os.sep) + 'workCooldown.p',
-                         'wb'))
+                    workCooldown,open(((((('servers' + os.sep) + str(guild.id)) + os.sep) + str(member.id)) + os.sep) + 'workCooldown.p','wb'))
                 try:
-                    crimeCooldown = pickle.load(
-                        open(((((('servers' + os.sep) + str(guild.id)) + os.sep) + str(member.id)) + os.sep) +
-                             'crimeCooldown.p', 'rb'))
+                    crimeCooldown = pickle.load(open(((((('servers' + os.sep) + str(guild.id)) + os.sep) + str(member.id)) + os.sep) +'crimeCooldown.p', 'rb'))
                 except:
                     crimeCooldown = 0
                 crimeCooldown -= 1
                 if crimeCooldown < (-60):
                     crimeCooldown = (-60)
-                pickle.dump(
-                    crimeCooldown,
-                    open(((((
-                        ('servers' + os.sep) + str(guild.id)) + os.sep) + str(member.id)) + os.sep) + 'crimeCooldown.p',
-                         'wb'))
+                pickle.dump(crimeCooldown,open(((((('servers' + os.sep) + str(guild.id)) + os.sep) + str(member.id)) + os.sep) + 'crimeCooldown.p','wb'))
                 try:
-                    robCooldown = pickle.load(
-                        open(((((('servers' + os.sep) + str(guild.id)) + os.sep) + str(member.id)) + os.sep) +
-                             'robCooldown.p', 'rb'))
+                    robCooldown = pickle.load(open(((((('servers' + os.sep) + str(guild.id)) + os.sep) + str(member.id)) + os.sep) +'robCooldown.p', 'rb'))
                 except:
                     robCooldown = 0
                 robCooldown -= 1
                 if robCooldown < (-60):
                     robCooldown = (-60)
-                pickle.dump(
-                    robCooldown,
-                    open(((((
-                        ('servers' + os.sep) + str(guild.id)) + os.sep) + str(member.id)) + os.sep) + 'robCooldown.p',
-                         'wb'))
+                pickle.dump(robCooldown,open(((((('servers' + os.sep) + str(guild.id)) + os.sep) + str(member.id)) + os.sep) + 'robCooldown.p','wb'))
                 try:
-                    questionCanGuess = pickle.load(
-                        open(((((('servers' + os.sep) + str(guild.id)) + os.sep) + str(member.id)) + os.sep) +
-                             'questionCanGuess.p', 'rb'))
+                    questionCanGuess = pickle.load(open(((((('servers' + os.sep) + str(guild.id)) + os.sep) + str(member.id)) + os.sep) +'questionCanGuess.p', 'rb'))
                 except:
                     questionCanGuess = False
                 if questionCanGuess:
                     try:
-                        trivCool = pickle.load(
-                            open(((((('servers' + os.sep) + str(guild.id)) + os.sep) + str(member.id)) + os.sep) +
-                                 'trivCool.p', 'rb'))
+                        trivCool = pickle.load(open(((((('servers' + os.sep) + str(guild.id)) + os.sep) + str(member.id)) + os.sep) + 'trivCool.p', 'rb'))
                     except:
                         trivCool = 0
                     if trivCool <= 0:  
@@ -306,17 +259,10 @@ async def background_task(): #Runs every 1 second, constantly.
                             trivChannel = bot.get_channel(int(trivChannel))
                         except:
                             trivChannel = guild.default_channel
-                        pickle.dump(
-                            False,
-                            open(((((('servers' + os.sep) + str(guild.id)) + os.sep) + str(member.id)) + os.sep) +
-                                 'questionCanGuess.p', 'wb'))
+                        pickle.dump(False,open(((((('servers' + os.sep) + str(guild.id)) + os.sep) + str(member.id)) + os.sep) +'questionCanGuess.p', 'wb'))
                         await trivChannel.send(str(member) + ' ran out of time for trivia! Oops.')
                     trivCool -= 1
-                    pickle.dump(
-                        trivCool,
-                        open(((((
-                            ('servers' + os.sep) + str(guild.id)) + os.sep) + str(member.id)) + os.sep) + 'trivCool.p',
-                             'wb'))
+                    pickle.dump(trivCool,open(((((('servers' + os.sep) + str(guild.id)) + os.sep) + str(member.id)) + os.sep) + 'trivCool.p','wb'))
         presenceCount += 1
         await asyncio.sleep(1)
 
@@ -328,30 +274,17 @@ async def on_message(message):
         return
     try:
         try:
-            currentMoney = pickle.load(
-                open(((((('servers' + os.sep) + str(message.guild.id)) + os.sep) + str(message.author.id)) + os.sep) +
-                     'money.p', 'rb'))
+            currentMoney = pickle.load(open(((((('servers' + os.sep) + str(message.guild.id)) + os.sep) + str(message.author.id)) + os.sep) +'money.p', 'rb'))
         except:
             currentMoney = 0
         currentMoney += random.choice([0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 3, 5])
-        pickle.dump(
-            currentMoney,
-            open(((((
-                ('servers' + os.sep) + str(message.guild.id)) + os.sep) + str(message.author.id)) + os.sep) + 'money.p',
-                 'wb'))
+        pickle.dump(currentMoney,open(((((('servers' + os.sep) + str(message.guild.id)) + os.sep) + str(message.author.id)) + os.sep) + 'money.p','wb'))
     except:
         pass
     if isinstance(message.channel, discord.abc.PrivateChannel)and (message.author.id != 357953549738573835):
         toChannel = await bot.get_user_info(357953549738573835)
-        await toChannel.send((((
-            ('**Message from ' + str(message.author)) + '[*') + str(message.author.id)) + '*]:** ') +
-                             str(message.content))
-    if (message.content == '<@421015092830666754>') or (message.content == '<@!421015092830666754>'):
-        msg1 = 'Somebody page me?'.format(message)
-        msg2 = 'Hello {0.author.mention}. *Glad to see you.*'.format(message)
-        await message.channel.send(msg1)
-        await message.channel.send(file=discord.File('paged.gif', filename='paged.gif'))
-        await message.channel.send(msg2)
+        await toChannel.send((((('**Message from ' + str(message.author)) + '[*') + str(message.author.id)) + '*]:** ') +str(message.content))
+
 
 
 if __name__ == '__main__':

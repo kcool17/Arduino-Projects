@@ -44,17 +44,14 @@ class Misc():
             pos += 1
         return (findList, findIDList)
 
-    @commands.command(
-        description='Add two numbers together. Change "num1" and "num2" to the numbers you wish to add together.')
+    @commands.command(description='Add two numbers together. Change "num1" and "num2" to the numbers you wish to add together.')
     async def add(self, ctx, num1: int, num2: int):
-        'Adds stuff together.'
+        '''Adds stuff together.'''
         await ctx.send(num1 + num2)
 
-    @commands.command(
-        description='Use NdN format, with the first N the amount of rolls and the second the amount of sides on the die.'
-    )
+    @commands.command(description='Use NdN format, with the first N the amount of rolls and the second the amount of sides on the die.')
     async def roll(self, ctx, dice: str):
-        'Rolls dice.'
+        '''Rolls dice.'''
         try:
             (rolls, limit) = map(int, dice.split('d'))
         except Exception:
@@ -80,17 +77,14 @@ class Misc():
             else:
                 await ctx.send(random.randint(1, limit))
 
-    @commands.command(
-        description=
-        'Have as many options as you want after "?choose", with a space in between each one. One will be randomly chosen.'
-    )
+    @commands.command(description='Have as many options as you want after "?choose", with a space in between each one. One will be randomly chosen.')
     async def choose(self, ctx, *choices: str):
-        'Chooses a random argument you give.'
+        '''Chooses a random argument you give.'''
         await ctx.send(random.choice(choices))
 
     @commands.command()
     async def admintest(self, ctx):
-        'Checks if you have admin permissions in this server.'
+        '''Checks if you have admin permissions in this server.'''
         ADMINS = pickle.load(open(((('servers' + os.sep) + str(ctx.guild.id)) + os.sep) + 'ADMINS.p', 'rb'))
         if str(ctx.author.id) in ADMINS:
             await ctx.send('You are an administrator/developer!')
@@ -99,7 +93,7 @@ class Misc():
 
     @commands.command()
     async def mentionuser(self, ctx, *user: str):
-        'Mentions the user based on input'
+        '''Mentions the user based on input'''
          #USE THIS IN OTHER FUNCTIONS
         arg = ''
         for item in user:
@@ -124,7 +118,7 @@ class Misc():
 
     @commands.command()
     async def findid(self, ctx, *user: str):
-        'Returns server ID and user ID.'
+        '''Returns server ID and user ID.'''
         guild = ctx.guild.id
         member = ctx.author.id
         arg = ''
@@ -164,6 +158,31 @@ class Misc():
         await ctx.send('Member: ' + str(theID))
         await ctx.send('Channel: ' + str(ctx.channel.id))
 
+    @commands.command(description="Make an Embed with the info given. Use RRRGGGBBB format for color (0-256 for R, 0-256 for G, etc.), and name::value format for fields.")
+    async def embed(self, ctx, myTitle = "", myDescription= "", myColor = 0x000000, *nameValue):
+        """Creates an Embed with the info given."""
+        myNames = []
+        myValues = []
+        for item in nameValue:
+            try:
+                (myName, myValue) = map(str, item.split('::'))
+                myNames.append(myName)
+                myValues.append(myValue)
+            except:
+                pass
+                
+        try:
+            myEmbed=discord.Embed(title=myTitle, description=myDescription, color=myColor)
+        except:
+            myEmbed=discord.Embed(title=myTitle, description=myDescription, color=0x000000)
+        x=0
+        for item in myNames:
+            myEmbed.add_field(name=item, value=myValues[x], inline=False)
+            x+=1
+        await ctx.send(embed=myEmbed)
+
+
+        
 
 def setup(bot):
     bot.add_cog(Misc(bot))
