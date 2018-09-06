@@ -32,34 +32,33 @@ class Developer():
         '''Repeats what you say.'''
         success = False
         newStr = ''
-        if isinstance(ctx.channel, discord.abc.PrivateChannel):
-            if guildid == 'display':
-                for guild in self.bot.guilds:
-                    await ctx.send((guild.id + ' | ') + str(guild))
-            elif channelarg.upper() == 'DM':
-                for item in arg:
-                    newStr = (newStr + str(item)) + ' '
-                newStr = newStr.replace('{', '<')
-                newStr = newStr.replace('}', '>')
-                human = await self.bot.get_user_info(guildid)
-                await human.send(newStr)
-                await ctx.send('Success!')
-            else:
-                for guild in self.bot.guilds:
-                    if (guildid == guild.id) or (guildid == str(guild.name)):
-                        for channel in guild.channels:
-                            if (channelarg == str(channel)) or (channelarg == str(channel.id)):
-                                for item in arg:
-                                    newStr = (newStr + str(item)) + ' '
-                                newStr = newStr.replace('{', '<')
-                                newStr = newStr.replace('}', '>')
-                                await channel.send(newStr)
-                                success = True
-                                await ctx.send('Success!')
-                if (not success):
-                    await ctx.send('Failure!')
-        elif (not ctx.channel.is_private):
-            await ctx.send("This is in public. Don't try that here.")
+        if guildid == 'display':
+            for guild in self.bot.guilds:
+                await ctx.send((guild.id + ' | ') + str(guild))
+            success = True
+        elif channelarg.upper() == 'DM':
+            for item in arg:
+                newStr = (newStr + str(item)) + ' '
+            newStr = newStr.replace('{', '<')
+            newStr = newStr.replace('}', '>')
+            human = await self.bot.get_user_info(guildid)
+            await human.send(newStr)
+            success = True
+            await ctx.send('Success!')
+        else:
+            for guild in self.bot.guilds:
+                if (guildid == guild.id) or (guildid == str(guild.name)):
+                    for channel in guild.channels:
+                        if (channelarg == str(channel)) or (channelarg == str(channel.id)):
+                            for item in arg:
+                                newStr = (newStr + str(item)) + ' '
+                            newStr = newStr.replace('{', '<')
+                            newStr = newStr.replace('}', '>')
+                            await channel.send(newStr)
+                            success = True
+                            await ctx.send('Success!')
+        if (not success):
+            await ctx.send('Failure!')
 
     @commands.command(hidden=True)
     @commands.check(check_dev)
@@ -71,7 +70,7 @@ class Developer():
         else:
             await ctx.send('toToken var empty. Please input a token in source.')
 
-    @commands.command(hidden=True)
+    @commands.command(aliases=["getservers"], hidden=True)
     @commands.check(check_dev)
     async def getguilds(self, ctx):
         '''Gets Server IDS that the bot is in.'''

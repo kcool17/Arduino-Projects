@@ -38,7 +38,8 @@ startup_extensions = ['modules.test1', #Default extensions (all enabled)
                       'modules.developer',
                       'modules.misc',
                       'modules.economy',
-                      'modules.minigames'
+                      'modules.minigames',
+                      'modules.music'
                     ]
 
 bot = commands.Bot(command_prefix=get_prefix, description=description)
