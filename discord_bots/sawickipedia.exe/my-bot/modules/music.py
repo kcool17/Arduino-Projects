@@ -2,6 +2,8 @@
 import discord
 from discord.ext import commands
 
+import pickle
+import os
 import asyncio
 import itertools
 import sys
@@ -9,6 +11,7 @@ import traceback
 from async_timeout import timeout
 from functools import partial
 from youtube_dl import YoutubeDL
+from server import DEVS
 
 
 ytdlopts = {
@@ -99,7 +102,7 @@ class MusicPlayer:
     When the bot disconnects from the Voice it's instance will be destroyed.
     """
 
-    __slots__ = ('bot', '_guild', '_channel', '_cog', 'queue', 'next', 'current', 'np', 'volume')
+    __slots__ = ('bot', '_guild', '_channel', '_cog', 'queue', 'next', 'current', 'np', 'volume', 'loop', 'skipLoop', 'skipVote', 'loopVote')
 
     def __init__(self, ctx):
         self.bot = ctx.bot
@@ -113,6 +116,11 @@ class MusicPlayer:
         self.np = None  # Now playing message
         self.volume = .5
         self.current = None
+        
+        self.loop = False
+        self.skipLoop = False
+        self.skipVote = []
+        self.loopVote = []
 
         ctx.bot.loop.create_task(self.player_loop())
 
@@ -123,10 +131,16 @@ class MusicPlayer:
         while not self.bot.is_closed():
             self.next.clear()
 
+            
             try:
                 # Wait for the next song. If we timeout cancel the player and disconnect...
                 async with timeout(300):  # 5 minutes...
-                    source = await self.queue.get()
+                    if self.loop == False or self.skipLoop == True:
+                        source = await self.queue.get()
+                        oldSource = source
+                        self.skipLoop = False
+                    else:
+                        source = oldSource
             except asyncio.TimeoutError:
                 return self.destroy(self._guild)
 
@@ -141,16 +155,22 @@ class MusicPlayer:
                     continue
 
             source.volume = self.volume
+
+            
             self.current = source
 
             self._guild.voice_client.play(source, after=lambda _: self.bot.loop.call_soon_threadsafe(self.next.set))
-            self.np = await self._channel.send('**Now Playing:** `{title}` requested by '
+            if not self.loop:
+                self.np = await self._channel.send('**Now Playing:** `{title}` requested by '
                                                '`{requester}`'.format(title = source.title, requester = source.requester))
-            await self.next.wait()
 
+            await self.next.wait()
+            
             # Make sure the FFmpeg process is cleaned up.
             source.cleanup()
             self.current = None
+            self.skipVote = []
+            self.loopVote = []
 
 
     def destroy(self, guild):
@@ -210,7 +230,7 @@ class Music:
 
     @commands.command(name='connect', aliases=['join'])
     async def connect_(self, ctx, *, channel: discord.VoiceChannel=None):
-        """Connect to voice.
+        """Connect to voice. DJ-Only, if already connected. (Note: DJ is someone with Manage Channels permissions)
         Parameters
         ------------
         channel: discord.VoiceChannel [Optional]
@@ -225,21 +245,28 @@ class Music:
                 raise InvalidVoiceChannel('No channel to join. Please either specify a valid channel or join one.')
 
         vc = ctx.voice_client
-
+        guild = ctx.guild.id
+        member = ctx.author.id
+        ADMINS = pickle.load(open(((('servers' + os.sep) + str(ctx.guild.id)) + os.sep) + 'ADMINS.p', 'rb'))
+        
         if vc:
-            if vc.channel.id == channel.id:
+            if ctx.author.guild_permissions.manage_channels or member in ADMINS:
+                if vc.channel.id == channel.id:
+                    return
+                try:
+                    await vc.move_to(channel)
+                except asyncio.TimeoutError:
+                    raise VoiceConnectionError('Moving to channel: <{channel}> timed out.'.format(channel=channel))
+            else:
+                await ctx.send("Bot already connected to channel! Just join that one.")
                 return
-            try:
-                await vc.move_to(channel)
-            except asyncio.TimeoutError:
-                raise VoiceConnectionError('Moving to channel: <{channel}> timed out.'.format(channel=channel))
         else:
             try:
                 await channel.connect()
             except asyncio.TimeoutError:
-                raise VoiceConnectionError(f'Connecting to channel: <{channel}> timed out.'.format(channel=channel))
+                raise VoiceConnectionError('Connecting to channel: <{channel}> timed out.'.format(channel=channel))
 
-        await ctx.send(f'Connected to: **{channel}**')
+        await ctx.send('Connected to: **{channel}**'.format(channel=channel))
 
     @commands.command(name='play', aliases=['sing'])
     async def play_(self, ctx, *, search: str):
@@ -257,58 +284,96 @@ class Music:
 
         if not vc:
             await ctx.invoke(self.connect_)
+        vc = ctx.voice_client
+        if ctx.author in vc.channel.members or ctx.author.id in DEVS:
+            player = self.get_player(ctx)
 
-        player = self.get_player(ctx)
+            # If download is False, source will be a dict which will be used later to regather the stream.
+            # If download is True, source will be a discord.FFmpegPCMAudio with a VolumeTransformer.
+            source = await YTDLSource.create_source(ctx, search, loop=self.bot.loop, download=False)
 
-        # If download is False, source will be a dict which will be used later to regather the stream.
-        # If download is True, source will be a discord.FFmpegPCMAudio with a VolumeTransformer.
-        source = await YTDLSource.create_source(ctx, search, loop=self.bot.loop, download=False)
-
-        await player.queue.put(source)
+            await player.queue.put(source)
+        else:
+            await ctx.send("Join the voice channel!")
 
     @commands.command(name='pause')
     async def pause_(self, ctx):
-        """Pause the currently playing song."""
+        """DJ-Only. Pause the currently playing song. (Note: DJ is someone with Manage Channels permissions)"""
         vc = ctx.voice_client
+        if ctx.author in vc.channel.members or ctx.author.id in DEVS:
+            guild = ctx.guild.id
+            member = ctx.author.id
+            ADMINS = pickle.load(open(((('servers' + os.sep) + str(ctx.guild.id)) + os.sep) + 'ADMINS.p', 'rb'))
+            if ctx.author.guild_permissions.manage_channels or member in ADMINS:
+                if not vc or not vc.is_playing():
+                    return await ctx.send('I am not currently playing anything!')
+                elif vc.is_paused():
+                    return
 
-        if not vc or not vc.is_playing():
-            return await ctx.send('I am not currently playing anything!')
-        elif vc.is_paused():
-            return
-
-        vc.pause()
-        await ctx.send('**`{author}`**: Paused the song!'.format(author=ctx.author))
+                vc.pause()
+                await ctx.send('**`{author}`**: Paused the song!'.format(author=ctx.author))
+            else:
+                await ctx.send("You're not a DJ! This isn't for you!")
+        else:
+            await ctx.send("Join the voice channel!")
 
     @commands.command(name='resume')
     async def resume_(self, ctx):
-        """Resume the currently paused song."""
+        """DJ-Only. Resume the currently paused song. (Note: DJ is someone with Manage Channels permissions)"""
         vc = ctx.voice_client
+        if ctx.author in vc.channel.members or ctx.author.id in DEVS:
+            guild = ctx.guild.id
+            member = ctx.author.id
+            ADMINS = pickle.load(open(((('servers' + os.sep) + str(ctx.guild.id)) + os.sep) + 'ADMINS.p', 'rb'))
+            if ctx.author.guild_permissions.manage_channels or member in ADMINS:
+                if not vc or not vc.is_connected():
+                    return await ctx.send('I am not currently playing anything!')
+                elif not vc.is_paused():
+                    return
 
-        if not vc or not vc.is_connected():
-            return await ctx.send('I am not currently playing anything!')
-        elif not vc.is_paused():
-            return
-
-        vc.resume()
-        await ctx.send('**`{author}`**: Resumed the song!'.format(author=ctx.author))
+                vc.resume()
+                await ctx.send('**`{author}`**: Resumed the song!'.format(author=ctx.author))
+            else:
+                await ctx.send("You're not a DJ! This isn't for you!")
+        else:
+            await ctx.send("Join the voice channel!")
 
     @commands.command(name='skip')
     async def skip_(self, ctx):
         """Skip the song."""
         vc = ctx.voice_client
-
-        if not vc or not vc.is_connected():
-            return await ctx.send('I am not currently playing anything!')
-
-        if vc.is_paused():
-            pass
-        elif not vc.is_playing():
-            return
-
-        vc.stop()
-        await ctx.send('**`{author}`**: Skipped the song!'.format(author=ctx.author))
-
-    @commands.command(name='queue', aliases=['q', 'playlist'])
+        if ctx.author in vc.channel.members or ctx.author.id in DEVS:
+            player = self.get_player(ctx)
+            guild = ctx.guild.id
+            member = ctx.author.id
+            ADMINS = pickle.load(open(((('servers' + os.sep) + str(ctx.guild.id)) + os.sep) + 'ADMINS.p', 'rb'))
+            if not vc or not vc.is_connected():
+                return await ctx.send('I am not currently playing anything!')
+            vcMembers = vc.channel.members
+            if vc.is_paused():
+                pass
+            elif not vc.is_playing():
+                return
+            for person in vcMembers:
+                if person.id in player.skipVote:
+                    player.skipVote.remove(person.id)
+            if ctx.author.guild_permissions.manage_channels or member in ADMINS:
+                vc.stop()
+                player = self.get_player(ctx)
+                player.skipLoop = True
+                await ctx.send('**`{author}`**: Skipped the song!'.format(author=ctx.author))
+            else:
+                player.skipVote.append(member)
+                await ctx.send(str(len(player.skipVote)) + "/" + str(int((len(vcMembers)/2))) + " people needed to skip!")
+            if len(player.skipVote) >= int((len(vcMembers)/2)):
+                vc.stop()
+                player = self.get_player(ctx)
+                player.skipLoop = True
+                await ctx.send('Skipping the song!')
+        else:
+            await ctx.send("Join the voice channel!")
+            
+    @commands.command(name='queue', aliases=['q'])
     async def queue_info(self, ctx):
         """Retrieve a basic queue of upcoming songs."""
         vc = ctx.voice_client
@@ -320,11 +385,13 @@ class Music:
         if player.queue.empty():
             return await ctx.send('There are currently no more queued songs.')
 
-        # Grab up to 5 entries from the queue...
-        upcoming = list(itertools.islice(player.queue._queue, 0, 5))
-
-        fmt = '\n'.join('**`{_["title"]}`**'.format(title=title) for _ in upcoming)
-        embed = discord.Embed(title='Upcoming - Next {upcoming_len}'.format(upcoming_len=len(upcoming)), description=fmt)
+        upcoming = list(player.queue._queue)
+        fmt = ""
+        z = 1
+        for x in upcoming:
+            fmt = fmt + '\n' + '**' + str(z) + ". " + x['title'] + '**'
+            z += 1
+        embed = discord.Embed(title='Upcoming - Next {upcoming_len}'.format(upcoming_len=len(upcoming)), description=fmt, color=0x0000FF)
 
         await ctx.send(embed=embed)
 
@@ -346,41 +413,89 @@ class Music:
 
     @commands.command(name='volume', aliases=['vol'])
     async def change_volume(self, ctx, *, vol: float):
-        """Change the player volume.
+        """DJ-only. Change the player volume. (Note: DJ is someone with Manage Channels permissions)
         Parameters
         ------------
         volume: float or int [Required]
             The volume to set the player to in percentage. This must be between 1 and 100.
         """
         vc = ctx.voice_client
+        if ctx.author in vc.channel.members or ctx.author.id in DEVS:
+            guild = ctx.guild.id
+            member = ctx.author.id
+            ADMINS = pickle.load(open(((('servers' + os.sep) + str(ctx.guild.id)) + os.sep) + 'ADMINS.p', 'rb'))
+            if ctx.author.guild_permissions.manage_channels or member in ADMINS:
+                if not vc or not vc.is_connected():
+                    return await ctx.send('I am not currently connected to voice!')
 
-        if not vc or not vc.is_connected():
-            return await ctx.send('I am not currently connected to voice!')
+                if not 0 < vol < 101:
+                    return await ctx.send('Please enter a value between 1 and 100.')
 
-        if not 0 < vol < 101:
-            return await ctx.send('Please enter a value between 1 and 100.')
+                player = self.get_player(ctx)
 
-        player = self.get_player(ctx)
+                if vc.source:
+                    vc.source.volume = vol / 100
 
-        if vc.source:
-            vc.source.volume = vol / 100
+                player.volume = vol / 100
+                await ctx.send('**`{author}`**: Set the volume to **{vol}%**'.format(author=ctx.author, vol=vol))
+            else:
+                await ctx.send("You're not a DJ! This isn't for you.")
+        else:
+            await ctx.send("Join the voice channel!")
 
-        player.volume = vol / 100
-        await ctx.send('**`{author}`**: Set the volume to **{vol}%**'.format(author=ctx.author))
-
-    @commands.command(name='stop')
+    @commands.command(name='leave', aliases=["disconnect"])
     async def stop_(self, ctx):
-        """Stop the currently playing song and destroy the player.
+        """DJ-Only. Stop the currently playing song and destroy the player. (Note: DJ is someone with Manage Channels permissions)
         !Warning!
             This will destroy the player assigned to your guild, also deleting any queued songs and settings.
         """
         vc = ctx.voice_client
+        if ctx.author in vc.channel.members or ctx.author.id in DEVS:
+            guild = ctx.guild.id
+            member = ctx.author.id
+            ADMINS = pickle.load(open(((('servers' + os.sep) + str(ctx.guild.id)) + os.sep) + 'ADMINS.p', 'rb'))
+            if ctx.author.guild_permissions.manage_channels or member in ADMINS:
+                if not vc or not vc.is_connected():
+                    return await ctx.send('I am not currently playing anything!')
 
-        if not vc or not vc.is_connected():
-            return await ctx.send('I am not currently playing anything!')
+                await self.cleanup(ctx.guild)
+            else:
+                await ctx.send("You're not a DJ! This isn't for you!")
+        else:
+            await ctx.send("Join the voice channel!")
 
-        await self.cleanup(ctx.guild)
 
+    @commands.command()
+    async def loop(self, ctx):
+        """Loops the currently playing song"""
+        player = self.get_player(ctx)
+        vc = ctx.voice_client
+        if ctx.author in vc.channel.members or ctx.author.id in DEVS:
+            if player.loop:
+                await ctx.send("Loop Disabled!")
+                player.loop = False
+            else:
+                await ctx.send("Loop Enabled!")
+                player.loop = True
+        else:
+            await ctx.send("Join the voice channel!")
+
+    @commands.command()
+    async def clear(self, ctx):
+        """DJ-Only. Clears the Queue. (Note: DJ is someone with Manage Channels permissions)"""
+        vc = ctx.voice_client
+        if ctx.author in vc.channel.members or ctx.author.id in DEVS:
+            guild = ctx.guild.id
+            member = ctx.author.id
+            ADMINS = pickle.load(open(((('servers' + os.sep) + str(ctx.guild.id)) + os.sep) + 'ADMINS.p', 'rb'))
+            if ctx.author.guild_permissions.manage_channels or member in ADMINS:
+                player = self.get_player(ctx)
+                player.queue = asyncio.Queue()
+                await ctx.send("Queue cleared!")
+            else:
+                await ctx.send("You're not a DJ! This isn't for you!")
+        else:
+            await ctx.send("Join the voice channel!")
 
 def setup(bot):
     bot.add_cog(Music(bot))
