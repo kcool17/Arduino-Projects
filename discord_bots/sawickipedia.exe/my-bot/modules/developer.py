@@ -115,7 +115,29 @@ class Developer():
         myID = the_page[the_page.find('id') + 6:the_page.find('",\\n\\t\\t"h')]
         myHash = the_page[the_page.find('hash') + 8:the_page.find('"\\n\\t}\\n}')]
         await ctx.send((('https://paste.lemonmc.com/' + myID) + '/') + myHash + "/raw")
+		
+    @commands.command(hidden=True)
+    @commands.check(check_dev)
+    async def getperms(self, ctx, serverid=0, userid=421015092830666754):
+        '''Checks permission levels in a server'''
+        try:
+            serverid = int(serverid)
+            userid = int(userid)
+        except:
+            await ctx.send("TypeError! Use valid args!")
+        server = self.bot.get_guild(serverid)
+        if server == None:
+            await ctx.send("Invalid server!")
+            return
+        member = server.get_member(userid)
+        if member == None:
+            await ctx.send("Invalid member!")
+            return
+        myPerms = member.guild_permissions
+        myPrettyPerms = "```\nKick Members: " + str(myPerms.kick_members) + "\nBan Members: " + str(myPerms.ban_members) + "\nAdministrator: " + str(myPerms.administrator) + "\nManage Channels: " + str(myPerms.manage_channels) + "\nManage Guild: " + str(myPerms.manage_guild) + "\nAdd Reactions: " + str(myPerms.add_reactions) + "\nView Audit Log: " + str(myPerms.view_audit_log) + "\nPriority Speaker: " + str(myPerms.priority_speaker) + "\nRead Messages: " + str(myPerms.read_messages) + "\nSend Messages: " + str(myPerms.send_messages) + "\nSend TTS: " + str(myPerms.send_tts_messages) + "\nManage Messages: " + str(myPerms.manage_messages) + "\nEmbed Links: " + str(myPerms.embed_links) + "\nAttach Files: " + str(myPerms.attach_files) + "\nMention Everyone: " + str(myPerms.mention_everyone) + "\nExternal Emojis: " + str(myPerms.external_emojis) + "\nConnect: " + str(myPerms.connect) + "\nSpeak: " + str(myPerms.speak) + "\Mute Members: " + str(myPerms.mute_members) + "\nDeafen Members: " + str(myPerms.deafen_members) + "\nMove Members: " + str(myPerms.move_members) + "\nUse Voice Activation: " + str(myPerms.use_voice_activation) + "\nChange Nickname: " + str(myPerms.change_nickname) + "\nManage Nicknames: " + str(myPerms.manage_nicknames) + "\nManage Roles: " + str(myPerms.manage_roles) + "\nManage Webhooks: " + str(myPerms.manage_webhooks) + "\nManage Emojis: " + str(myPerms.manage_emojis) + "\n```"
 
+        await ctx.send(myPrettyPerms)
 
 def setup(bot):
     bot.add_cog(Developer(bot))
+ 
