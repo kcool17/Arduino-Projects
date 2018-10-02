@@ -8,6 +8,7 @@ import pickle
 import asyncio
 import urllib.parse
 import urllib.request
+import re
 from server import DEVS
 
 
@@ -39,8 +40,15 @@ class Developer():
         elif channelarg.upper() == 'DM':
             for item in arg:
                 newStr = (newStr + str(item)) + ' '
-            newStr = newStr.replace('{', '<')
-            newStr = newStr.replace('}', '>')
+            rresult = re.findall(r':(.*?):', newStr)
+            emojiFound = False
+            for item in result:
+                for guild in self.bot.guilds:
+                    for emote in guild.emojis:
+                        if emote.name == item and emojiFound == False:
+                            newStr = newStr.replace(":" + item + ":", "<:" + emote.name + ":" + str(emote.id) + ">")
+                            emojiFound = True
+                    
             human = await self.bot.get_user_info(guildid)
             await human.send(newStr)
             success = True
@@ -52,8 +60,16 @@ class Developer():
                         if (channelarg == str(channel)) or (channelarg == str(channel.id)):
                             for item in arg:
                                 newStr = (newStr + str(item)) + ' '
-                            newStr = newStr.replace('{', '<')
-                            newStr = newStr.replace('}', '>')
+
+                            result = re.findall(r':(.*?):', newStr)
+                            emojiFound = False
+                            for item in result:
+                                for guild in self.bot.guilds:
+                                    for emote in guild.emojis:
+                                        if emote.name == item and emojiFound == False:
+                                            newStr = newStr.replace(":" + item + ":", "<:" + emote.name + ":" + str(emote.id) + ">")
+                                            emojiFound = True
+                               
                             await channel.send(newStr)
                             success = True
                             await ctx.send('Success!')
@@ -138,6 +154,15 @@ class Developer():
 
         await ctx.send(myPrettyPerms)
 
+    @commands.command(hidden=True,name="print")
+    @commands.check(check_dev)
+    async def print_(self, ctx, *arg : str):
+        '''Prints to log.'''
+        thing = ""
+        for item in arg:
+            thing = thing + item
+        print(thing)
+            
 def setup(bot):
     bot.add_cog(Developer(bot))
  

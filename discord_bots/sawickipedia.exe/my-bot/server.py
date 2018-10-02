@@ -9,8 +9,14 @@ import os
 import asyncio
 import datetime
 import random
+import io
+import sys
+import logging
 DEVS = [357953549738573835]
 GAMES = ['with Snowden', 'the NSA', 'with Lizard-People', 'with The Zucc', 'with Element 94', 'with the Doctor','the Doctor', 'with Space-Time', 'on the Death Star', 'God', 'with Nightmares', 'with Lucifer', 'Crap(s)','with Test Monkeys', 'Society', 'with Logs', 'at 88 MPH', 'you all for fools', 'with the One Ring', 'in Mordor','with my Palantir', 'with Myself', 'with Pythons', 'in CMD', 'as Root', 'Hang Man', 'with your passwords','with your money', 'with your existence', 'you', 'with Just Monika', 'with Explosives', 'with Lives','with your Life', 'on a Good Christian Minecraft Server', 'a Game.', 'with You...', 'in the Meth Lab','with your S.O.', 'with Death', 'with Lightsabers', 'with your Heart', 'Jedi Mind-tricks', 'Mind-games']
+
+#Logging
+#logging.basicConfig(level=logging.DEBUG)
 
 #Get Autoresponder Images
 with urllib.request.urlopen('https://cdn.glitch.com/b62dbbb6-5065-4db0-ac88-ce2ffbf2c18f%2Fpaged.gif?1526252261731') as url:
@@ -52,9 +58,11 @@ async def on_ready():
         if (not os.path.exists(('servers' + os.sep) + str(guild.id))):
             os.makedirs(('servers' + os.sep) + str(guild.id))
     startup_extensions = []
+    print('**______----------------------------STARTING----------------------------______**')
     print('Logged in as')
     print(bot.user.name)
-    print(bot.user.id)  
+    print(bot.user.id)
+    print("**Date:** " + str(datetime.datetime.now()))
     print('------')
     await bot.change_presence(activity=discord.Game(name='with Snowden'))
 
@@ -69,6 +77,22 @@ async def background_task(): #Runs every 1 second, constantly.
             await bot.change_presence(activity=discord.Game(name=GAMES[randomGame]))
             presenceCount = 0
 
+        #Logging
+        global logBuffer
+        global errBuffer
+        toChannel=bot.get_channel(496780822553034752)
+        toSend = logBuffer.getvalue()
+        toSend2 = errBuffer.getvalue()
+        logBuffer.close()
+        errBuffer.close()
+        sys.stdout = logBuffer = io.StringIO()
+        sys.stderr = errBuffer = io.StringIO()
+        
+        if toSend != "":
+            await toChannel.send(toSend)
+        if toSend2 != "":
+            await toChannel.send(toSend2)
+            
         #Filesystem
         myGuilds = bot.guilds
         for guild in myGuilds:
@@ -295,5 +319,7 @@ if __name__ == '__main__':
         except Exception as e:
             exc = '{}: {}'.format(type(e).__name__, e)
             print('Failed to load extension {}\n{}'.format(extension, exc))
+    sys.stdout = logBuffer = io.StringIO()
+    sys.stderr = errBuffer = io.StringIO()
     bot.loop.create_task(background_task())
     bot.run(pickle.load(open('token.p', 'rb')))

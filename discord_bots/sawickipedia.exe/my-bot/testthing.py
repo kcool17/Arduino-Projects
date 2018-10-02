@@ -17,4 +17,4 @@ async def testcommandthing(ctx):
     channel = await bot.get_user_info(120195047470661632)
     await channel.send("<:trollface:453272230516752406>")
 
-bot.run("Mzg2NzI1MzMyNzIxNTk4NDc0.DfDbdA.e3ddv0ntOZDGcQwsbUS7a7pn5S0")
+bot.run("")
