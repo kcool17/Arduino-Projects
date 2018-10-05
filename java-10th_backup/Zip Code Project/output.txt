@@ -1,0 +1,86 @@
+59043: LAME DEER,MT, 
+Postal Barcode:   |:|:|:|:|::||::::|::|::||:|:|::|
+Readable Barcode: | :|:|: |:|:: ||::: :|::| ::||: |:|:: |
+
+16058: TURKEY CITY,PA, 
+Postal Barcode:   |:::||:||::||::::|:|:|::|:||:::|
+Readable Barcode: | :::|| :||:: ||::: :|:|: |::|: ||::: |
+
+21020: BORING,MD, 
+Postal Barcode:   |::|:|:::||||:::::|:|||::::|:|:|
+Readable Barcode: | ::|:| :::|| ||::: ::|:| ||::: :|:|: |
+
+29395: DISNEY DIRECT MARKETING,SC, JONESVILLE,SC, 
+Postal Barcode:   |::|:||:|::::||:|:|:::|:|:::|:||
+Readable Barcode: | ::|:| |:|:: ::||: |:|:: :|:|: ::|:| |
+
+25259: LINDEN,WV, LOONEYVILLE,WV, TARIFF,WV, 
+Postal Barcode:   |::|:|:|:|:::|:|:|:|:|:|::|:::||
+Readable Barcode: | ::|:| :|:|: ::|:| :|:|: |:|:: |:::| |
+
+05042: EAST RYEGATE,VT, MOSQUITOVILLE,VT, RYEGATE,VT, RYEGATE CORNER,VT, 
+Postal Barcode:   |||::::|:|:||::::|::|::|:||:|::|
+Readable Barcode: | ||::: :|:|: ||::: :|::| ::|:| |:|:: |
+
+40122: FORT KNOX,KY, 
+Postal Barcode:   |:|::|||::::::||::|:|::|:|:::|||
+Readable Barcode: | :|::| ||::: :::|| ::|:| ::|:| :::|| |
+
+99755: DENALI NATIONAL PARK,AK, DENALI PARK,AK, HEALY,AK, 
+Postal Barcode:   ||:|::|:|::|:::|:|:|::|:|::|:|:|
+Readable Barcode: | |:|:: |:|:: |:::| :|:|: :|:|: :|:|: |
+
+90210: BEVERLY HILLS,CA, 
+Postal Barcode:   ||:|::||:::::|:|:::||||:::|::|:|
+Readable Barcode: | |:|:: ||::: ::|:| :::|| ||::: |::|: |
+
+20050: PENTAGON,DC, WASHINGTON,DC, 
+Postal Barcode:   |::|:|||:::||::::|:|:||:::::||:|
+Readable Barcode: | ::|:| ||::: ||::: :|:|: ||::: ::||: |
+
+-----------------------------------------
+
+Barcode: ||:|:::||::||:::::||:|:|::::||:|
+Zipcode: 96039
+Cities: HAPPY CAMP,CA, 
+
+Barcode: |:||::|:|:::::||:|::|::||:|:::||
+Zipcode: 69143
+Cities: HERSHEY,NE, 
+
+Barcode: |:|:|:|:|::|:|:::::|||:|::|:::||
+Zipcode: 59919
+Cities: HUNGRY HORSE,MT, 
+
+Barcode: ||:::|:|:|:::||::::||::|:|::|:||
+Zipcode: 75312
+Cities: DALLAS,TX, READER'S DIGEST,TX, 
+
+Barcode: ||:::||:::|::||:||::::||::|:::||
+Zipcode: 77306
+Cities: CONROE,TX, CUT AND SHOOT,TX, 
+
+Barcode: ||:|::::|:||:::|:||:::|::|:::|||
+Zipcode: Invalid Barcode
+Cities: No Cities Found
+
+Barcode: ||||:::::||:|:|::::||||:::::||:|
+Zipcode: Invalid Barcode
+Cities: No Cities Found
+
+Barcode: ||:::|:|:|::::||:|:|::||:::||::|
+Zipcode: 75156
+Cities: ENCHANTED OAK,TX, ENCHANTED OAKS,TX, GUN BARREL CITY,TX, GUN BARREL CY,TX, MABANK,TX, 
+
+Barcode: ||::|::|:|:::||:::|:|:::||:::|||
+Zipcode: 85321
+Cities: AJO,AZ, WHY,AZ, 
+
+Barcode: |::|:|||:::::||::|:|::|:|::|:|:|
+Zipcode: 20355
+Cities: PENTAGON,DC, WASHINGTON,DC, 
+
+Barcode: ||:|:::::|||:::|::||:||:::||:::|
+Zipcode: 91730
+Cities: CUCAMONGA,CA, RANCHO CUCAMONGA,CA, RCH CUCAMONGA,CA, 
+
