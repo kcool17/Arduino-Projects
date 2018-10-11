@@ -6,12 +6,28 @@
  */
 public class Die {
 	//The Die's current face value is stored in this variable.
-	public int face;
+	private int face;
+	//The # of sides on the die.
+	private int sides;
+	/**
+	 * Constructor method; rolls the die once.
+	 */
+	public Die() {
+		rollDie();
+		sides = 6;
+	}
+	/**
+	 * Constructor method for number of sides.
+	 */
+	public Die(int sideNum) {
+		if (sideNum>1)sides = sideNum;
+		else sides=2;
+	}
 	/**
 	 * This method rolls the die, by setting the face from a random number from 1-6.
 	 */
 	public void rollDie() {
-		face = (int)(Math.random()*6) + 1;
+		face = (int)(Math.random()*sides) + 1;
 	}
 	/**
 	 * This function returns the die's face as an integer.
@@ -24,7 +40,31 @@ public class Die {
 	 * This function returns the die's face as a String.
 	 * @return
 	 */
-	public String stringFace() {
+	public String toString() {
 		return Integer.toString(face);
+	}
+	/**
+	 * Changes the amount of sides on the die.
+	 * @param sideNum
+	 */
+	public void changeSides(int sideNum) {
+		if (sideNum>1)sides = sideNum;
+		else sides=2;
+	}
+	/**
+	 * Returns the amount of sides.
+	 * @return
+	 */
+	public int getSides() {
+		return sides;
+	}
+	/**
+	 * Checks if this die has the same face as another die.
+	 * @param otherDie
+	 * @return
+	 */
+	public boolean isDoubles(Die otherDie) {
+		if(face==otherDie.checkFace())return true;
+		else return false;
 	}
 }
