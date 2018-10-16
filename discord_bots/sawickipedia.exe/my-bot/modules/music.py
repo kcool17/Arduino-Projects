@@ -252,6 +252,7 @@ class Music:
         return player
 
     @commands.command(name='connect', aliases=['join'])
+	@commands.cooldown(1, 1, commands.BucketType.user)
     async def connect_(self, ctx, *, channel: discord.VoiceChannel=None):
         """Connect to voice. DJ-Only, if already connected. (Note: DJ is someone with Manage Channels permissions)
         Parameters
@@ -292,6 +293,7 @@ class Music:
         await ctx.send('Connected to: **{channel}**'.format(channel=channel))
 
     @commands.command(name='play', aliases=['sing'])
+	@commands.cooldown(1, 1, commands.BucketType.user)
     async def play_(self, ctx, *, search: str):
         """Request a song and add it to the queue.
         This command attempts to join a valid voice channel if the bot is not already in one.
@@ -320,6 +322,7 @@ class Music:
             await ctx.send("Join the voice channel!")
 
     @commands.command(name='pause')
+	@commands.cooldown(1, 1, commands.BucketType.user)
     async def pause_(self, ctx):
         """DJ-Only. Pause the currently playing song. (Note: DJ is someone with Manage Channels permissions)"""
         vc = ctx.voice_client
@@ -342,6 +345,7 @@ class Music:
             await ctx.send("Join the voice channel!")
 
     @commands.command(name='resume')
+	@commands.cooldown(1, 1, commands.BucketType.user)
     async def resume_(self, ctx):
         """DJ-Only. Resume the currently paused song. (Note: DJ is someone with Manage Channels permissions)"""
         vc = ctx.voice_client
@@ -373,6 +377,7 @@ class Music:
             await ctx.send("Join the voice channel!")
 
     @commands.command(name='skip')
+	@commands.cooldown(1, 1, commands.BucketType.user)
     async def skip_(self, ctx):
         """Skip the song."""
         vc = ctx.voice_client
@@ -408,6 +413,7 @@ class Music:
             await ctx.send("Join the voice channel!")
             
     @commands.command(name='queue', aliases=['q'])
+	@commands.cooldown(1, 1, commands.BucketType.user)
     async def queue_info(self, ctx):
         """Retrieve a basic queue of upcoming songs."""
         vc = ctx.voice_client
@@ -438,6 +444,7 @@ class Music:
         await ctx.send(embed=embed)
 
     @commands.command(name='now_playing', aliases=['np', 'current', 'currentsong', 'playing'])
+	@commands.cooldown(1, 1, commands.BucketType.user)
     async def now_playing_(self, ctx):
         """Display information about the currently playing song."""
         guild = ctx.guild
@@ -483,6 +490,7 @@ class Music:
         player.np = await ctx.send(embed=npEmbed)
 
     @commands.command(name='volume', aliases=['vol'])
+	@commands.cooldown(1, 1, commands.BucketType.user)
     async def change_volume(self, ctx, *, vol: float):
         """DJ-only. Change the player volume. (Note: DJ is someone with Manage Channels permissions)
         Parameters
@@ -515,6 +523,7 @@ class Music:
             await ctx.send("Join the voice channel!")
 
     @commands.command(name='leave', aliases=["disconnect"])
+	@commands.cooldown(1, 1, commands.BucketType.user)
     async def stop_(self, ctx):
         """DJ-Only. Stop the currently playing song and destroy the player. (Note: DJ is someone with Manage Channels permissions)
         !Warning!
@@ -537,6 +546,7 @@ class Music:
 
 
     @commands.command()
+	@commands.cooldown(1, 1, commands.BucketType.user)
     async def loop(self, ctx):
         """Loops the currently playing song"""
         player = self.get_player(ctx)
@@ -552,6 +562,7 @@ class Music:
             await ctx.send("Join the voice channel!")
 
     @commands.command()
+	@commands.cooldown(1, 1, commands.BucketType.user)
     async def clear(self, ctx):
         """DJ-Only. Clears the Queue. (Note: DJ is someone with Manage Channels permissions)"""
         vc = ctx.voice_client
@@ -568,6 +579,7 @@ class Music:
         else:
             await ctx.send("Join the voice channel!")
     @commands.command()
+	@commands.cooldown(1, 1, commands.BucketType.user)
     async def remove(self, ctx, toRemove = ""):
         """DJ-Only. Removes item from the Queue. (Note: DJ is someone with Manage Channels permissions)"""
         vc = ctx.voice_client

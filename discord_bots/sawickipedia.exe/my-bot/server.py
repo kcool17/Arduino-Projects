@@ -49,7 +49,7 @@ startup_extensions = ['modules.test1', #Default extensions (all enabled)
                     ]
 
 bot = commands.Bot(command_prefix=get_prefix, description=description)
-
+bot.remove_command('help')
 
 @bot.event  
 async def on_ready():

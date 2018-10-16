@@ -78,11 +78,13 @@ class Misc():
                 await ctx.send(random.randint(1, limit))
 
     @commands.command(description='Have as many options as you want after "?choose", with a space in between each one. One will be randomly chosen.')
-    async def choose(self, ctx, *choices: str):
+    @commands.cooldown(1, 1, commands.BucketType.user)
+	async def choose(self, ctx, *choices: str):
         '''Chooses a random argument you give.'''
         await ctx.send(random.choice(choices))
 
     @commands.command()
+	@commands.cooldown(1, 1, commands.BucketType.user)
     async def admintest(self, ctx):
         '''Checks if you have admin permissions in this server.'''
         ADMINS = pickle.load(open(((('servers' + os.sep) + str(ctx.guild.id)) + os.sep) + 'ADMINS.p', 'rb'))
@@ -92,6 +94,7 @@ class Misc():
             await ctx.send('You are *not* an administrator/developer. How sad.')
 
     @commands.command()
+	@commands.cooldown(1, 1, commands.BucketType.user)
     async def mentionuser(self, ctx, *user: str):
         '''Mentions the user based on input'''
          #USE THIS IN OTHER FUNCTIONS
@@ -117,6 +120,7 @@ class Misc():
             await ctx.send(('<@' + str(theID)) + '>')
 
     @commands.command()
+	@commands.cooldown(1, 1, commands.BucketType.user)
     async def findid(self, ctx, *user: str):
         '''Returns server ID and user ID.'''
         guild = ctx.guild.id
@@ -159,7 +163,8 @@ class Misc():
         await ctx.send('Channel: ' + str(ctx.channel.id))
 
     @commands.command(description="Make an Embed with the info given. Use RRRGGGBBB format for color (0-256 for R, 0-256 for G, etc.), and name::value format for fields.")
-    async def embed(self, ctx, myTitle = "", myDescription= "", myColor = 0x000000, *nameValue):
+	@commands.cooldown(1, 1, commands.BucketType.user)
+	async def embed(self, ctx, myTitle = "", myDescription= "", myColor = 0x000000, *nameValue):
         """Creates an Embed with the info given."""
         myNames = []
         myValues = []
@@ -181,7 +186,10 @@ class Misc():
             x+=1
         await ctx.send(embed=myEmbed)
 
-
+	@commands.command()
+	@commands.cooldown(1, 1, commands.BucketType.user)
+	async def help(self):
+		pass
         
 
 def setup(bot):

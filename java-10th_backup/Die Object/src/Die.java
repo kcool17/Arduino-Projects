@@ -64,7 +64,6 @@ public class Die {
 	 * @return
 	 */
 	public boolean isDoubles(Die otherDie) {
-		if(face==otherDie.checkFace())return true;
-		else return false;
+		return face==otherDie.checkFace();
 	}
 }

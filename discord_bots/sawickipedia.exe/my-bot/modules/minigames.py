@@ -64,7 +64,8 @@ class Minigames():
         return (findList, findIDList)
 
     @commands.command(aliases=['bj'])
-    async def blackjack(self, ctx, arg='noArg'):
+    @commands.cooldown(1, 1, commands.BucketType.user)
+	async def blackjack(self, ctx, arg='noArg'):
         'Blackjack! Use "?bj about" for details.'
         guild = ctx.guild.id
         member = ctx.author.id
@@ -414,7 +415,8 @@ class Minigames():
             open(((((('servers' + os.sep) + str(guild)) + os.sep) + str(member)) + os.sep) + 'playingBJ.p', 'wb'))
 
     @commands.command(aliases=['rou'])
-    async def roulette(self, ctx, bet='noArg', place='noArg'):
+    @commands.cooldown(1, 1, commands.BucketType.user)
+	async def roulette(self, ctx, bet='noArg', place='noArg'):
         'Roulette! Use "?roulette about" for details.'
         guild = ctx.guild.id
         member = ctx.author.id
@@ -535,7 +537,8 @@ class Minigames():
                 await ctx.send('Bet placed!')
 
     @commands.command(aliases=['triv'])
-    async def trivia(self, ctx, arg='noArg', *user: str):
+    @commands.cooldown(1, 1, commands.BucketType.user)
+	async def trivia(self, ctx, arg='noArg', *user: str):
         'A Trivia Game! Use "?trivia about" for details.'
         guild = ctx.guild.id
         member = ctx.author.id

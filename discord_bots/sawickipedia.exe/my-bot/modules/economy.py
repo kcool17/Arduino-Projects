@@ -55,6 +55,7 @@ class Economy():
         description=
         'Displays the amount of money either you have, or the person you inputted. Displays On Hand money, Bank, and Total money.'
     )
+	@commands.cooldown(1, 1, commands.BucketType.user)
     async def money(self, ctx, *user: str):
         "Checks your balance or someone else's balance."
         guild = ctx.guild.id
@@ -117,7 +118,8 @@ class Economy():
             await ctx.send(embed=balanceEmbed)
 
     @commands.command(aliases=['money-adjust', 'mon-adj', 'money-adj', 'moneyadj'])
-    async def moneyadjust(self, ctx, amount: str, *user: str):
+    @commands.cooldown(1, 1, commands.BucketType.user)
+	async def moneyadjust(self, ctx, amount: str, *user: str):
         'Admin-only. Adjusts the amount of money On Hand of the person inputted.'
         guild = ctx.guild.id
         member = ctx.author.id
@@ -189,7 +191,8 @@ class Economy():
             await ctx.channel.send(file=discord.File('nopower.gif', filename='nopower.gif'))
 
     @commands.command(aliases=['bank-adjust', 'bank-adj', 'bankadj'])
-    async def bankadjust(self, ctx, amount: str, *user: str):
+    @commands.cooldown(1, 1, commands.BucketType.user)
+	async def bankadjust(self, ctx, amount: str, *user: str):
         'Admin-only. Same as ?money-adjust, but for the bank instead.'
         guild = ctx.guild.id
         member = ctx.author.id
@@ -265,6 +268,7 @@ class Economy():
         description=
         'Deposits the money you have. You can deposit a specific amount, or all on hand. Format: "?dep all", or "?dep amount".'
     )
+	@commands.cooldown(1, 1, commands.BucketType.user)
     async def deposit(self, ctx, amount: str):
         'Deposits the money you have.'
         guild = ctx.guild.id
@@ -307,7 +311,8 @@ class Economy():
                     open(((((('servers' + os.sep) + str(guild)) + os.sep) + str(member)) + os.sep) + 'bank.p', 'wb'))
 
     @commands.command(aliases=['with'])
-    async def withdraw(self, ctx, amount='noArg'):
+    @commands.cooldown(1, 1, commands.BucketType.user)
+	async def withdraw(self, ctx, amount='noArg'):
         'Same as ?dep, but for withdrawing from the bank.'
         guild = ctx.guild.id
         member = ctx.author.id
@@ -349,7 +354,8 @@ class Economy():
                     open(((((('servers' + os.sep) + str(guild)) + os.sep) + str(member)) + os.sep) + 'bank.p', 'wb'))
 
     @commands.command(description='Gives money to someone of your choice.')
-    async def give(self, ctx, amount: str, *person: str):
+    @commands.cooldown(1, 1, commands.BucketType.user)
+	async def give(self, ctx, amount: str, *person: str):
         'Gives money from your On Hand to someone else.'
         guild = ctx.guild.id
         member = ctx.author.id
@@ -433,7 +439,8 @@ class Economy():
     @commands.command(
         aliases=['lb', 'top', 'highscore'],
         description='Displays the server\'s leaderboard. Use "?lb page" for a different page.')
-    async def leaderboard(self, ctx, page='1'):
+    @commands.cooldown(1, 1, commands.BucketType.user)
+	async def leaderboard(self, ctx, page='1'):
         "Displays the server's leaderboard."
         guild = ctx.guild.id
         arg = page
@@ -500,7 +507,8 @@ class Economy():
     @commands.command(
         aliases=['reset-economy', 'reset-eco', 'reseteco'],
         description='Admin-only. Resets all money in the server. Make sure you want to do this for real.')
-    async def reseteconomy(self, ctx, arg='Nope,', arg2=" I'm uncertain"):
+    @commands.cooldown(1, 1, commands.BucketType.user)
+	async def reseteconomy(self, ctx, arg='Nope,', arg2=" I'm uncertain"):
         'Admin-only. Resets all money in the server.'
         guild = ctx.guild.id
         ADMINS = pickle.load(open(((('servers' + os.sep) + str(ctx.guild.id)) + os.sep) + 'ADMINS.p', 'rb'))
@@ -535,7 +543,8 @@ class Economy():
 
     @commands.command(
         aliases=['give-to-all'], description='Admin-only. Gives a certain amount of money to everyone in the server.')
-    async def givetoall(self, ctx, amount: str):
+    @commands.cooldown(1, 1, commands.BucketType.user)
+	async def givetoall(self, ctx, amount: str):
         'Admin-only. Gives money to everyone.'
         guild = ctx.guild.id
         ADMINS = pickle.load(open(((('servers' + os.sep) + str(ctx.guild.id)) + os.sep) + 'ADMINS.p', 'rb'))
@@ -568,7 +577,8 @@ class Economy():
             await ctx.channel.send(file=discord.File('nopower.gif', filename='nopower.gif'))
 
     @commands.command(aliases=['set-salary', 'set-sal', 'setsal'])
-    async def setsalary(self, ctx, role: str, salary: str):
+    @commands.cooldown(1, 1, commands.BucketType.user)
+	async def setsalary(self, ctx, role: str, salary: str):
         'Admin-only. Sets the salary for a certain role.'
         guild = ctx.guild.id
         member = ctx.author.id
@@ -604,7 +614,8 @@ class Economy():
     @commands.command(
         aliases=['give-salary', 'give-sal', 'givesal'],
         description="Admin-only. Distributes salary, even if it's not the right time.")
-    async def givesalary(self, ctx):
+    @commands.cooldown(1, 1, commands.BucketType.user)
+	async def givesalary(self, ctx):
         'Admin-only. Distributes salary.'
         guild = ctx.guild.id
         ADMINS = pickle.load(open(((('servers' + os.sep) + str(ctx.guild.id)) + os.sep) + 'ADMINS.p', 'rb'))
@@ -644,7 +655,8 @@ class Economy():
     @commands.command(
         aliases=['sal'],
         description="Used to check the salaries of each role in the server. If it's $0, it won't show.")
-    async def salary(self, ctx):
+    @commands.cooldown(1, 1, commands.BucketType.user)
+	async def salary(self, ctx):
         "Checks the server's salaries."
         guild = ctx.guild.id
         member = ctx.author.id
@@ -665,7 +677,8 @@ class Economy():
         description=
         'Admin-only. Sets the channel for bot notifications. Uses the default one by default. Format: "?setchannel #channel".'
     )
-    async def setchannel(self, ctx, channel: str):
+    @commands.cooldown(1, 1, commands.BucketType.user)
+	async def setchannel(self, ctx, channel: str):
         'Admin-only. Sets the channel for bot notifications.'
         guild = ctx.guild.id
         ADMINS = pickle.load(open(((('servers' + os.sep) + str(ctx.guild.id)) + os.sep) + 'ADMINS.p', 'rb'))
@@ -683,7 +696,8 @@ class Economy():
             await ctx.channel.send(file=discord.File('nopower.gif', filename='nopower.gif'))
 
     @commands.command(aliases=['reset-salary', 'reset-sal', 'resetsal'])
-    async def resetsalary(self, ctx, arg='I am ', arg2='unsure about this.'):
+    @commands.cooldown(1, 1, commands.BucketType.user)
+	async def resetsalary(self, ctx, arg='I am ', arg2='unsure about this.'):
         'Admin-only. Resets all of the salaries for the server'
         guild = ctx.guild.id
         ADMINS = pickle.load(open(((('servers' + os.sep) + str(ctx.guild.id)) + os.sep) + 'ADMINS.p', 'rb'))
@@ -710,7 +724,8 @@ class Economy():
     @commands.command(
         aliases=['job'],
         description='Work for a small amount of money. Always succeeds, but only can be done sometimes.')
-    async def work(self, ctx):
+    @commands.cooldown(1, 1, commands.BucketType.user)
+	async def work(self, ctx):
         'Work for a small amount of money.'
         guild = ctx.guild.id
         member = ctx.author.id
@@ -757,7 +772,8 @@ class Economy():
             await ctx.send(('Please wait ' + '{:,}'.format(workCooldown)) + ' seconds before working again!')
 
     @commands.command(aliases=['set-work'], description='Admin-only. Set max, min, and cooldown values of ?work.')
-    async def setwork(self, ctx, myMin='noArg', myMax='noArg', coolDown='noArg'):
+    @commands.cooldown(1, 1, commands.BucketType.user)
+	async def setwork(self, ctx, myMin='noArg', myMax='noArg', coolDown='noArg'):
         'Admin-only. Set up values for work.'
         guild = ctx.guild.id
         member = ctx.author.id
@@ -814,7 +830,8 @@ class Economy():
             await ctx.send(embed=workEmbed)
 
     @commands.command(description='Crime for a large amount of money. Sometimes fails, and you lose money instead.')
-    async def crime(self, ctx):
+    @commands.cooldown(1, 1, commands.BucketType.user)
+	async def crime(self, ctx):
         "Crime for a large amount of money. Sometimes you win, and sometimes you're bad."
         guild = ctx.guild.id
         member = ctx.author.id
@@ -900,7 +917,8 @@ class Economy():
         description=
         'Admin-only. Set max, min, winrate, and cooldown values of ?crime. Losing = you lose a number between min and max. Winning = gaining that number.'
     )
-    async def setcrime(self, ctx, myMin='noArg', myMax='noArg', winRate='noArg', coolDown='noArg'):
+    @commands.cooldown(1, 1, commands.BucketType.user)
+	async def setcrime(self, ctx, myMin='noArg', myMax='noArg', winRate='noArg', coolDown='noArg'):
         'Admin-only. Set crime cooldowns.'
         guild = ctx.guild.id
         member = ctx.author.id
@@ -973,7 +991,8 @@ class Economy():
 
     @commands.command(
         aliases=['steal'], description="Rob money from a member's On Hand. It may fail, and you'll lose instead.")
-    async def rob(self, ctx, *person: str):
+    @commands.cooldown(1, 1, commands.BucketType.user)
+	async def rob(self, ctx, *person: str):
         "Rob money from a member's On Hand."
         guild = ctx.guild.id
         member = ctx.author.id
@@ -1132,7 +1151,8 @@ class Economy():
         description=
         "Admin-only. Set max, min, winrate, and cooldown values of rob. Losing = you lose a number between min and max. Winning = rob around 85% of the person's On Hand."
     )
-    async def setrob(self, ctx, myMin='noArg', myMax='noArg', winRate='noArg', coolDown='noArg'):
+    @commands.cooldown(1, 1, commands.BucketType.user)
+	async def setrob(self, ctx, myMin='noArg', myMax='noArg', winRate='noArg', coolDown='noArg'):
         'Admin-only. Set rob values.'
         guild = ctx.guild.id
         member = ctx.author.id
@@ -1206,7 +1226,8 @@ class Economy():
     @commands.command(
         aliases=['set-salary-time', 'setsaltime', 'set-sal-time'],
         description='Admin-only. Sets the salary giving time.')
-    async def setsalarytime(self, ctx, hour='noArg', minute='noArg'):
+    @commands.cooldown(1, 1, commands.BucketType.user)
+	async def setsalarytime(self, ctx, hour='noArg', minute='noArg'):
         'Admin-only. Sets the salary giving time to what is said. Please use military time. Format: "?set-salary-time hour minute".'
         guild = ctx.guild.id
         ADMINS = pickle.load(open(((('servers' + os.sep) + str(ctx.guild.id)) + os.sep) + 'ADMINS.p', 'rb'))
@@ -1227,7 +1248,8 @@ class Economy():
             await ctx.channel.send(file=discord.File('nopower.gif', filename='nopower.gif'))
 
     @commands.command(aliases=['get-salary-time', 'getsaltime', 'get-sal-time', 'saltime', 'sal-time'])
-    async def getsalarytime(self, ctx):
+    @commands.cooldown(1, 1, commands.BucketType.user)
+	async def getsalarytime(self, ctx):
         'This command tells you when the salaries will be given.'
         guild = ctx.guild.id
         try:
