@@ -212,7 +212,7 @@ class Misc():
 
         # help by itself just lists our own commands.
         if len(commands) == 0:
-            pages = bot.formatter.format_help_for(ctx, bot)
+            pages = await bot.formatter.format_help_for(ctx, bot)
         elif len(commands) == 1:
             # try to see if it is a cog name
             name = _mention_pattern.sub(repl, commands[0])
@@ -220,43 +220,41 @@ class Misc():
             if name in bot.cogs:
                 command = bot.cogs[name]
             else:
-                command = commands[0]
+                command = bot.all_commands.get(name)
                 if command is None:
-                    await ctx.send(bot.command_not_found.format(name))
+                    await destination.send(bot.command_not_found.format(name))
                     return
 
-            pages = bot.formatter.format_help_for(ctx, command)
+            pages = await bot.formatter.format_help_for(ctx, command)
         else:
             name = _mention_pattern.sub(repl, commands[0])
-            command = commands[0]
+            command = bot.all_commands.get(name)
             if command is None:
-                await ctx.send(bot.command_not_found.format(name))
+                await destination.send(bot.command_not_found.format(name))
                 return
 
             for key in commands[1:]:
                 try:
                     key = _mention_pattern.sub(repl, key)
-                    command = command.commands.get(key)
+                    command = command.all_commands.get(key)
                     if command is None:
-                        await ctx.send(bot.command_not_found.format(key))
+                        await destination.send(bot.command_not_found.format(key))
                         return
                 except AttributeError:
-                    await ctx.send(bot.command_has_no_subcommands.format(command, key))
+                    await destination.send(bot.command_has_no_subcommands.format(command, key))
                     return
 
-            pages = bot.formatter.format_help_for(ctx, command)
+            pages = await bot.formatter.format_help_for(ctx, command)
 
         if bot.pm_help is None:
-            characters = sum(map(lambda l: len(l), pages))
+            characters = sum(map(len, pages))
             # modify destination based on length of pages.
             if characters > 1000:
                 destination = ctx.message.author
-        thing = True
 
-        toSay = await pages
 
-        myEmbed = discord.Embed(title="sawickipedia.exe Help", description=str(toSay[pageNum]))
-        myEmbed.set_footer(text="Page " + str(pageNum+1) + "/" + str(len(toSay)))
+        myEmbed = discord.Embed(title="sawickipedia.exe Help", description=str(pages[pageNum]))
+        myEmbed.set_footer(text="Page " + str(pageNum+1) + "/" + str(len(pages)))
 
         await ctx.send(embed=myEmbed)
 
