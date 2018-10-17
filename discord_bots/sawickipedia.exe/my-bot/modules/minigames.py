@@ -65,7 +65,7 @@ class Minigames():
 
     @commands.command(aliases=['bj'])
     @commands.cooldown(1, 1, commands.BucketType.user)
-	async def blackjack(self, ctx, arg='noArg'):
+    async def blackjack(self, ctx, arg='noArg'):
         'Blackjack! Use "?bj about" for details.'
         guild = ctx.guild.id
         member = ctx.author.id
@@ -416,7 +416,7 @@ class Minigames():
 
     @commands.command(aliases=['rou'])
     @commands.cooldown(1, 1, commands.BucketType.user)
-	async def roulette(self, ctx, bet='noArg', place='noArg'):
+    async def roulette(self, ctx, bet='noArg', place='noArg'):
         'Roulette! Use "?roulette about" for details.'
         guild = ctx.guild.id
         member = ctx.author.id
@@ -538,7 +538,7 @@ class Minigames():
 
     @commands.command(aliases=['triv'])
     @commands.cooldown(1, 1, commands.BucketType.user)
-	async def trivia(self, ctx, arg='noArg', *user: str):
+    async def trivia(self, ctx, arg='noArg', *user: str):
         'A Trivia Game! Use "?trivia about" for details.'
         guild = ctx.guild.id
         member = ctx.author.id

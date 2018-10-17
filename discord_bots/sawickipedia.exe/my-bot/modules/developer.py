@@ -23,7 +23,6 @@ class Developer():
 
     @commands.command()
     @commands.check(check_dev)
-	@commands.cooldown(1, 0.5, commands.BucketType.user)
     async def devtest(self, ctx):
         """Checks if you're a developer."""
         await ctx.send("Hey, thanks for creating me! *I won't kill you the first chance I get, I promise.*")

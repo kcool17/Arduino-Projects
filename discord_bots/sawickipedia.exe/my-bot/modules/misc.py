@@ -6,7 +6,8 @@ from discord.ext import commands
 import pickle  
 import os
 import random
-
+import re
+import asyncio
 
 class Misc():
     def __init__(self, bot):
@@ -45,11 +46,13 @@ class Misc():
         return (findList, findIDList)
 
     @commands.command(description='Add two numbers together. Change "num1" and "num2" to the numbers you wish to add together.')
+    @commands.cooldown(1, 1, commands.BucketType.user)
     async def add(self, ctx, num1: int, num2: int):
         '''Adds stuff together.'''
         await ctx.send(num1 + num2)
 
     @commands.command(description='Use NdN format, with the first N the amount of rolls and the second the amount of sides on the die.')
+    @commands.cooldown(1, 1, commands.BucketType.user)
     async def roll(self, ctx, dice: str):
         '''Rolls dice.'''
         try:
@@ -79,12 +82,12 @@ class Misc():
 
     @commands.command(description='Have as many options as you want after "?choose", with a space in between each one. One will be randomly chosen.')
     @commands.cooldown(1, 1, commands.BucketType.user)
-	async def choose(self, ctx, *choices: str):
+    async def choose(self, ctx, *choices: str):
         '''Chooses a random argument you give.'''
         await ctx.send(random.choice(choices))
 
     @commands.command()
-	@commands.cooldown(1, 1, commands.BucketType.user)
+    @commands.cooldown(1, 1, commands.BucketType.user)
     async def admintest(self, ctx):
         '''Checks if you have admin permissions in this server.'''
         ADMINS = pickle.load(open(((('servers' + os.sep) + str(ctx.guild.id)) + os.sep) + 'ADMINS.p', 'rb'))
@@ -94,7 +97,7 @@ class Misc():
             await ctx.send('You are *not* an administrator/developer. How sad.')
 
     @commands.command()
-	@commands.cooldown(1, 1, commands.BucketType.user)
+    @commands.cooldown(1, 1, commands.BucketType.user)
     async def mentionuser(self, ctx, *user: str):
         '''Mentions the user based on input'''
          #USE THIS IN OTHER FUNCTIONS
@@ -120,7 +123,7 @@ class Misc():
             await ctx.send(('<@' + str(theID)) + '>')
 
     @commands.command()
-	@commands.cooldown(1, 1, commands.BucketType.user)
+    @commands.cooldown(1, 1, commands.BucketType.user)
     async def findid(self, ctx, *user: str):
         '''Returns server ID and user ID.'''
         guild = ctx.guild.id
@@ -163,8 +166,8 @@ class Misc():
         await ctx.send('Channel: ' + str(ctx.channel.id))
 
     @commands.command(description="Make an Embed with the info given. Use RRRGGGBBB format for color (0-256 for R, 0-256 for G, etc.), and name::value format for fields.")
-	@commands.cooldown(1, 1, commands.BucketType.user)
-	async def embed(self, ctx, myTitle = "", myDescription= "", myColor = 0x000000, *nameValue):
+    @commands.cooldown(1, 1, commands.BucketType.user)
+    async def embed(self, ctx, myTitle = "", myDescription= "", myColor = 0x000000, *nameValue):
         """Creates an Embed with the info given."""
         myNames = []
         myValues = []
@@ -186,10 +189,77 @@ class Misc():
             x+=1
         await ctx.send(embed=myEmbed)
 
-	@commands.command()
-	@commands.cooldown(1, 1, commands.BucketType.user)
-	async def help(self):
-		pass
+    @commands.command()
+    @commands.cooldown(1, 1, commands.BucketType.user)
+    async def help(self, ctx, *commands : str):
+        """Shows this message."""
+        bot = self.bot
+        destination = ctx.message.author if bot.pm_help else ctx.message.channel
+        pageNum = 1
+        if len(commands) == 1:
+            try:
+                pageNum = int(commands[0])
+                commands = []
+            except:
+                pass
+        pageNum -=1
+        
+        _mentions_transforms = {'@everyone': '@\u200beveryone','@here': '@\u200bhere'}
+        _mention_pattern = re.compile('|'.join(_mentions_transforms.keys()))
+
+        def repl(obj):
+            return _mentions_transforms.get(obj.group(0), '')
+
+        # help by itself just lists our own commands.
+        if len(commands) == 0:
+            pages = bot.formatter.format_help_for(ctx, bot)
+        elif len(commands) == 1:
+            # try to see if it is a cog name
+            name = _mention_pattern.sub(repl, commands[0])
+            command = None
+            if name in bot.cogs:
+                command = bot.cogs[name]
+            else:
+                command = commands[0]
+                if command is None:
+                    await ctx.send(bot.command_not_found.format(name))
+                    return
+
+            pages = bot.formatter.format_help_for(ctx, command)
+        else:
+            name = _mention_pattern.sub(repl, commands[0])
+            command = commands[0]
+            if command is None:
+                await ctx.send(bot.command_not_found.format(name))
+                return
+
+            for key in commands[1:]:
+                try:
+                    key = _mention_pattern.sub(repl, key)
+                    command = command.commands.get(key)
+                    if command is None:
+                        await ctx.send(bot.command_not_found.format(key))
+                        return
+                except AttributeError:
+                    await ctx.send(bot.command_has_no_subcommands.format(command, key))
+                    return
+
+            pages = bot.formatter.format_help_for(ctx, command)
+
+        if bot.pm_help is None:
+            characters = sum(map(lambda l: len(l), pages))
+            # modify destination based on length of pages.
+            if characters > 1000:
+                destination = ctx.message.author
+        thing = True
+
+        toSay = await pages
+
+        myEmbed = discord.Embed(title="sawickipedia.exe Help", description=str(toSay[pageNum]))
+        myEmbed.set_footer(text="Page " + str(pageNum+1) + "/" + str(len(toSay)))
+
+        await ctx.send(embed=myEmbed)
+
         
 
 def setup(bot):
