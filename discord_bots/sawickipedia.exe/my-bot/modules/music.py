@@ -292,7 +292,7 @@ class Music:
 
         await ctx.send('Connected to: **{channel}**'.format(channel=channel))
 
-    @commands.command(name='play', aliases=['sing'])
+    @commands.command(name='play', aliases=['p'])
     @commands.cooldown(1, 1, commands.BucketType.user)
     async def play_(self, ctx, *, search: str):
         """Request a song and add it to the queue.
@@ -321,7 +321,40 @@ class Music:
         else:
             await ctx.send("Join the voice channel!")
 
-    @commands.command(name='pause')
+    @commands.command(aliases=['s'])
+    @commands.cooldown(1, 1, commands.BucketType.user)
+    async def search(self, ctx, *, search: str):
+        """"""
+        await ctx.send("Searching for \"" + search + "\"...")
+        loop = asyncio.get_event_loop()
+        to_run = partial(ytdl.extract_info, url="ytsearch10:" + search, download=False)
+        data = await loop.run_in_executor(None, to_run)
+            
+        searchList = []
+        for thing in data['entries']:
+            myDict = {"webpage_url" : thing["webpage_url"],
+                      "title" : thing["title"],
+                      "duration" : thing["duration"],
+                      }
+            searchList.append(myDict)
+        
+        z=1
+        fmt = ""
+        for x in searchList:
+            m, s = divmod(x['duration'], 60)
+            h, m = divmod(m, 60)
+            prettyLength = "%d:%02d:%02d" % (h, m, s)
+            fmt = fmt + '\n' + '**' + str(z) + ". [" + x['title'] + '](' + x['webpage_url'] + ')** | Length: ' + prettyLength
+            z += 1
+    
+        embed = discord.Embed(title='Search Results for "' + search + '"', description=fmt, color=0x0000FF)
+        embed.add_field(name=" ", value="Use `?play x`, with `x` being from 1-10, to play one of these results.", inline=False)
+        embed.set_footer(text="Searched By: " + ctx.author.display_name + "(" + str(ctx.author) + ")")
+        await ctx.send(embed=embed)
+        
+        
+        
+    @commands.command(name='pause', aliases=["stop"])
     @commands.cooldown(1, 1, commands.BucketType.user)
     async def pause_(self, ctx):
         """DJ-Only. Pause the currently playing song. (Note: DJ is someone with Manage Channels permissions)"""

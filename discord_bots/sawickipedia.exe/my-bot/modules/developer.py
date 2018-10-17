@@ -40,7 +40,7 @@ class Developer():
         elif channelarg.upper() == 'DM':
             for item in arg:
                 newStr = (newStr + str(item)) + ' '
-            rresult = re.findall(r':(.*?):', newStr)
+            result = re.findall(r':(.*?):', newStr)
             emojiFound = False
             for item in result:
                 for guild in self.bot.guilds:

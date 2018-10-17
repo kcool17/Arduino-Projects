@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+	<name>sawickipedia.exe</name>
+	<comment></comment>
+	<projects>
+	</projects>
+	<buildSpec>
+		<buildCommand>
+			<name>org.python.pydev.PyDevBuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+	</buildSpec>
+	<natures>
+		<nature>org.python.pydev.pythonNature</nature>
+	</natures>
+	<linkedResources>
+		<link>
+			<name>my-bot</name>
+			<type>2</type>
+			<location>E:/Documents-E/Github/personal_projects/discord_bots/sawickipedia.exe/my-bot</location>
+		</link>
+	</linkedResources>
+</projectDescription>
