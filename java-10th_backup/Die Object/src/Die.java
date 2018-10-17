@@ -13,8 +13,8 @@ public class Die {
 	 * Constructor method; rolls the die once.
 	 */
 	public Die() {
-		rollDie();
 		sides = 6;
+		rollDie();
 	}
 	/**
 	 * Constructor method for number of sides.
@@ -22,6 +22,7 @@ public class Die {
 	public Die(int sideNum) {
 		if (sideNum>1)sides = sideNum;
 		else sides=2;
+		rollDie();
 	}
 	/**
 	 * This method rolls the die, by setting the face from a random number from 1-6.
