@@ -111,7 +111,7 @@ class MusicPlayer:
     When the bot disconnects from the Voice it's instance will be destroyed.
     """
 
-    __slots__ = ('bot', '_guild', '_channel', '_cog', 'queue', 'next', 'current', 'np', 'volume', 'loop', 'skipLoop', 'skipVote', 'loopVote')
+    __slots__ = ('bot', '_guild', '_channel', '_cog', 'queue', 'next', 'current', 'np', 'volume', 'loop', 'skipLoop', 'skipVote', 'loopVote', 'searchArr')
 
     def __init__(self, ctx):
         self.bot = ctx.bot
@@ -130,6 +130,7 @@ class MusicPlayer:
         self.skipLoop = False
         self.skipVote = []
         self.loopVote = []
+        self.searchArr =[]
 
         ctx.bot.loop.create_task(self.player_loop())
 
@@ -315,7 +316,13 @@ class Music:
 
             # If download is False, source will be a dict which will be used later to regather the stream.
             # If download is True, source will be a discord.FFmpegPCMAudio with a VolumeTransformer.
-            source = await YTDLSource.create_source(ctx, search, loop=self.bot.loop, download=False)
+            try:
+                newSearch = int(search) - 1
+                newSearch = player.searchArr[newSearch]
+                newSearch = newSearch["webpage_url"]
+                source = await YTDLSource.create_source(ctx, newSearch, loop=self.bot.loop, download=False)
+            except:
+                source = await YTDLSource.create_source(ctx, search, loop=self.bot.loop, download=False)
 
             await player.queue.put(source)
         else:
@@ -323,8 +330,8 @@ class Music:
 
     @commands.command(aliases=['s'])
     @commands.cooldown(1, 1, commands.BucketType.user)
-    async def search(self, ctx, *, search: str):
-        """"""
+    async def search(self, ctx, *, search : str):
+        """Searches for the top 10 Youtube results for the search, and these songs can then be played."""
         await ctx.send("Searching for \"" + search + "\"...")
         loop = asyncio.get_event_loop()
         to_run = partial(ytdl.extract_info, url="ytsearch10:" + search, download=False)
@@ -335,20 +342,23 @@ class Music:
             myDict = {"webpage_url" : thing["webpage_url"],
                       "title" : thing["title"],
                       "duration" : thing["duration"],
+                      "author" : thing["uploader"],
                       }
             searchList.append(myDict)
         
+        player = self.get_player(ctx)
+        player.searchArr = searchList
         z=1
         fmt = ""
         for x in searchList:
             m, s = divmod(x['duration'], 60)
             h, m = divmod(m, 60)
             prettyLength = "%d:%02d:%02d" % (h, m, s)
-            fmt = fmt + '\n' + '**' + str(z) + ". [" + x['title'] + '](' + x['webpage_url'] + ')** | Length: ' + prettyLength
+            fmt = fmt + '\n' + '**' + str(z) + ". [" + x['title'] + '](' + x['webpage_url'] + ')** | By: ' + x['author'] + ' | Length: ' + prettyLength
             z += 1
     
         embed = discord.Embed(title='Search Results for "' + search + '"', description=fmt, color=0x0000FF)
-        embed.add_field(name=" ", value="Use `?play x`, with `x` being from 1-10, to play one of these results.", inline=False)
+        embed.add_field(name="\U0000200B", value="Use `?play x`, with `x` being from 1-10, to play one of these results.", inline=False)
         embed.set_footer(text="Searched By: " + ctx.author.display_name + "(" + str(ctx.author) + ")")
         await ctx.send(embed=embed)
         
