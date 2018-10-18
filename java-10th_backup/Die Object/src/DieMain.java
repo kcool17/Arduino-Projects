@@ -3,27 +3,32 @@ public class DieMain {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		//Creates 2 new die objects, and sets the dice to die1 and die2. 
-		Die die1 = new Die(20);
-		Die die2 = new Die(20);
+		//Creates 5 new die objects
+		Die die1 = new Die();
+		Die die2 = new Die();
+		Die die3 = new Die();
+		Die die4 = new Die();
+		Die die5 = new Die();
+		Die[] dieArr = {die1, die2, die3, die4, die5};
+		int[] rollArr = new int[5];
 		//Variables for determining how many moves until doubles are rolled.
 		int counter = 0;
-		boolean doubles = false;
+		boolean yahtzee = false;
 		//Loop that rolls the dice until doubles are found.
-		while(!doubles) {
-			//Increases counter by 1, so we know how many rolls it took to get doubles.
+		while(!yahtzee) {
+			//Increases counter by 1, so we know how many rolls it took to get Yahtzee.
 			counter++;
-			//Rolls the two dice.
-			die1.rollDie();
-			die2.rollDie();
-			//Prints the values of each side of the die.
-			System.out.println("Die 1: " + die1 + " | Die 2: " + die2);
-			//Checks if the dies' faces are equal, to know if doubles were found. It will then
-			//set the variable doubles accordingly, so the loop will exit if they're gotten.
-			if (die1.isDoubles(die2)) doubles = true;
+			int x=0;
+			for (Die myDie : dieArr) {
+				myDie.rollDie();
+				rollArr[x] = myDie.checkFace();
+				x++;
+			}
+			System.out.println(rollArr[0] + " | " + rollArr[1] + " | " + rollArr[2] + " | " + rollArr[3] + " | " + rollArr[4]);
+			if (rollArr[0] == rollArr[1] && rollArr[1] == rollArr[2] && rollArr[2] == rollArr[3] && rollArr[3] == rollArr[4]) yahtzee = true;
 		}
 		//Prints how many rolls it took to get doubles.
-		System.out.println("Doubles gotten in " + counter + " rolls!");
+		System.out.println("Yahtzee gotten in " + counter + " rolls!");
 	}
 
 }
