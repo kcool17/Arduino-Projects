@@ -12,6 +12,8 @@ import random
 import io
 import sys
 import logging
+from discord.utils import get
+
 DEVS = [357953549738573835]
 GAMES = ['with Snowden', 'the NSA', 'with Lizard-People', 'with The Zucc', 'with Element 94', 'with the Doctor','the Doctor', 'with Space-Time', 'on the Death Star', 'God', 'with Nightmares', 'with Lucifer', 'Crap(s)','with Test Monkeys', 'Society', 'with Logs', 'at 88 MPH', 'you all for fools', 'with the One Ring', 'in Mordor','with my Palantir', 'with Myself', 'with Pythons', 'in CMD', 'as Root', 'Hang Man', 'with your passwords','with your money', 'with your existence', 'you', 'with Just Monika', 'with Explosives', 'with Lives','with your Life', 'on a Good Christian Minecraft Server', 'a Game.', 'with You...', 'in the Meth Lab','with your S.O.', 'with Death', 'with Lightsabers', 'with your Heart', 'Jedi Mind-tricks', 'Mind-games']
 
@@ -45,26 +47,12 @@ startup_extensions = ['modules.test1', #Default extensions (all enabled)
                       'modules.misc',
                       'modules.economy',
                       'modules.minigames',
-                      'modules.music'
+                      'modules.music',
+                      'modules.moderation'
                     ]
 
 bot = commands.Bot(command_prefix=get_prefix, description=description)
 bot.remove_command('help')
-
-@bot.event  
-async def on_ready():
-    myGuilds = bot.guilds  
-    for guild in myGuilds: #Bot preferences Setup
-        if (not os.path.exists(('servers' + os.sep) + str(guild.id))):
-            os.makedirs(('servers' + os.sep) + str(guild.id))
-    startup_extensions = []
-    print('**______----------------------------STARTING----------------------------______**')
-    print('Logged in as')
-    print(bot.user.name)
-    print(bot.user.id)
-    print("**Date:** " + str(datetime.datetime.now()))
-    print('------')
-    await bot.change_presence(activity=discord.Game(name='with Snowden'))
 
 
 async def background_task(): #Runs every 1 second, constantly.
@@ -296,7 +284,23 @@ async def background_task(): #Runs every 1 second, constantly.
         presenceCount += 1
         await asyncio.sleep(1)
 
-
+#Events:
+@bot.event  
+async def on_ready():
+    myGuilds = bot.guilds  
+    for guild in myGuilds: #Bot preferences Setup
+        if (not os.path.exists(('servers' + os.sep) + str(guild.id))):
+            os.makedirs(('servers' + os.sep) + str(guild.id))
+    startup_extensions = []
+    print('**______----------------------------STARTING----------------------------______**')
+    print('Logged in as')
+    print(bot.user.name)
+    print(bot.user.id)
+    print("**Date:** " + str(datetime.datetime.now()))
+    print('------')
+    await bot.change_presence(activity=discord.Game(name='with Startup Caches'))
+    
+    
 @bot.event
 async def on_message(message):
     await bot.process_commands(message)
@@ -314,6 +318,32 @@ async def on_message(message):
     if isinstance(message.channel, discord.abc.PrivateChannel)and (message.author.id != 357953549738573835):
         toChannel = await bot.get_user_info(357953549738573835)
         await toChannel.send((((('**Message from ' + str(message.author)) + '[*') + str(message.author.id)) + '*]:** ') +str(message.content))
+        
+    #Ning is stupid:
+    if isinstance(message.channel, discord.abc.PrivateChannel) and message.author.id == 180852994231762945 and message.content == "im an idiot":
+        await message.channel.send("*Here's a list of server invites for you, Ning. Enjoy.*")
+        await message.channel.send("**Savage Kyle:** https://discord.gg/gjBS6f3 | **The Empire:** https://discord.gg/QPAmKCK | **mimi9:** https://discord.gg/RQVe7Pj")
+
+
+@bot.event
+async def on_member_join(member):
+    guild = member.guild
+    try:
+        customJoin = pickle.load(open('servers' + os.sep + str(guild.id) + os.sep + str(member.id) + os.sep + 'customJoin.p', 'rb'))
+    except:
+        pass
+    roleList = []
+    for role in customJoin[1:]:
+        try:
+            roleList.append(get(guild.roles, id=role))
+        except:
+            pass
+    await member.edit(nick=customJoin[0], roles = roleList)
+
+        
+
+
+
 
 
 

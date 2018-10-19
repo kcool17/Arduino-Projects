@@ -111,7 +111,7 @@ class MusicPlayer:
     When the bot disconnects from the Voice it's instance will be destroyed.
     """
 
-    __slots__ = ('bot', '_guild', '_channel', '_cog', 'queue', 'next', 'current', 'np', 'volume', 'loop', 'skipLoop', 'skipVote', 'loopVote', 'searchArr')
+    __slots__ = ('bot', '_guild', '_channel', '_cog', 'queue', 'next', 'current', 'np', 'volume', 'loop', 'skipLoop', 'skipVote', 'loopVote', 'searchArr', 'didSkip')
 
     def __init__(self, ctx):
         self.bot = ctx.bot
@@ -131,6 +131,7 @@ class MusicPlayer:
         self.skipVote = []
         self.loopVote = []
         self.searchArr =[]
+        self.didSkip = False
 
         ctx.bot.loop.create_task(self.player_loop())
 
@@ -149,6 +150,7 @@ class MusicPlayer:
                         source = await self.queue.get()
                         oldSource = source
                         self.skipLoop = False
+                        self.didSkip = True
                     else:
                         source = oldSource
             except asyncio.TimeoutError:
@@ -170,7 +172,8 @@ class MusicPlayer:
             self.current = source
 
             self._guild.voice_client.play(source, after=lambda _: self.bot.loop.call_soon_threadsafe(self.next.set))
-            if not self.loop:
+            if not self.loop or self.didSkip:
+                self.didSkip = False
                 releaseDate = source.release_date
                 m, s = divmod(source.length, 60)
                 h, m = divmod(m, 60)
@@ -332,35 +335,38 @@ class Music:
     @commands.cooldown(1, 1, commands.BucketType.user)
     async def search(self, ctx, *, search : str):
         """Searches for the top 10 Youtube results for the search, and these songs can then be played."""
-        await ctx.send("Searching for \"" + search + "\"...")
-        loop = asyncio.get_event_loop()
-        to_run = partial(ytdl.extract_info, url="ytsearch10:" + search, download=False)
-        data = await loop.run_in_executor(None, to_run)
+        vc = ctx.voice_client
+        if ctx.author in vc.channel.members or ctx.author.id in DEVS:
+            await ctx.send("Searching for \"" + search + "\"...")
+            await ctx.trigger_typing()
+            loop = asyncio.get_event_loop()
+            to_run = partial(ytdl.extract_info, url="ytsearch10:" + search, download=False)
+            data = await loop.run_in_executor(None, to_run)
+                
+            searchList = []
+            for thing in data['entries']:
+                myDict = {"webpage_url" : thing["webpage_url"],
+                          "title" : thing["title"],
+                          "duration" : thing["duration"],
+                          "author" : thing["uploader"],
+                          }
+                searchList.append(myDict)
             
-        searchList = []
-        for thing in data['entries']:
-            myDict = {"webpage_url" : thing["webpage_url"],
-                      "title" : thing["title"],
-                      "duration" : thing["duration"],
-                      "author" : thing["uploader"],
-                      }
-            searchList.append(myDict)
+            player = self.get_player(ctx)
+            player.searchArr = searchList
+            z=1
+            fmt = ""
+            for x in searchList:
+                m, s = divmod(x['duration'], 60)
+                h, m = divmod(m, 60)
+                prettyLength = "%d:%02d:%02d" % (h, m, s)
+                fmt = fmt + '\n' + '**' + str(z) + ". [" + x['title'] + '](' + x['webpage_url'] + ')** | By: ' + x['author'] + ' | Length: ' + prettyLength
+                z += 1
         
-        player = self.get_player(ctx)
-        player.searchArr = searchList
-        z=1
-        fmt = ""
-        for x in searchList:
-            m, s = divmod(x['duration'], 60)
-            h, m = divmod(m, 60)
-            prettyLength = "%d:%02d:%02d" % (h, m, s)
-            fmt = fmt + '\n' + '**' + str(z) + ". [" + x['title'] + '](' + x['webpage_url'] + ')** | By: ' + x['author'] + ' | Length: ' + prettyLength
-            z += 1
-    
-        embed = discord.Embed(title='Search Results for "' + search + '"', description=fmt, color=0x0000FF)
-        embed.add_field(name="\U0000200B", value="Use `?play x`, with `x` being from 1-10, to play one of these results.", inline=False)
-        embed.set_footer(text="Searched By: " + ctx.author.display_name + "(" + str(ctx.author) + ")")
-        await ctx.send(embed=embed)
+            embed = discord.Embed(title='Search Results for "' + search + '"', description=fmt, color=0x0000FF)
+            embed.add_field(name="\U0000200B", value="Use `?play x`, with `x` being from 1-10, to play one of these results.", inline=False)
+            embed.set_footer(text="Searched By: " + ctx.author.display_name + "(" + str(ctx.author) + ")")
+            await ctx.send(embed=embed)
         
         
         
