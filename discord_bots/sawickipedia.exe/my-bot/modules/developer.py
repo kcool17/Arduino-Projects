@@ -90,17 +90,24 @@ class Developer():
     @commands.check(check_dev)
     async def getguilds(self, ctx):
         '''Gets Server IDS that the bot is in.'''
+        toSend = ''
         for guild in self.bot.guilds:
-            await ctx.send((str(guild.name) + ' | ') + str(guild.id))
+            toSend = toSend + (str(guild.name) + ' | ') + str(guild.id) + "\n"
+        myEmbed = discord.Embed(title="**Guild List**", description=toSend)
+        await ctx.send(embed=myEmbed)
+        
 
     @commands.command(hidden=True)
     @commands.check(check_dev)
     async def getchannels(self, ctx, guild):
         '''Gets channel IDs of a server'''
+        toSend = ""
         for thing in self.bot.guilds:
             if (guild == str(thing.name)) or (guild == str(thing.id)):
                 for item in thing.channels:
-                    await ctx.send((str(item.name) + ' | ') + str(item.id))
+                    toSend = toSend + (str(item.name) + ' | ') + str(item.id) + "\n"
+        myEmbed = discord.Embed(title="**Guild List**", description=toSend)
+        await ctx.send(embed=myEmbed)
 
     @commands.command(hidden=True)
     @commands.check(check_dev)
@@ -131,7 +138,7 @@ class Developer():
         myID = the_page[the_page.find('id') + 6:the_page.find('",\\n\\t\\t"h')]
         myHash = the_page[the_page.find('hash') + 8:the_page.find('"\\n\\t}\\n}')]
         await ctx.send((('https://paste.lemonmc.com/' + myID) + '/') + myHash + "/raw")
-		
+
     @commands.command(hidden=True)
     @commands.check(check_dev)
     async def getperms(self, ctx, serverid=0, userid=421015092830666754):
