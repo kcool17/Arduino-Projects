@@ -12,6 +12,7 @@ import random
 import io
 import sys
 import logging
+import gc
 from discord.utils import get
 
 DEVS = [357953549738573835]
@@ -281,6 +282,7 @@ async def background_task(): #Runs every 1 second, constantly.
             
         
         #Other
+        gc.collect()
         presenceCount += 1
         await asyncio.sleep(1)
 
