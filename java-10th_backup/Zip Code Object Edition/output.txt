@@ -1,0 +1,28 @@
+ZipCodeRunner:
+
+59043 | |:|:|:|:|::||::::|::|::||:|:|::| | LAME DEER, MT
+16058 | |:::||:||::||::::|:|:|::|:||:::| | TURKEY CITY, PA
+21020 | |::|:|:::||||:::::|:|||::::|:|:| | BORING, MD
+29395 | |::|:||:|::::||:|:|:::|:|:::|:|| | DISNEY DIRECT MARKETING, SC | JONESVILLE, SC
+25259 | |::|:|:|:|:::|:|:|:|:|:|::|:::|| | LINDEN, WV | LOONEYVILLE, WV | TARIFF, WV
+05042 | |||::::|:|:||::::|::|::|:||:|::| | EAST RYEGATE, VT | MOSQUITOVILLE, VT | RYEGATE, VT | RYEGATE CORNER, VT
+40122 | |:|::|||::::::||::|:|::|:|:::||| | FORT KNOX, KY
+99755 | ||:|::|:|::|:::|:|:|::|:|::|:|:| | DENALI NATIONAL PARK, AK | DENALI PARK, AK | HEALY, AK
+90210 | ||:|::||:::::|:|:::||||:::|::|:| | BEVERLY HILLS, CA
+20050 | |::|:|||:::||::::|:|:||:::::||:| | PENTAGON, DC | WASHINGTON, DC
+
+
+----------------------------------------------------------------------------------------------------------------------
+ZipBarCodeRunner:
+
+96039 | ||:|:::||::||:::::||:|:|::::||:| | HAPPY CAMP, CA
+69143 | |:||::|:|:::::||:|::|::||:|:::|| | HERSHEY, NE
+59919 | |:|:|:|:|::|:|:::::|||:|::|:::|| | HUNGRY HORSE, MT
+75312 | ||:::|:|:|:::||::::||::|:|::|:|| | DALLAS, TX | READER'S DIGEST, TX
+77306 | ||:::||:::|::||:||::::||::|:::|| | CONROE, TX | CUT AND SHOOT, TX
+INVALID BARCODE
+01510 | ||||:::::||:|:|::::||||:::::||:| | CLINTON, MA
+75156 | ||:::|:|:|::::||:|:|::||:::||::| | ENCHANTED OAK, TX | ENCHANTED OAKS, TX | GUN BARREL CITY, TX | GUN BARREL CY, TX | MABANK, TX
+85321 | ||::|::|:|:::||:::|:|:::||:::||| | AJO, AZ | WHY, AZ
+20355 | |::|:|||:::::||::|:|::|:|::|:|:| | PENTAGON, DC | WASHINGTON, DC
+91730 | ||:|:::::|||:::|::||:||:::||:::| | CUCAMONGA, CA | RANCHO CUCAMONGA, CA | RCH CUCAMONGA, CA

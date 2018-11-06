@@ -8,30 +8,67 @@ public class ZipCode {
 	private Barcode barCode;
 	private Location[] zipLocations;
 	
-	public ZipCode(String myZip) {
+	/**
+	 * String constructor, for when you give the ZipCode class a zipcode to start with.
+	 * @param myZip
+	 * @throws FileNotFoundException
+	 */
+	public ZipCode(String myZip) throws FileNotFoundException {
 		zipCode = myZip;
 		findLocations();
-		barCode = new Barcode(zipCode);
+		int intZip = Integer.parseInt(zipCode);
+		barCode = new Barcode(intZip);
 	}
+	/**
+	 * Barcode constructor, for when you give the ZipCode class a barcode to start with.
+	 * @param myBar
+	 * @throws FileNotFoundException
+	 */
 	public ZipCode(Barcode myBar) throws FileNotFoundException {
 		barCode = myBar;
-		readBarcode();
-		findLocations();
+		if (readBarcode()) {
+			findLocations();
+		}
 	}
 	
+	/**
+	 * Returns the barcode.
+	 * @return
+	 */
 	public Barcode getBar() {
 		return barCode;
 	}
+	/**
+	 * Returns the zipcode.
+	 * @return
+	 */
 	public String getZip() {
 		return zipCode;
 	}
+	/**
+	 * ToString method (returns a string with the zipcode, barcode, and locations all in one string)
+	 */
 	public String toString() {
-		return "" + barCode;
+		if (!barCode.isValid()) return "INVALID BARCODE";
+		
+		String locString = "";
+		for(Location loc : zipLocations) {
+			if (loc != null) locString = locString + " | " + loc;
+		}
+		return "" + zipCode + " | " + barCode + locString;
 	}
+	/**
+	 * Returns the list of locations.
+	 * @return
+	 */
 	public Location[] getLocations() {
 		return zipLocations;
 	}
 	
+	/**
+	 * Method that finds all of the locations corresponding to a zipcode, and puts them in an array of location objects.
+	 * @throws FileNotFoundException
+	 */
 	private void findLocations() throws FileNotFoundException{
 		File zipCodesCity = new File("ZipCodesCity.txt");
 		Scanner cityInput = new Scanner(zipCodesCity);
@@ -46,12 +83,17 @@ public class ZipCode {
 				zipLocations[x] = new Location(currentLocArr[1], currentLocArr[2]);
 				x++;
 			}
+		
 		}
 		cityInput.close();
 		
 	}
-	private void readBarcode() {
-		if (!barCode.isValid()) return;
+	/**
+	 * Reads the barcode, and turns it into a zipcode. If it's invalid, it returns false.
+	 * @return
+	 */
+	private boolean readBarcode() {
+		if (!barCode.isValid()) return false;
 		String myBar = barCode.toString();
 		String[] barArray = new String[6];
 		int z = 0;
@@ -75,7 +117,7 @@ public class ZipCode {
 			toReturn = toReturn + zipArray[x];
 		}
 		zipCode = toReturn;
-		
+		return true;
 	}
 	
 }
