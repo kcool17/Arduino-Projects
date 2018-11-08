@@ -77,7 +77,10 @@ class YTDLSource(discord.PCMVolumeTransformer):
             to_run = partial(ytdl.extract_info, url=search, download=download)
             data = await loop.run_in_executor(None, to_run)
             search = search + " "
-
+        
+        if data == None:
+            await ctx.send("There was an error finding your song. Please try a different keyword.")
+            
         if 'entries' in data:
             # take first item from a playlist
             data = data['entries'][0]
@@ -111,7 +114,7 @@ class MusicPlayer:
     When the bot disconnects from the Voice it's instance will be destroyed.
     """
 
-    __slots__ = ('bot', '_guild', '_channel', '_cog', 'queue', 'next', 'current', 'np', 'volume', 'loop', 'skipLoop', 'skipVote', 'loopVote', 'searchArr', 'didSkip')
+    __slots__ = ('bot', '_guild', '_channel', '_cog', 'queue', 'next', 'current', 'np', 'volume', 'oldSource', 'loop', 'skipLoop', 'skipVote', 'loopVote', 'searchArr', 'didSkip', 'loopQueue', 'jumpTo', 'jumpLoop')
 
     def __init__(self, ctx):
         self.bot = ctx.bot
@@ -126,12 +129,17 @@ class MusicPlayer:
         self.volume = .5
         self.current = None
         
+        self.oldSource = None
         self.loop = False
         self.skipLoop = False
         self.skipVote = []
         self.loopVote = []
         self.searchArr =[]
         self.didSkip = False
+        
+        self.loopQueue = False
+        self.jumpTo = 0
+        self.jumpLoop = False
 
         ctx.bot.loop.create_task(self.player_loop())
 
@@ -141,21 +149,38 @@ class MusicPlayer:
 
         while not self.bot.is_closed():
             self.next.clear()
-
             
             try:
                 # Wait for the next song. If we timeout cancel the player and disconnect...
                 async with timeout(300):  # 5 minutes...
-                    if self.loop == False or self.skipLoop == True:
+                    if self.loop == False or self.skipLoop == True or self.jumpLoop == True:
                         source = await self.queue.get()
-                        oldSource = source
                         self.skipLoop = False
                         self.didSkip = True
+                        if self.loopQueue == True:
+                            await self.queue.put(self.oldSource)
+                            if self.jumpLoop == True:
+                                await self.queue.put(source)
+                                for x in range(0, self.jumpTo - 1):
+                                    source = await self.queue.get()
+                                    if not self.jumpTo - 2  == x:
+                                        await self.queue.put(source)
+                                    x+=1
+                                self.jumpLoop = False
+                            
+                        elif self.jumpLoop == True:
+                            for x in range(0, self.jumpTo - 1):
+                                source = await self.queue.get()
+                                x+=1
+                            self.jumpLoop = False
+                            
+                        self.oldSource = source
+                            
                     else:
-                        source = oldSource
+                        source = self.oldSource
             except asyncio.TimeoutError:
                 return self.destroy(self._guild)
-
+            
             if not isinstance(source, YTDLSource):
                 # Source was probably a stream (not downloaded)
                 # So we should regather to prevent stream expiration
@@ -442,9 +467,9 @@ class Music:
                 pass
             elif not vc.is_playing():
                 return
-            for person in vcMembers:
-                if person.id in player.skipVote:
-                    player.skipVote.remove(person.id)
+            for person in player.skipVote:
+                if person not in vcMembers:
+                    player.skipVote.remove(person)
             if ctx.author.guild_permissions.manage_channels or member in ADMINS:
                 vc.stop()
                 player = self.get_player(ctx)
@@ -460,6 +485,7 @@ class Music:
                 await ctx.send('Skipping the song!')
         else:
             await ctx.send("Join the voice channel!")
+
             
     @commands.command(name='queue', aliases=['q'])
     @commands.cooldown(1, 1, commands.BucketType.user)
@@ -472,10 +498,19 @@ class Music:
 
         player = self.get_player(ctx)
         if player.queue.empty():
-            return await ctx.send('There are currently no more queued songs.')
+            await ctx.send('Queue is empty.')
+            await ctx.invoke(self.now_playing_)
+            return
 
         upcoming = list(player.queue._queue)
-        fmt = ""
+        x = vc.source
+        totalLength = 0
+        fmt = "**NOW PLAYING: "
+        totalLength = totalLength + x.length
+        m, s = divmod(x.length, 60)
+        h, m = divmod(m, 60)
+        prettyLength = "%d:%02d:%02d" % (h, m, s)
+        fmt = fmt + "[" + x.title + '](' + x.web_url + ')** | Length: ' + prettyLength
         z = 1
         totalLength = 0
         for x in upcoming:
@@ -489,7 +524,22 @@ class Music:
         h, m = divmod(m, 60)
         prettyTotalLength = "%d:%02d:%02d" % (h, m, s)
         embed = discord.Embed(title='Upcoming - Next {upcoming_len} | Total Length: '.format(upcoming_len=len(upcoming)) + prettyTotalLength, description=fmt, color=0x0000FF)
-
+        toFoot = ""
+        if player.loop:
+            toFoot = toFoot + "Looping Current Song"
+        elif player.loopQueue:
+            toFoot = toFoot + "Looping Queue"
+        else:
+            toFoot = toFoot + "Looping Disabled"
+        toFoot = toFoot + " | "
+        if vc.is_paused():
+            toFoot = toFoot + "Paused"
+        else:
+            toFoot = toFoot + "Playing"
+        toFoot = toFoot + " | "
+        toFoot = toFoot + "Skip Votes: " + str(len(player.skipVote)) + "/" + str(int((len(vc.channel.members)/2)))
+        
+        embed.set_footer(text= toFoot)
         await ctx.send(embed=embed)
 
     @commands.command(name='now_playing', aliases=['np', 'current', 'currentsong', 'playing'])
@@ -605,11 +655,33 @@ class Music:
                 await ctx.send("Loop Disabled!")
                 player.loop = False
             else:
-                await ctx.send("Loop Enabled!")
+                await ctx.send("Loop Enabled! (And loop queue disabled!)")
                 player.loop = True
+                player.loopQueue = False
         else:
             await ctx.send("Join the voice channel!")
-
+            
+    @commands.command(aliases=["loopq", "qloop"])
+    @commands.cooldown(1, 1, commands.BucketType.user)
+    async def loopqueue(self, ctx):
+        """Loops the current Queue"""
+        player = self.get_player(ctx)
+        vc = ctx.voice_client
+        if ctx.author in vc.channel.members or ctx.author.id in DEVS:
+            if player.loopQueue:
+                await ctx.send("Loop Queue Disabled!")
+                player.loopQueue = False
+            else:
+                await ctx.send("Loop Queue Enabled! (And regular loop disabled!)")
+                player.loopQueue = True
+                player.loop = False
+        else:
+            await ctx.send("Join the voice channel!")
+        
+        
+        
+        
+        
     @commands.command()
     @commands.cooldown(1, 1, commands.BucketType.user)
     async def clear(self, ctx):
@@ -627,6 +699,51 @@ class Music:
                 await ctx.send("You're not a DJ! This isn't for you!")
         else:
             await ctx.send("Join the voice channel!")
+    
+    @commands.command(aliases = ["j"])
+    @commands.cooldown(1, 1, commands.BucketType.user)
+    async def jump(self, ctx, toJump = ""):
+        """If queue is currently looped, it jumps to the song # you input. If it's not, only DJs (those with Manage Channels permissions) can jump immediately."""
+        vc = ctx.voice_client
+        if ctx.author in vc.channel.members or ctx.author.id in DEVS:
+            player = self.get_player(ctx)
+            guild = ctx.guild.id
+            member = ctx.author.id
+            ADMINS = pickle.load(open(((('servers' + os.sep) + str(ctx.guild.id)) + os.sep) + 'ADMINS.p', 'rb'))
+            if not vc or not vc.is_connected():
+                return await ctx.send('I am not currently playing anything!')
+            if vc.is_paused():
+                pass
+            elif not vc.is_playing():
+                return
+            
+            try:
+                toJump = int(toJump)
+            except:
+                await ctx.send("Error! Make sure you pick a number to jump to!")
+                return
+            if toJump < 1 or toJump > len(player.queue._queue):
+                await ctx.send("Error! Please pick a valid song to jump to!")
+                return
+            
+            if ctx.author.guild_permissions.manage_channels or member in ADMINS:
+                vc.stop()
+                player.jumpLoop = True
+                player.jumpTo = toJump
+                await ctx.send('**`{author}`**: is jumping to song #{num}!!'.format(author=ctx.author, num=toJump))
+            else:
+                if player.loopQueue == True:
+                    vc.stop()
+                    player.jumpLoop = True
+                    player.jumpTo = toJump
+                    await ctx.send('**`{author}`**: is jumping to song #{num}!!'.format(author=ctx.author, num=toJump))
+                else:
+                    await ctx.send("Sorry, you have to be a DJ to jump to a song in normal mode!")
+            
+        else:
+            await ctx.send("Join the voice channel!")
+        
+        
     @commands.command()
     @commands.cooldown(1, 1, commands.BucketType.user)
     async def remove(self, ctx, toRemove = ""):
