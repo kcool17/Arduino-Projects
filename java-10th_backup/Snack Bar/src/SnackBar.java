@@ -58,13 +58,13 @@ public class SnackBar extends JFrame
     password.setText("");
     if (MY_PASSWORD.equals(word))
     {
-      // double amt = Vendor.getTotalSales();
+      double amt = Vendor.getTotalSales();
       machine1.reload();
       machine2.reload();
       machine3.reload();
       machine4.reload();
       JOptionPane.showMessageDialog(null,
-        // String.format("Total sales: $%.2f\n", amt) + 
+        String.format("Total sales: $%.2f\n", amt) + 
         "Machines reloaded",
         "Service", JOptionPane.INFORMATION_MESSAGE);
     }

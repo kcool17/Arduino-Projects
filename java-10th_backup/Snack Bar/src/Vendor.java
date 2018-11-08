@@ -4,6 +4,9 @@
  */
 public class Vendor
 {
+	//Static variables:
+	private static double totalSales = 0;
+	
   // Fields:
   private int itemPrice;
   private int totalStock;
@@ -65,6 +68,7 @@ public class Vendor
   public boolean makeSale() {
     if (centsIn < itemPrice || totalStock <=0) return false;
     else {
+    	totalSales = totalSales + ((double)itemPrice / 100.0);
     	centsIn = centsIn - itemPrice;
     	totalStock--;
     	return true;
@@ -80,5 +84,14 @@ public class Vendor
     int oldCents=centsIn;
     centsIn=0;
     return oldCents;
+  }
+  
+  /**
+   * 
+   */
+  public static double getTotalSales() {
+	 double temp = totalSales;
+	 totalSales = 0;
+	 return temp;
   }
 }
