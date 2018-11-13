@@ -69,7 +69,10 @@ async def background_task(): #Runs every 1 second, constantly.
         #Logging
         global logBuffer
         global errBuffer
-        toChannel=bot.get_channel(496780822553034752)
+        if bot.user.id == 421015092830666754:
+            toChannel=bot.get_channel(496780822553034752)
+        else:
+            toChannel=bot.get_channel(496794388689584146)
         toSend = logBuffer.getvalue()
         toSend2 = errBuffer.getvalue()
         logBuffer.close()
@@ -324,7 +327,7 @@ async def on_message(message):
     #Ning is stupid:
     if isinstance(message.channel, discord.abc.PrivateChannel) and message.author.id == 180852994231762945 and message.content == "im an idiot":
         await message.channel.send("*Here's a list of server invites for you, Ning. Enjoy.*")
-        await message.channel.send("**Savage Kyle:** https://discord.gg/gjBS6f3 | **The Empire:** https://discord.gg/QPAmKCK | **mimi9:** https://discord.gg/RQVe7Pj")
+        await message.channel.send("**Savage Kyle:** https://discord.gg/gjBS6f3 | **The Empire:** https://discord.gg/sUckHpT | **mimi9:** https://discord.gg/RQVe7Pj")
 
 
 @bot.event

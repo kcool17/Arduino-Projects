@@ -122,7 +122,7 @@ class MusicPlayer:
         self._channel = ctx.channel
         self._cog = ctx.cog
 
-        self.queue = asyncio.Queue()
+        self.queue = []
         self.next = asyncio.Event()
 
         self.np = None  # Now playing message
@@ -153,24 +153,26 @@ class MusicPlayer:
             try:
                 # Wait for the next song. If we timeout cancel the player and disconnect...
                 async with timeout(300):  # 5 minutes...
-                    if self.loop == False or self.skipLoop == True or self.jumpLoop == True:
-                        source = await self.queue.get()
+                    if self.queue == []:
+                        source = None
+                    elif self.loop == False or self.skipLoop == True or self.jumpLoop == True:
+                        source = self.queue.pop(0)
                         self.skipLoop = False
                         self.didSkip = True
                         if self.loopQueue == True:
-                            await self.queue.put(self.oldSource)
+                            self.queue.append(self.oldSource)
                             if self.jumpLoop == True:
-                                await self.queue.put(source)
+                                self.queue.append(source)
                                 for x in range(0, self.jumpTo - 1):
-                                    source = await self.queue.get()
+                                    source = self.queue.pop(0)
                                     if not self.jumpTo - 2  == x:
-                                        await self.queue.put(source)
+                                        self.queue.append(source)
                                     x+=1
                                 self.jumpLoop = False
                             
                         elif self.jumpLoop == True:
                             for x in range(0, self.jumpTo - 1):
-                                source = await self.queue.get()
+                                source = self.queue.pop(0)
                                 x+=1
                             self.jumpLoop = False
                             
@@ -187,10 +189,15 @@ class MusicPlayer:
                 try:
                     source = await YTDLSource.regather_stream(source, loop=self.bot.loop)
                 except Exception as e:
-                    await self._channel.send('There was an error processing your song.\n'
-                                             '```css\n[{e}]\n```'.format(e=e))
+                    if source != None:
+                        await self._channel.send('There was an error processing your song.\n'
+                                                 '```css\n[{e}]\n```'.format(e=e))
+                    else:
+                        await self.bot.get_channel(511655906854043725).send('There was an error processing your song.\n'
+                                                                            '```css\n[{e}]\n```'.format(e=e))
                     continue
 
+            
             source.volume = self.volume
 
             
@@ -203,8 +210,8 @@ class MusicPlayer:
                 m, s = divmod(source.length, 60)
                 h, m = divmod(m, 60)
                 prettyLength = "%d:%02d:%02d" % (h, m, s)
-                if list(self.queue._queue)!=[]:
-                    upNext = list(self.queue._queue)[0]["title"]
+                if self.queue!=[]:
+                    upNext = self.queue[0]["title"]
                 else:
                     upNext = "Nothing"
                 
@@ -352,7 +359,7 @@ class Music:
             except:
                 source = await YTDLSource.create_source(ctx, search, loop=self.bot.loop, download=False)
 
-            await player.queue.put(source)
+            player.queue.append(source)
         else:
             await ctx.send("Join the voice channel!")
 
@@ -497,12 +504,12 @@ class Music:
             return await ctx.send('I am not currently connected to voice!')
 
         player = self.get_player(ctx)
-        if player.queue.empty():
+        if player.queue == []:
             await ctx.send('Queue is empty.')
             await ctx.invoke(self.now_playing_)
             return
 
-        upcoming = list(player.queue._queue)
+        upcoming = player.queue
         x = vc.source
         totalLength = 0
         fmt = "**NOW PLAYING: "
@@ -693,7 +700,7 @@ class Music:
             ADMINS = pickle.load(open(((('servers' + os.sep) + str(ctx.guild.id)) + os.sep) + 'ADMINS.p', 'rb'))
             if ctx.author.guild_permissions.manage_channels or member in ADMINS:
                 player = self.get_player(ctx)
-                player.queue = asyncio.Queue()
+                player.queue = []
                 await ctx.send("Queue cleared!")
             else:
                 await ctx.send("You're not a DJ! This isn't for you!")
@@ -722,7 +729,7 @@ class Music:
             except:
                 await ctx.send("Error! Make sure you pick a number to jump to!")
                 return
-            if toJump < 1 or toJump > len(player.queue._queue):
+            if toJump < 1 or toJump > len(player.queue):
                 await ctx.send("Error! Please pick a valid song to jump to!")
                 return
             
@@ -755,9 +762,9 @@ class Music:
             ADMINS = pickle.load(open(((('servers' + os.sep) + str(ctx.guild.id)) + os.sep) + 'ADMINS.p', 'rb'))
             if ctx.author.guild_permissions.manage_channels or member in ADMINS:
                 player = self.get_player(ctx)
-                newQueue = list(player.queue._queue)
+                newQueue = player.queue
                 if toRemove.lower() == "all":
-                    player.queue = asyncio.Queue()
+                    player.queue = []
                     await ctx.send("Queue cleared!")
                     return
                 try:
@@ -770,7 +777,7 @@ class Music:
                     return
 
                     
-                player.queue._queue = newQueue
+                player.queue = newQueue
                 await ctx.send("Removed `" + removed["title"] + "` (#" + str(toRemove+1) + ") from the Queue!")
             else:
                 await ctx.send("You're not a DJ! This isn't for you!")
