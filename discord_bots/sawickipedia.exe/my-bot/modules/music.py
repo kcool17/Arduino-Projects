@@ -9,6 +9,7 @@ import itertools
 import sys
 import traceback
 import time
+import random
 from async_timeout import timeout
 from functools import partial
 from youtube_dl import YoutubeDL
@@ -114,7 +115,7 @@ class MusicPlayer:
     When the bot disconnects from the Voice it's instance will be destroyed.
     """
 
-    __slots__ = ('bot', '_guild', '_channel', '_cog', 'queue', 'next', 'current', 'np', 'volume', 'oldSource', 'loop', 'skipLoop', 'skipVote', 'loopVote', 'searchArr', 'didSkip', 'loopQueue', 'jumpTo', 'jumpLoop')
+    __slots__ = ('bot', '_guild', '_channel', '_cog', 'queue', 'next', 'current', 'np', 'volume', 'oldSource', 'loop', 'skipLoop', 'skipVote', 'loopVote', 'searchArr', 'didSkip', 'loopQueue', 'jumpTo', 'jumpLoop', 'currentURL')
 
     def __init__(self, ctx):
         self.bot = ctx.bot
@@ -140,6 +141,8 @@ class MusicPlayer:
         self.loopQueue = False
         self.jumpTo = 0
         self.jumpLoop = False
+        
+        self.currentURL = ""
 
         ctx.bot.loop.create_task(self.player_loop())
 
@@ -150,6 +153,10 @@ class MusicPlayer:
         while not self.bot.is_closed():
             self.next.clear()
             
+            for thing in self.queue:
+                if thing == None:
+                    print("Hey, you wanted to see this error. Well, a None just appeared in a queue. Hopefully it's fixed!")
+                    self.queue.remove(thing)
             try:
                 # Wait for the next song. If we timeout cancel the player and disconnect...
                 async with timeout(300):  # 5 minutes...
@@ -176,12 +183,16 @@ class MusicPlayer:
                                 x+=1
                             self.jumpLoop = False
                             
-                        self.oldSource = source
-                            
                     else:
                         source = self.oldSource
+                        
             except asyncio.TimeoutError:
                 return self.destroy(self._guild)
+            
+            if source != None:
+                self.oldSource = source
+            
+            
             
             if not isinstance(source, YTDLSource):
                 # Source was probably a stream (not downloaded)
@@ -204,13 +215,18 @@ class MusicPlayer:
             self.current = source
 
             self._guild.voice_client.play(source, after=lambda _: self.bot.loop.call_soon_threadsafe(self.next.set))
+            
             if not self.loop or self.didSkip:
                 self.didSkip = False
                 releaseDate = source.release_date
                 m, s = divmod(source.length, 60)
                 h, m = divmod(m, 60)
                 prettyLength = "%d:%02d:%02d" % (h, m, s)
-                if self.queue!=[]:
+                try:
+                    tempVar = self.queue[0] == None
+                except:
+                    tempVar = False
+                if self.queue!=[] and not tempVar:
                     upNext = self.queue[0]["title"]
                 else:
                     upNext = "Nothing"
@@ -223,6 +239,13 @@ class MusicPlayer:
                 self.np = await self._channel.send(embed=npEmbed)
                 
             pickle.dump(time.time(), open('servers' + os.sep + str(self._guild.id) + os.sep + "vidStart.p", "wb"))
+            if self.queue!=[]:
+                newQueue = []
+                for item in self.queue:
+                    newQueue.append(item['webpage_url'])
+                self.currentURL = source.web_url
+                newQueue.append(self.currentURL)
+                pickle.dump(newQueue, open('servers' + os.sep + str(self._guild.id) + os.sep + "queueBackup.p", "wb"))
             await self.next.wait()
             
             # Make sure the FFmpeg process is cleaned up.
@@ -327,7 +350,44 @@ class Music:
                 raise VoiceConnectionError('Connecting to channel: <{channel}> timed out.'.format(channel=channel))
 
         await ctx.send('Connected to: **{channel}**'.format(channel=channel))
+    
+    @commands.command(aliases=['restart', 'fixq'])
+    @commands.cooldown(1, 1, commands.BucketType.user)
+    async def replay(self, ctx):
+        vc = ctx.voice_client
 
+        if not vc:
+            await ctx.invoke(self.connect_)
+        vc = ctx.voice_client
+        if ctx.author in vc.channel.members or ctx.author.id in DEVS:
+            player = self.get_player(ctx)
+            try:
+                searchlist = pickle.load(open('servers' + os.sep + str(ctx.guild.id) + os.sep + "queueBackup.p", "rb"))
+                player = self.get_player(ctx)
+            
+                # If download is False, source will be a dict which will be used later to regather the stream.
+                # If download is True, source will be a discord.FFmpegPCMAudio with a VolumeTransformer.
+                for search in searchlist:
+                    if search != None and search != "":
+                        try:
+                            source = await YTDLSource.create_source(ctx, search, loop=self.bot.loop, download=False)
+                            player.queue.append(source)
+                            if player.queue!=[]:
+                                newQueue = []
+                                for item in player.queue:
+                                    newQueue.append(item["webpage_url"])
+                                newQueue.append(player.currentURL)
+                                pickle.dump(newQueue, open('servers' + os.sep + str(ctx.guild.id) + os.sep + "queueBackup.p", "wb"))
+                        except:
+                            pass
+                player.loopQueue = True
+                await ctx.send("Old Queue added to new one!")
+            except Exception as e:
+                print('```css\n[{e}]\n```'.format(e=e))
+                await ctx.send("Sorry, there was no previous queue saved!")
+                
+    
+    
     @commands.command(name='play', aliases=['p'])
     @commands.cooldown(1, 1, commands.BucketType.user)
     async def play_(self, ctx, *, search: str):
@@ -360,9 +420,52 @@ class Music:
                 source = await YTDLSource.create_source(ctx, search, loop=self.bot.loop, download=False)
 
             player.queue.append(source)
+            if player.queue!=[]:
+                newQueue = []
+                for item in player.queue:
+                    newQueue.append(item["webpage_url"])
+                newQueue.append(player.currentURL)
+                pickle.dump(newQueue, open('servers' + os.sep + str(ctx.guild.id) + os.sep + "queueBackup.p", "wb"))
         else:
             await ctx.send("Join the voice channel!")
+    
+    @commands.command(aliases=['playm', 'playmult', 'playmultiple', 'pmult'])
+    @commands.cooldown(1, 1, commands.BucketType.user)
+    async def play_multiple(self, ctx, *searchlist : str):
+        """Play a list of songs. make sure to quote each search term, as it'll go through your quoted list and play each one. Max of 10 at a time.
+        Note: Incompatible with the Search feature.
+        """
+        await ctx.trigger_typing()
 
+        vc = ctx.voice_client
+
+        if not vc:
+            await ctx.invoke(self.connect_)
+        vc = ctx.voice_client
+        if ctx.author in vc.channel.members or ctx.author.id in DEVS:
+            player = self.get_player(ctx)
+            
+            if len(searchlist) > 10:
+                await ctx.send("Too many songs! Please only do 10 at a time.")
+                return
+            # If download is False, source will be a dict which will be used later to regather the stream.
+            # If download is True, source will be a discord.FFmpegPCMAudio with a VolumeTransformer.
+            for search in searchlist:
+                try:
+                    source = await YTDLSource.create_source(ctx, search, loop=self.bot.loop, download=False)
+                    player.queue.append(source)
+                    if player.queue!=[]:
+                        newQueue = []
+                        for item in player.queue:
+                            newQueue.append(item["webpage_url"])
+                        newQueue.append(player.currentURL)
+                        pickle.dump(newQueue, open('servers' + os.sep + str(ctx.guild.id) + os.sep + "queueBackup.p", "wb"))
+                except:
+                    await ctx.send("An error occurred with your search \"" + search + "\"! Please try again!")
+        else:
+            await ctx.send("Join the voice channel!")
+    
+    
     @commands.command(aliases=['s'])
     @commands.cooldown(1, 1, commands.BucketType.user)
     async def search(self, ctx, *, search : str):
@@ -508,7 +611,12 @@ class Music:
             await ctx.send('Queue is empty.')
             await ctx.invoke(self.now_playing_)
             return
-
+        
+        for thing in player.queue:
+            if thing == None:
+                print("Hey, you wanted to see this error. Well, a None just appeared in a queue. Hopefully it's fixed! #2, of course.")
+                player.queue.remove(thing)
+                
         upcoming = player.queue
         x = vc.source
         totalLength = 0
@@ -785,10 +893,32 @@ class Music:
             await ctx.send("Join the voice channel!")
         
 
+    @commands.command()
+    @commands.cooldown(1, 1, commands.BucketType.user)
+    async def shuffle(self, ctx):
+        """Shuffles the current music queue of the bot."""
+        vc = ctx.voice_client
+        if ctx.author in vc.channel.members or ctx.author.id in DEVS:
+            player = self.get_player(ctx)
+            random.shuffle(player.queue)
+            await ctx.send("Shuffled Queue!")
 
-
-
-
+    @commands.command()
+    @commands.cooldown(1, 1, commands.BucketType.user)
+    async def move(self, ctx, toMove : int, toPosition : int):
+        """Moves the selected song number to a given position in the queue."""
+        vc = ctx.voice_client
+        if ctx.author in vc.channel.members or ctx.author.id in DEVS:
+            player = self.get_player(ctx)
+            if toMove > len(player.queue) or toPosition > len(player.queue) or toMove < 1 or toPosition < 1:
+                await ctx.send("Invalid song position! Please pick a valid position!")
+                return
+            moveSong = player.queue.pop(toMove - 1)
+            if toPosition -1 == len(player.queue):
+                player.queue.append(moveSong)
+            else:
+                player.queue.insert(toPosition-1, moveSong)
+            await ctx.send("Song #" + str(toMove) + " moved to position #" + str(toPosition) + "!")
 
 
 

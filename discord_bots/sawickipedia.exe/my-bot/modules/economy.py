@@ -1084,7 +1084,7 @@ class Economy():
                     currentChance = 0
                 if currentChance < robRate:
                     didSucceed = 1
-                if didSucceed == 1:
+                if didSucceed == 1 and robbedMoney > 0:
                     randomRob = ROBWIN[random.randint(0, len(ROBWIN) - 1)]
                     randomMoney = int((random.randint(75, 95) / 100) * robbedMoney)
                 else:

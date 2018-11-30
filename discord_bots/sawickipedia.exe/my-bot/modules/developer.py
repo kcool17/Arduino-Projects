@@ -9,8 +9,10 @@ import asyncio
 import urllib.parse
 import urllib.request
 import re
+import inspect
 from server import DEVS
-
+import io
+import sys
 
 class Developer():
     def __init__(self, bot):
@@ -169,6 +171,93 @@ class Developer():
         for item in arg:
             thing = thing + item
         print(thing)
+        
+    @commands.command(hidden=True)
+    @commands.check(check_dev)
+    async def checkvar(self, ctx, *filepathtemp : str):
+        """Checks the value of a variable. Use spaces for slashes."""
+        filepath = ""
+        for thing in filepathtemp:
+            filepath = filepath + thing + os.sep
+        filepath = filepath[:len(filepath)-1]
+        
+        toCheck = pickle.load(open(filepath, "rb"))
+        await ctx.send("```python" + "\n" +
+                        str(type(toCheck)) + "\n" +
+                        str(toCheck) + "\n" +
+                        "```"
+                        )
+        
+    @commands.command(hidden=True, name="evaluate", aliases = ["eval"])
+    @commands.check(check_dev)
+    async def evaluate_(self, ctx, *, toEval : str):
+        """Evaluates raw Python code. BE CAREFUL."""
+        if toEval == "":
+            await ctx.send("No code inputted.")
+            return
+        
+        first= "```python"
+        last = "```"
+        start = toEval.index( first ) + len( first )
+        end = toEval.index( last, start )
+        toEval = toEval[start:end]
+        sys.stdout = logBuffer = io.StringIO()
+        try:
+            output = eval(toEval)
+            if inspect.isawaitable(output):
+                output = await output
+            outEmbed = discord.Embed(title = "Code evaluated!", color = 0x00FF00)
+            outEmbed.description = "```python\n{output}\n```".format(output=output)
+        except Exception as e:
+            outEmbed = discord.Embed(title = "Error!", color = 0xFF0000)
+            outEmbed.description = "```python\n{e}\n```".format(e=e)
+            
+        
+        toSend = logBuffer.getvalue()
+        logBuffer.close()
+        await ctx.send("```python\n{toSend}\n```".format(toSend=toSend), embed=outEmbed)
+
+    @commands.command(hidden=True, name="execute", aliases = ["exec"])
+    @commands.check(check_dev)
+    async def execute_(self, ctx, *, toEval : str):
+        """Executes raw Python code. BE CAREFUL."""
+        if toEval == "":
+            await ctx.send("No code inputted.")
+            return
+        
+        first= "```python"
+        last = "```"
+        start = toEval.index( first ) + len( first )
+        end = toEval.index( last, start )
+        toEval = toEval[start:end]
+        sys.stdout = logBuffer = io.StringIO()
+        try:
+            output = exec(toEval)
+            if inspect.isawaitable(output):
+                output = await output
+            outEmbed = discord.Embed(title = "Code evaluated!", color = 0x00FF00)
+            outEmbed.description = "```python\n{output}\n```".format(output=output)
+        except Exception as e:
+            outEmbed = discord.Embed(title = "Error!", color = 0xFF0000)
+            outEmbed.description = "```python\n{e}\n```".format(e=e)
+            
+        
+        toSend = logBuffer.getvalue()
+        logBuffer.close()
+        await ctx.send("```python\n{toSend}\n```".format(toSend=toSend), embed=outEmbed)
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
             
 def setup(bot):
     bot.add_cog(Developer(bot))

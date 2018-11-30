@@ -14,11 +14,18 @@ import sys
 import logging
 import gc
 from discord.utils import get
+from googleapiclient.discovery import build
+from httplib2 import Http
+from oauth2client import file, client, tools
 
 DEVS = [357953549738573835]
 GAMES = ['with Snowden', 'the NSA', 'with Lizard-People', 'with The Zucc', 'with Element 94', 'with the Doctor','the Doctor', 'with Space-Time', 'on the Death Star', 'God', 'with Nightmares', 'with Lucifer', 'Crap(s)','with Test Monkeys', 'Society', 'with Logs', 'at 88 MPH', 'you all for fools', 'with the One Ring', 'in Mordor','with my Palantir', 'with Myself', 'with Pythons', 'in CMD', 'as Root', 'Hang Man', 'with your passwords','with your money', 'with your existence', 'you', 'with Just Monika', 'with Explosives', 'with Lives','with your Life', 'on a Good Christian Minecraft Server', 'a Game.', 'with You...', 'in the Meth Lab','with your S.O.', 'with Death', 'with Lightsabers', 'with your Heart', 'Jedi Mind-tricks', 'Mind-games']
 
-#Logging
+
+SCOPES = 'https://www.googleapis.com/auth/classroom.courses.readonly'
+
+
+####Logging####
 #logging.basicConfig(level=logging.DEBUG)
 
 #Get Autoresponder Images
@@ -49,7 +56,8 @@ startup_extensions = ['modules.test1', #Default extensions (all enabled)
                       'modules.economy',
                       'modules.minigames',
                       'modules.music',
-                      'modules.moderation'
+                      'modules.moderation',
+                      'modules.data'
                     ]
 
 bot = commands.Bot(command_prefix=get_prefix, description=description)
@@ -289,6 +297,25 @@ async def background_task(): #Runs every 1 second, constantly.
         presenceCount += 1
         await asyncio.sleep(1)
 
+async def slow_background_task(): #Runs every 30 seconds, constantly.
+    await bot.wait_until_ready()
+    
+    #Classroom API
+    store = file.Storage('modules' + os.sep + 'data_files' + os.sep + 'token.json')
+    creds = store.get()
+    if not creds or creds.invalid:
+        flow = client.flow_from_clientsecrets('modules' + os.sep + 'data_files' + os.sep + 'credentials.json', SCOPES)
+        creds = tools.run_flow(flow, store)
+         
+    service = build('classroom', 'v1', http=creds.authorize(Http()))
+   
+
+    while (not bot.is_closed()):
+        
+        await asyncio.sleep(30)
+    
+    
+    
 #Events:
 @bot.event  
 async def on_ready():
@@ -323,6 +350,12 @@ async def on_message(message):
     if isinstance(message.channel, discord.abc.PrivateChannel)and (message.author.id != 357953549738573835):
         toChannel = await bot.get_user_info(357953549738573835)
         await toChannel.send((((('**Message from ' + str(message.author)) + '[*') + str(message.author.id)) + '*]:** ') +str(message.content))
+        print(message.attachments)
+        if message.attachments != []:
+            toSay = "**Attachments**: "
+            for thing in message.attachments:
+                toSay = toSay + thing.url + "\n"
+            await toChannel.send(toSay)
         
     #Ning is stupid:
     if isinstance(message.channel, discord.abc.PrivateChannel) and message.author.id == 180852994231762945 and message.content == "im an idiot":
@@ -362,4 +395,5 @@ if __name__ == '__main__':
     sys.stdout = logBuffer = io.StringIO()
     sys.stderr = errBuffer = io.StringIO()
     bot.loop.create_task(background_task())
+    #bot.loop.create_task(slow_background_task())
     bot.run(pickle.load(open('token.p', 'rb')))
