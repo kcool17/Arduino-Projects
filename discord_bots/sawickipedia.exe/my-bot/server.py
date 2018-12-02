@@ -14,9 +14,9 @@ import sys
 import logging
 import gc
 from discord.utils import get
-from googleapiclient.discovery import build
-from httplib2 import Http
-from oauth2client import file, client, tools
+#from googleapiclient.discovery import build
+#from httplib2 import Http
+#from oauth2client import file, client, tools
 
 DEVS = [357953549738573835]
 GAMES = ['with Snowden', 'the NSA', 'with Lizard-People', 'with The Zucc', 'with Element 94', 'with the Doctor','the Doctor', 'with Space-Time', 'on the Death Star', 'God', 'with Nightmares', 'with Lucifer', 'Crap(s)','with Test Monkeys', 'Society', 'with Logs', 'at 88 MPH', 'you all for fools', 'with the One Ring', 'in Mordor','with my Palantir', 'with Myself', 'with Pythons', 'in CMD', 'as Root', 'Hang Man', 'with your passwords','with your money', 'with your existence', 'you', 'with Just Monika', 'with Explosives', 'with Lives','with your Life', 'on a Good Christian Minecraft Server', 'a Game.', 'with You...', 'in the Meth Lab','with your S.O.', 'with Death', 'with Lightsabers', 'with your Heart', 'Jedi Mind-tricks', 'Mind-games']
@@ -290,6 +290,42 @@ async def background_task(): #Runs every 1 second, constantly.
                     pickle.dump(trivCool,open(((((('servers' + os.sep) + str(guild.id)) + os.sep) + str(member.id)) + os.sep) + 'trivCool.p','wb'))
         #Music
         
+        
+        #Moderation:
+        for guild in myGuilds:
+            for member in guild.members:
+                for role in member.roles:
+                    if role.name == "Muted":
+                        try:
+                            muteDat = pickle.load(open('servers' + os.sep + str(guild.id) + os.sep + str(member.id) + os.sep + 'muteDat.p', "rb"))
+                        except:
+                            muteDat = {"time":"forever"}
+                            
+                        if muteDat["time"] == "forever":
+                            pass
+                        elif int(muteDat["time"]) <= 0:
+                            muteDat = {}
+                            for role in guild.roles:
+                                if role.name == "Muted":
+                                    muteRole = role
+                            await guild.get_member(member.id).remove_roles(muteRole)
+                            await guild.get_member(member.id).edit(speak = True)
+                            muteOldChannel = pickle.load(open('servers' + os.sep + str(guild.id) + os.sep + member.id + os.sep + 'muteOldChannel.p',"rb"))
+            
+                            for channel in guild.text_channels:
+                                await channel.set_permissions(member, send_messages = muteOldChannel[str(channel.id)][0], add_reactions = muteOldChannel[str(channel.id)][1])
+                                if channel.overwrites_for(member).is_empty():
+                                    await channel.set_permissions(member, overwrite=None)
+                            for channel in guild.voice_channels:
+                                await channel.set_permissions(member, speak = muteOldChannel[str(channel.id)])
+                                if channel.overwrites_for(member).is_empty():
+                                    await channel.set_permissions(member, overwrite=None)
+                                
+                            pickle.dump(muteDat, open('servers' + os.sep + str(guild.id) + os.sep + str(member.id) + os.sep + 'muteDat.p',"wb"))
+                        else:
+                            muteDat["time"] = str(int(muteDat["time"]) - 1)
+                            pickle.dump(muteDat, open('servers' + os.sep + str(guild.id) + os.sep + str(member.id) + os.sep + 'muteDat.p',"wb"))
+                    
             
         
         #Other
@@ -297,6 +333,7 @@ async def background_task(): #Runs every 1 second, constantly.
         presenceCount += 1
         await asyncio.sleep(1)
 
+"""
 async def slow_background_task(): #Runs every 30 seconds, constantly.
     await bot.wait_until_ready()
     
@@ -313,7 +350,7 @@ async def slow_background_task(): #Runs every 30 seconds, constantly.
     while (not bot.is_closed()):
         
         await asyncio.sleep(30)
-    
+"""    
     
     
 #Events:
