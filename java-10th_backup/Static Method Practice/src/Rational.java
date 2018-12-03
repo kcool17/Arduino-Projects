@@ -103,7 +103,64 @@ public class Rational
    }
 
 
+   //Static add, subtract, etc.
+   public static Rational add (Rational op1, Rational op2) {
+	   int commonDenominator = op1.getDenominator() * op2.getDenominator();
+	   int numerator1 = op1.getNumerator() * op2.getDenominator();
+	   int numerator2 = op2.getNumerator() * op1.getDenominator();
+	   int sum = numerator1 + numerator2;
 
+	   return new Rational (sum, commonDenominator);
+	   
+   }
+   public static Rational subtract (Rational op1, Rational op2)
+   {
+	   int commonDenominator = op1.getDenominator() * op2.getDenominator();
+	   int numerator1 = op1.getNumerator() * op2.getDenominator();
+	   int numerator2 = op2.getNumerator() * op1.getDenominator();
+	   int difference = numerator1 - numerator2;
+
+      return new Rational (difference, commonDenominator);
+   }
+   
+   public static Rational multiply (Rational op1, Rational op2)
+   {
+      int numer = op1.getNumerator() * op2.getNumerator();
+      int denom = op1.getDenominator() * op2.getDenominator();
+      return new Rational (numer, denom);
+   }
+
+   //-----------------------------------------------------------------
+   //  Divides this rational number by the one passed as a parameter
+   //  by multiplying by the reciprocal of the second rational.
+   //-----------------------------------------------------------------
+   public static Rational divide (Rational op1, Rational op2)
+   {
+      return multiply (op1, op2.reciprocal());
+   }
+   
+   //Power methods
+   public Rational toPower(int power){
+	   Rational myRational = new Rational(1, 1);
+	   for (int x = 0; x<power; x++) {
+		   myRational = multiply(myRational, this);
+	   }
+	   return myRational;
+   }
+   public static Rational toPower(Rational op1, int power) {
+	   Rational myRational = new Rational(1, 1);
+	   for (int x = 0; x<power; x++) {
+		   myRational = multiply(myRational, op1);
+	   }
+	   return myRational;
+   }
+   
+   //Equals Override
+   public boolean equals(Rational op2) {
+	   return numerator == op2.getNumerator() && denominator == op2.getDenominator();
+   }
+   
+   
    //-----------------------------------------------------------------
    //  Returns this rational number as a string.
    //-----------------------------------------------------------------
