@@ -921,9 +921,28 @@ class Music:
             await ctx.send("Song #" + str(toMove) + " moved to position #" + str(toPosition) + "!")
 
 
-
-
-
+    @commands.command(aliases = ["getq"])
+    @commands.cooldown(1, 1, commands.BucketType.user)
+    async def getqueue(self, ctx):
+        """Sends a command that you can input to add all songs to a separate queue."""
+        vc = ctx.voice_client
+        if ctx.author in vc.channel.members or ctx.author.id in DEVS:
+            player = self.get_player(ctx)
+            toSay = "`?playm "
+            for item in player.queue:
+                toSay = toSay + str(item["webpage_url"]) + " "
+            await ctx.send(toSay + "`")
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
         
 def setup(bot):
     bot.add_cog(Music(bot))
