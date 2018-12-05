@@ -1,4 +1,6 @@
 
-public interface Compiler {
+public interface Compiler{
+	
+	public String compile(String userCode);
 
 }

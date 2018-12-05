@@ -1,0 +1,109 @@
+Kyle Sawicki's Hierarchy Project
+AP CS Period 1 | Mrs. Rodriguez
+Client Class Examples
+
+----------------------------------------------Inherited methods-------------------------------------------------------
+OS Type: Linux/Unix
+Main Usage: OS programming
+--------------------------------------------Constants---------------------------------------------------------
+Newest Java Version: 8.191
+---------------------------------------------CompareTo--------------------------------------------------------
+Assembly is harder than Java!
+
+Bash and Java have the same difficulty!
+---------------------------------------------Equals--------------------------------------------------------
+bash1 and bash2: true
+bash1 and bash3: false
+bash1 and bash4: false
+--------------------------------------------------toString---------------------------------------------------
+HEY, LISTEN! YOU SHOULD UPDATE JAVA TO THE NEWEST VERSION!
+Java Version: 8.181
+Does it use Headers far too much?: false
+Language Name: Java
+File Extension: .java
+Ease of Use: 6
+Safety of Use: 7
+Programmer's Skill Level: 1
+User's code: 
+ZipCode.java
+Results when run: 
+You are currently taking the standard Java Programming class, and you actually didn't already know how to program when you started the class.
+----------------------------------------------Aliases-------------------------------------------------------
+some code here
+some NEW code here
+---------------------------------------------Static methods--------------------------------------------------------
+Number of ProgammingLanguage objects created: 10
+Defintion: A programming language is a formal language, which comprises a set of instructions used to produce various kinds of output. Programming languages are used in computer programming to create programs that implement specific algorithms. - Source: Wikipedia
+-------------------------------------------------Polymorphism, Object array, for each loop, casting objects.----------------------------------------------------
+Java version: 8.191
+
+Processor Type: Intel i7-8700k
+Language Name: Assembly
+File Extension: .s
+Ease of Use: 1
+Safety of Use: 1
+Programmer's Skill Level: 1
+User's code: 
+insert some code here that will definitely run
+Results when run: 
+You somehow managed to blow up your entire computer. Next time, don't accidentally make your PSU unstable. I don't even know how you managed that.
+
+Is Root?: true
+OS: Linux/Unix
+Main Usage: OS programming
+Language Name: Bash
+File Extension: .sh
+Ease of Use: 6
+Safety of Use: 3
+Programmer's Skill Level: 1
+User's code: 
+insert some code here that will definitely run
+Results when run: 
+Anddddd you accidentally deleted your entire hard drive. Nice. That's gonna be fun to fix.
+
+Main Usage: All-Purpose
+Language Name: Python
+File Extension: .py
+Ease of Use: 7
+Safety of Use: 7
+Programmer's Skill Level: 1
+User's code: 
+insert some code here that will definitely run
+Results when run: 
+You'll learn. Hopefully.
+
+Does it use Headers far too much?: true
+Language Name: C
+File Extension: .c
+Ease of Use: 3
+Safety of Use: 3
+Programmer's Skill Level: 1
+User's code: 
+insert some code here that will definitely run
+Results when run: 
+Welp, you screwed up badly. You manipulated the computer's memory in weird ways, and crashed it. And you forgot to save your work. Good job.
+
+Does it use Headers far too much?: true
+Language Name: C++
+File Extension: .cpp
+Ease of Use: 4
+Safety of Use: 5
+Programmer's Skill Level: 1
+User's code: 
+insert some code here that will definitely run
+Results when run: 
+Your code does nothing useful, and you somehow managed to make an infinite loop. I hope you saved this time.
+
+Java Version: 8.191
+Does it use Headers far too much?: false
+Language Name: Java
+File Extension: .java
+Ease of Use: 6
+Safety of Use: 7
+Programmer's Skill Level: 1
+User's code: 
+insert some code here that will definitely run
+Results when run: 
+You are currently taking the standard Java Programming class, and you actually didn't already know how to program when you started the class.
+
+-----------------------------------------------------------------------------------------------------
