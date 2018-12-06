@@ -249,11 +249,48 @@ class Developer():
     
     
     
-    
-    
-    
-    
-    
+    @commands.command()
+    @commands.check(check_dev)
+    async def getaudit(self, ctx, serverid=0, myLimit = 100):    
+        """Gets the audit logs for a server"""
+        try:
+            serverid = int(serverid)
+            myLimit = int(myLimit)
+        except:
+            await ctx.send("TypeError! Use valid args!")
+        server = self.bot.get_guild(serverid)
+        if server == None:
+            await ctx.send("Invalid server!")
+            return
+        
+        await ctx.send("Getting data...")
+        auditData = ""
+        async for entry in server.audit_logs():
+            for thing in iter(entry.before):
+                prettyBefore = str(thing) + " | "
+            prettyBefore = prettyBefore[:len(prettyBefore)-3]
+            for thing in iter(entry.after):
+                prettyAfter = str(thing) + " | "
+            prettyAfter = prettyAfter[:len(prettyAfter)-3]
+            prettyEntry = "User: " + str(entry.user) + " | Target: " +  str(entry.target) + " | Creation Date: " + str(entry.created_at) + " | Action: " + str(entry.action) + " | Before: " + str(prettyBefore) + " | After: " + str(prettyAfter)
+            
+            auditData = auditData + str(prettyEntry) + "\n"
+            
+        
+        values = {
+            'data': auditData,
+            'api_paste_private': 'true',
+            'api_paste_name': 'Message Data',
+            'language': 'python',
+        }
+        data = urllib.parse.urlencode(values)
+        data = data.encode('utf-8')
+        req = urllib.request.Request(self.pasteURL, data)
+        with urllib.request.urlopen(req) as response:
+            the_page = str(response.read())
+        myID = the_page[the_page.find('id') + 6:the_page.find('",\\n\\t\\t"h')]
+        myHash = the_page[the_page.find('hash') + 8:the_page.find('"\\n\\t}\\n}')]
+        await ctx.send((('https://paste.lemonmc.com/' + myID) + '/') + myHash + "/raw")
     
     
     
