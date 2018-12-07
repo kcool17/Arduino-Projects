@@ -84,7 +84,9 @@ class Misc():
     @commands.cooldown(1, 1, commands.BucketType.user)
     async def choose(self, ctx, *choices: str):
         '''Chooses a random argument you give.'''
-        await ctx.send(random.choice(choices))
+        newChoice = random.choice(choices)
+        choiceEmbed = discord.Embed(title=str(ctx.author) + "'s Choices", description = newChoice, color=0x00FF00)
+        await ctx.send(embed=choiceEmbed)
 
     @commands.command()
     @commands.cooldown(1, 1, commands.BucketType.user)
@@ -100,7 +102,7 @@ class Misc():
     @commands.cooldown(1, 1, commands.BucketType.user)
     async def mentionuser(self, ctx, *user: str):
         '''Mentions the user based on input'''
-         #USE THIS IN OTHER FUNCTIONS
+        #USE THIS IN OTHER FUNCTIONS
         arg = ''
         for item in user:
             arg = (arg + item) + ' '
