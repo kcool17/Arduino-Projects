@@ -5,6 +5,7 @@ public class MainRunner {
 		System.out.println("Students are late, again.");
 		System.out.println("Join VC, nerd.");
 		System.out.println("In Discord.");
+		
 	}
 
 }
