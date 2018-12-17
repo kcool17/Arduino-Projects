@@ -386,6 +386,7 @@ class Music:
     @commands.command(aliases=['restart', 'fixq'])
     @commands.cooldown(1, 1, commands.BucketType.user)
     async def replay(self, ctx):
+        """Resets the current queue to what the queue was before the bot last left a voice channel."""
         vc = ctx.voice_client
 
         if not vc:
@@ -423,7 +424,7 @@ class Music:
     @commands.command(name='play', aliases=['p'])
     @commands.cooldown(1, 1, commands.BucketType.user)
     async def play_(self, ctx, *, search: str):
-        """Request a song and add it to the queue.
+        """Request a song and adds it to the queue. If you do a playlist with this command, it will only do the first song in the playlist. Use ?playlist to play a playlist.
         This command attempts to join a valid voice channel if the bot is not already in one.
         Uses YTDL to automatically search and retrieve a song.
         Parameters
@@ -497,6 +498,56 @@ class Music:
         else:
             await ctx.send("Join the voice channel!")
     
+    @commands.command(aliases=['plist'])
+    @commands.cooldown(1, 1, commands.BucketType.user)
+    async def playlist(self, ctx, *, search : str):
+        """Plays a link to a YouTube playlist."""
+        
+
+        vc = ctx.voice_client
+
+        if not vc:
+            await ctx.invoke(self.connect_)
+        vc = ctx.voice_client
+        if ctx.author in vc.channel.members or ctx.author.id in DEVS:
+            player = self.get_player(ctx)
+            await ctx.send("Getting playlist (note: this may take a little bit).")
+            await ctx.trigger_typing()
+            loop = self.bot.loop or asyncio.get_event_loop()
+            data = None
+            to_run = partial(ytdl.extract_info, url=search, download=False)
+            data = await loop.run_in_executor(None, to_run)
+
+            
+            if data == None:
+                await ctx.send("There was an error finding your playlist. Please try a different one.")
+                
+            if 'entries' not in data:
+                await ctx.send("Not a playlist! Please use the link to a playlist here!")
+                return
+            
+            if len(data['entries']) > 20:
+                await ctx.send("Playlist too long! I will only play the first 20 songs in the playlist!")
+                data['entries'] = data['entries'][:20]
+            
+            for song in data['entries']:
+                try:
+                    source = await YTDLSource.create_source(ctx, song['webpage_url'], loop=self.bot.loop, download=False)
+                except:
+                    await ctx.send("Sorry, an error occurred with one of the songs in this playlist.")
+                player.queue.append(source)
+                if player.queue!=[]:
+                    newQueue = []
+                    for item in player.queue:
+                        newQueue.append(item["webpage_url"])
+                    newQueue.append(player.currentURL)
+                    pickle.dump(newQueue, open('servers' + os.sep + str(ctx.guild.id) + os.sep + "queueBackup.p", "wb"))
+            
+            
+        
+        else:
+            await ctx.send("Join the voice channel!")
+        
     
     @commands.command(aliases=['s'])
     @commands.cooldown(1, 1, commands.BucketType.user)
@@ -657,7 +708,7 @@ class Music:
         if len(player.queue)<= (pageNum)*10 or pageNum < 1:
             pageNum = 0
             
-        upcoming = player.queue[(pageNum*10)+1:((pageNum+1)*10)+1]
+        upcoming = player.queue[(pageNum*10):((pageNum+1)*10)]
         x = vc.source
         totalLength = 0
         fmt = "**NOW PLAYING: "
@@ -668,8 +719,10 @@ class Music:
         fmt = fmt + "[" + x.title + '](' + x.web_url + ')** | Length: ' + prettyLength
         z = 1 + (pageNum*10)
         totalLength = 0
-        for x in upcoming:
+        for x in player.queue:
             totalLength = totalLength + x['duration']
+            
+        for x in upcoming:
             m, s = divmod(x['duration'], 60)
             h, m = divmod(m, 60)
             prettyLength = "%d:%02d:%02d" % (h, m, s)
@@ -678,7 +731,7 @@ class Music:
         m, s = divmod(totalLength, 60)
         h, m = divmod(m, 60)
         prettyTotalLength = "%d:%02d:%02d" % (h, m, s)
-        embed = discord.Embed(title='Upcoming - {upcoming_len} Songs | Total Length: '.format(upcoming_len=len(player.queue) - 1) + prettyTotalLength, description=fmt, color=0x0000FF)
+        embed = discord.Embed(title= '{upcoming_len} Songs | Queue Length: '.format(upcoming_len=len(player.queue) - 1) + prettyTotalLength, description=fmt, color=0x0000FF)
         toFoot = ""
         if player.loop:
             toFoot = toFoot + "Looping Current Song"
@@ -694,7 +747,7 @@ class Music:
         toFoot = toFoot + " | "
         toFoot = toFoot + "Skip Votes: " + str(len(player.skipVote)) + "/" + str(int((len(vc.channel.members)/2)))
         toFoot = toFoot + " | Page " + str(pageNum + 1) + "/" + str(math.ceil(len(player.queue)/10))
-        
+        embed.set_author(name=str(ctx.guild) + '\'s Queue', icon_url=ctx.guild.icon_url)
         embed.set_footer(text= toFoot)
         await ctx.send(embed=embed)
 
@@ -979,6 +1032,7 @@ class Music:
     @commands.command(aliases = ["get-djs"])
     @commands.cooldown(1, 1, commands.BucketType.user)   
     async def getdjs(self, ctx):
+        """Gets the server's list of DJs. Note: all Administrators are DJs by default; it's just not shown here."""
         DJS = pickle.load(open(((('servers' + os.sep) + str(ctx.guild.id)) + os.sep) + 'setDJS.p', 'rb'))
         djStr = ""
         for person in DJS:
@@ -992,6 +1046,7 @@ class Music:
     @commands.command(aliases = ["remove-dj"])
     @commands.cooldown(1, 1, commands.BucketType.user)
     async def removedj(self, ctx, user):
+        """Removes a DJ from the server's list of DJs."""
         ADMINS = pickle.load(open(((('servers' + os.sep) + str(ctx.guild.id)) + os.sep) + 'ADMINS.p', 'rb'))
         guild = ctx.guild.id
         member = ctx.author.id
@@ -1035,6 +1090,7 @@ class Music:
     @commands.command(aliases = ["add-dj"])
     @commands.cooldown(1, 1, commands.BucketType.user)
     async def adddj(self, ctx, user):
+        """Adds a DJ to the server's list of DJs."""
         ADMINS = pickle.load(open(((('servers' + os.sep) + str(ctx.guild.id)) + os.sep) + 'ADMINS.p', 'rb'))
         guild = ctx.guild.id
         member = ctx.author.id
