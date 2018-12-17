@@ -288,7 +288,26 @@ async def background_task(): #Runs every 1 second, constantly.
                         await trivChannel.send(str(member) + ' ran out of time for trivia! Oops.')
                     trivCool -= 1
                     pickle.dump(trivCool,open(((((('servers' + os.sep) + str(guild.id)) + os.sep) + str(member.id)) + os.sep) + 'trivCool.p','wb'))
+        
         #Music
+        
+        for guild in myGuilds:
+            try:
+                ADMINS = pickle.load(open(((('servers' + os.sep) + str(guild.id)) + os.sep) + 'ADMINS.p', 'rb'))
+            except:
+                ADMINS = []
+            try:
+                setDJS = pickle.load(open(((('servers' + os.sep) + str(guild.id)) + os.sep) + 'setDJS.p', 'rb'))
+            except:
+                setDJS = []
+            
+            pickle.dump(setDJS, open(((('servers' + os.sep) + str(guild.id)) + os.sep) + 'setDJS.p', 'wb'))
+            
+            for member in ADMINS:
+                if member not in setDJS:
+                    setDJS.append(member)
+                    
+            pickle.dump(setDJS, open(((('servers' + os.sep) + str(guild.id)) + os.sep) + 'DJS.p', 'wb'))
         
         
         #Moderation:

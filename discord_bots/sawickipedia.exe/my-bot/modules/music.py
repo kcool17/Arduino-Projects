@@ -6,6 +6,7 @@ import pickle
 import os
 import asyncio
 import itertools
+import math
 import sys
 import traceback
 import time
@@ -268,7 +269,38 @@ class Music:
     def __init__(self, bot):
         self.bot = bot
         self.players = {}
-
+    
+    def getUsers(self, ctx, arg='noArg'):
+        userList = []
+        userIDList = []
+        userNickList = []
+        for person in ctx.guild.members:  #Creates lists
+            userList.append(person)
+            userIDList.append(person.id)
+            try:
+                if len(person.display_name) > 0:
+                    userNickList.append(person.display_name)
+                else:
+                    userNickList.append(person)
+            except:
+                userNickList.append(person)
+        findList = []
+        findIDList = []
+        pos = 0
+        #Finds user
+        for thing in userList:
+            if str(thing).lower().startswith(arg.lower()):
+                findList.append(str(thing))
+                findIDList.append(userIDList[pos])  
+            pos += 1
+        pos = 0
+        for thing in userNickList:
+            if str(thing).lower().startswith(arg.lower()) and (str(userList[pos]) not in findList):
+                findList.append(str(userList[pos]))
+                findIDList.append(userIDList[pos])
+            pos += 1
+        return (findList, findIDList)
+    
     async def cleanup(self, guild):
         try:
             await guild.voice_client.disconnect()
@@ -313,7 +345,7 @@ class Music:
     @commands.command(name='connect', aliases=['join'])
     @commands.cooldown(1, 1, commands.BucketType.user)
     async def connect_(self, ctx, *, channel: discord.VoiceChannel=None):
-        """Connect to voice. DJ-Only, if already connected. (Note: DJ is someone with Manage Channels permissions)
+        """Connect to voice. DJ-Only, if already connected. 
         Parameters
         ------------
         channel: discord.VoiceChannel [Optional]
@@ -508,13 +540,13 @@ class Music:
     @commands.command(name='pause', aliases=["stop"])
     @commands.cooldown(1, 1, commands.BucketType.user)
     async def pause_(self, ctx):
-        """DJ-Only. Pause the currently playing song. (Note: DJ is someone with Manage Channels permissions)"""
+        """DJ-Only. Pause the currently playing song. """
         vc = ctx.voice_client
+        DJS = pickle.load(open(((('servers' + os.sep) + str(ctx.guild.id)) + os.sep) + 'DJS.p', 'rb'))
         if ctx.author in vc.channel.members or ctx.author.id in DEVS:
             guild = ctx.guild.id
             member = ctx.author.id
-            ADMINS = pickle.load(open(((('servers' + os.sep) + str(ctx.guild.id)) + os.sep) + 'ADMINS.p', 'rb'))
-            if ctx.author.guild_permissions.manage_channels or member in ADMINS:
+            if member in DJS:
                 if not vc or not vc.is_playing():
                     return await ctx.send('I am not currently playing anything!')
                 elif vc.is_paused():
@@ -531,13 +563,13 @@ class Music:
     @commands.command(name='resume')
     @commands.cooldown(1, 1, commands.BucketType.user)
     async def resume_(self, ctx):
-        """DJ-Only. Resume the currently paused song. (Note: DJ is someone with Manage Channels permissions)"""
+        """DJ-Only. Resume the currently paused song. """
         vc = ctx.voice_client
+        DJS = pickle.load(open(((('servers' + os.sep) + str(ctx.guild.id)) + os.sep) + 'DJS.p', 'rb'))
         if ctx.author in vc.channel.members or ctx.author.id in DEVS:
             guild = ctx.guild.id
             member = ctx.author.id
-            ADMINS = pickle.load(open(((('servers' + os.sep) + str(ctx.guild.id)) + os.sep) + 'ADMINS.p', 'rb'))
-            if ctx.author.guild_permissions.manage_channels or member in ADMINS:
+            if member in DJS:
                 if not vc or not vc.is_connected():
                     return await ctx.send('I am not currently playing anything!')
                 elif not vc.is_paused():
@@ -565,11 +597,11 @@ class Music:
     async def skip_(self, ctx):
         """Skip the song."""
         vc = ctx.voice_client
+        DJS = pickle.load(open(((('servers' + os.sep) + str(ctx.guild.id)) + os.sep) + 'DJS.p', 'rb'))
         if ctx.author in vc.channel.members or ctx.author.id in DEVS:
             player = self.get_player(ctx)
             guild = ctx.guild.id
             member = ctx.author.id
-            ADMINS = pickle.load(open(((('servers' + os.sep) + str(ctx.guild.id)) + os.sep) + 'ADMINS.p', 'rb'))
             if not vc or not vc.is_connected():
                 return await ctx.send('I am not currently playing anything!')
             vcMembers = vc.channel.members
@@ -580,7 +612,7 @@ class Music:
             for person in player.skipVote:
                 if person not in vcMembers:
                     player.skipVote.remove(person)
-            if ctx.author.guild_permissions.manage_channels or member in ADMINS:
+            if member in DJS:
                 vc.stop()
                 player = self.get_player(ctx)
                 player.skipLoop = True
@@ -599,7 +631,7 @@ class Music:
             
     @commands.command(name='queue', aliases=['q'])
     @commands.cooldown(1, 1, commands.BucketType.user)
-    async def queue_info(self, ctx):
+    async def queue_info(self, ctx, pageNum = "1"):
         """Retrieve a basic queue of upcoming songs."""
         vc = ctx.voice_client
 
@@ -616,8 +648,16 @@ class Music:
             if thing == None:
                 print("Hey, you wanted to see this error. Well, a None just appeared in a queue. Hopefully it's fixed! #2, of course.")
                 player.queue.remove(thing)
-                
-        upcoming = player.queue
+        
+        try:
+            pageNum = int(pageNum) - 1
+        except:
+            pageNum = 0
+                   
+        if len(player.queue)<= (pageNum)*10 or pageNum < 1:
+            pageNum = 0
+            
+        upcoming = player.queue[(pageNum*10)+1:((pageNum+1)*10)+1]
         x = vc.source
         totalLength = 0
         fmt = "**NOW PLAYING: "
@@ -626,7 +666,7 @@ class Music:
         h, m = divmod(m, 60)
         prettyLength = "%d:%02d:%02d" % (h, m, s)
         fmt = fmt + "[" + x.title + '](' + x.web_url + ')** | Length: ' + prettyLength
-        z = 1
+        z = 1 + (pageNum*10)
         totalLength = 0
         for x in upcoming:
             totalLength = totalLength + x['duration']
@@ -638,7 +678,7 @@ class Music:
         m, s = divmod(totalLength, 60)
         h, m = divmod(m, 60)
         prettyTotalLength = "%d:%02d:%02d" % (h, m, s)
-        embed = discord.Embed(title='Upcoming - Next {upcoming_len} | Total Length: '.format(upcoming_len=len(upcoming)) + prettyTotalLength, description=fmt, color=0x0000FF)
+        embed = discord.Embed(title='Upcoming - {upcoming_len} Songs | Total Length: '.format(upcoming_len=len(player.queue) - 1) + prettyTotalLength, description=fmt, color=0x0000FF)
         toFoot = ""
         if player.loop:
             toFoot = toFoot + "Looping Current Song"
@@ -653,6 +693,7 @@ class Music:
             toFoot = toFoot + "Playing"
         toFoot = toFoot + " | "
         toFoot = toFoot + "Skip Votes: " + str(len(player.skipVote)) + "/" + str(int((len(vc.channel.members)/2)))
+        toFoot = toFoot + " | Page " + str(pageNum + 1) + "/" + str(math.ceil(len(player.queue)/10))
         
         embed.set_footer(text= toFoot)
         await ctx.send(embed=embed)
@@ -706,18 +747,18 @@ class Music:
     @commands.command(name='volume', aliases=['vol'])
     @commands.cooldown(1, 1, commands.BucketType.user)
     async def change_volume(self, ctx, *, vol: float):
-        """DJ-only. Change the player volume. (Note: DJ is someone with Manage Channels permissions)
+        """DJ-only. Change the player volume. 
         Parameters
         ------------
         volume: float or int [Required]
             The volume to set the player to in percentage. This must be between 1 and 100.
         """
         vc = ctx.voice_client
+        DJS = pickle.load(open(((('servers' + os.sep) + str(ctx.guild.id)) + os.sep) + 'DJS.p', 'rb'))
         if ctx.author in vc.channel.members or ctx.author.id in DEVS:
             guild = ctx.guild.id
             member = ctx.author.id
-            ADMINS = pickle.load(open(((('servers' + os.sep) + str(ctx.guild.id)) + os.sep) + 'ADMINS.p', 'rb'))
-            if ctx.author.guild_permissions.manage_channels or member in ADMINS:
+            if member in DJS:
                 if not vc or not vc.is_connected():
                     return await ctx.send('I am not currently connected to voice!')
 
@@ -739,16 +780,16 @@ class Music:
     @commands.command(name='leave', aliases=["disconnect"])
     @commands.cooldown(1, 1, commands.BucketType.user)
     async def stop_(self, ctx):
-        """DJ-Only. Stop the currently playing song and destroy the player. (Note: DJ is someone with Manage Channels permissions)
+        """DJ-Only. Stop the currently playing song and destroy the player. 
         !Warning!
             This will destroy the player assigned to your guild, also deleting any queued songs and settings.
         """
         vc = ctx.voice_client
+        DJS = pickle.load(open(((('servers' + os.sep) + str(ctx.guild.id)) + os.sep) + 'DJS.p', 'rb'))
         if ctx.author in vc.channel.members or ctx.author.id in DEVS:
             guild = ctx.guild.id
             member = ctx.author.id
-            ADMINS = pickle.load(open(((('servers' + os.sep) + str(ctx.guild.id)) + os.sep) + 'ADMINS.p', 'rb'))
-            if ctx.author.guild_permissions.manage_channels or member in ADMINS:
+            if member in DJS:
                 if not vc or not vc.is_connected():
                     return await ctx.send('I am not currently playing anything!')
 
@@ -800,13 +841,13 @@ class Music:
     @commands.command()
     @commands.cooldown(1, 1, commands.BucketType.user)
     async def clear(self, ctx):
-        """DJ-Only. Clears the Queue. (Note: DJ is someone with Manage Channels permissions)"""
+        """DJ-Only. Clears the Queue. """
         vc = ctx.voice_client
+        DJS = pickle.load(open(((('servers' + os.sep) + str(ctx.guild.id)) + os.sep) + 'DJS.p', 'rb'))
         if ctx.author in vc.channel.members or ctx.author.id in DEVS:
             guild = ctx.guild.id
             member = ctx.author.id
-            ADMINS = pickle.load(open(((('servers' + os.sep) + str(ctx.guild.id)) + os.sep) + 'ADMINS.p', 'rb'))
-            if ctx.author.guild_permissions.manage_channels or member in ADMINS:
+            if member in DJS:
                 player = self.get_player(ctx)
                 player.queue = []
                 await ctx.send("Queue cleared!")
@@ -820,11 +861,11 @@ class Music:
     async def jump(self, ctx, toJump = ""):
         """If queue is currently looped, it jumps to the song # you input. If it's not, only DJs (those with Manage Channels permissions) can jump immediately."""
         vc = ctx.voice_client
+        DJS = pickle.load(open(((('servers' + os.sep) + str(ctx.guild.id)) + os.sep) + 'DJS.p', 'rb'))
         if ctx.author in vc.channel.members or ctx.author.id in DEVS:
             player = self.get_player(ctx)
             guild = ctx.guild.id
             member = ctx.author.id
-            ADMINS = pickle.load(open(((('servers' + os.sep) + str(ctx.guild.id)) + os.sep) + 'ADMINS.p', 'rb'))
             if not vc or not vc.is_connected():
                 return await ctx.send('I am not currently playing anything!')
             if vc.is_paused():
@@ -841,7 +882,7 @@ class Music:
                 await ctx.send("Error! Please pick a valid song to jump to!")
                 return
             
-            if ctx.author.guild_permissions.manage_channels or member in ADMINS:
+            if member in DJS:
                 vc.stop()
                 player.jumpLoop = True
                 player.jumpTo = toJump
@@ -853,7 +894,7 @@ class Music:
                     player.jumpTo = toJump
                     await ctx.send('**`{author}`**: is jumping to song #{num}!!'.format(author=ctx.author, num=toJump))
                 else:
-                    await ctx.send("Sorry, you have to be a DJ to jump to a song in normal mode!")
+                    await ctx.send("Sorry, you have to be a DJ to jump to a song in normal mode! Try changing to loop queue mode to jump!")
             
         else:
             await ctx.send("Join the voice channel!")
@@ -862,13 +903,13 @@ class Music:
     @commands.command()
     @commands.cooldown(1, 1, commands.BucketType.user)
     async def remove(self, ctx, toRemove = ""):
-        """DJ-Only. Removes item from the Queue. (Note: DJ is someone with Manage Channels permissions)"""
+        """DJ-Only. Removes item from the Queue. """
         vc = ctx.voice_client
+        DJS = pickle.load(open(((('servers' + os.sep) + str(ctx.guild.id)) + os.sep) + 'DJS.p', 'rb'))
         if ctx.author in vc.channel.members or ctx.author.id in DEVS:
             guild = ctx.guild.id
             member = ctx.author.id
-            ADMINS = pickle.load(open(((('servers' + os.sep) + str(ctx.guild.id)) + os.sep) + 'ADMINS.p', 'rb'))
-            if ctx.author.guild_permissions.manage_channels or member in ADMINS:
+            if member in DJS:
                 player = self.get_player(ctx)
                 newQueue = player.queue
                 if toRemove.lower() == "all":
@@ -935,11 +976,105 @@ class Music:
         
         
         
+    @commands.command(aliases = ["get-djs"])
+    @commands.cooldown(1, 1, commands.BucketType.user)   
+    async def getdjs(self, ctx):
+        DJS = pickle.load(open(((('servers' + os.sep) + str(ctx.guild.id)) + os.sep) + 'setDJS.p', 'rb'))
+        djStr = ""
+        for person in DJS:
+            if ctx.guild.get_member(person) != None:
+                djStr = djStr + str(ctx.guild.get_member(person)) + "\n"
+        djEmbed = discord.Embed(title = str(ctx.guild) + "'s DJs:", description=djStr)
+        await ctx.send(embed=djEmbed)
         
+         
         
+    @commands.command(aliases = ["remove-dj"])
+    @commands.cooldown(1, 1, commands.BucketType.user)
+    async def removedj(self, ctx, user):
+        ADMINS = pickle.load(open(((('servers' + os.sep) + str(ctx.guild.id)) + os.sep) + 'ADMINS.p', 'rb'))
+        guild = ctx.guild.id
+        member = ctx.author.id
         
+        if member in ADMINS:
+            #Select user:
+            arg = user
+            try:
+                if arg[2] == '!':
+                    arg = int(arg[3:len(arg) - 1])
+                else:
+                    arg = int(arg[2:len(arg) - 1])
+            except:
+                arg = ''
+            theID = arg
+            if self.bot.get_guild(guild).get_member(arg) is None:
+                (findList, findIDList) = self.getUsers(ctx, user)
+                theID = ''
+                if len(findIDList) == 1:
+                    theID = findIDList[0]
+                else:
+                    await ctx.send('Multiple people found. Pick someone specific next time.') 
+                    userFindEmbed = discord.Embed(title='Users Found:', color=16742144)
+                    aNum = 0
+                    for human in findList:
+                        userFindEmbed.add_field(name=('#' + str(aNum + 1)) + ':', value=human, inline=True)
+                        aNum += 1
+                    await ctx.send(embed=userFindEmbed)
+                    return
+            
+            DJS = pickle.load(open(((('servers' + os.sep) + str(ctx.guild.id)) + os.sep) + 'setDJS.p', 'rb'))
+            if ctx.guild.get_member(theID) == None:
+                await ctx.send("Invalid user!")
+            elif theID not in DJS:
+                await ctx.send("User not a DJ!")
+            else:
+                DJS.remove(theID)
+                await ctx.send("Removed " + str(ctx.guild.get_member(theID)) + " from the DJ list!")
+                pickle.dump(DJS, open(((('servers' + os.sep) + str(ctx.guild.id)) + os.sep) + 'setDJS.p', 'wb'))
         
+    @commands.command(aliases = ["add-dj"])
+    @commands.cooldown(1, 1, commands.BucketType.user)
+    async def adddj(self, ctx, user):
+        ADMINS = pickle.load(open(((('servers' + os.sep) + str(ctx.guild.id)) + os.sep) + 'ADMINS.p', 'rb'))
+        guild = ctx.guild.id
+        member = ctx.author.id
         
+        if member in ADMINS:
+            #Select user:
+            arg = user
+            try:
+                if arg[2] == '!':
+                    arg = int(arg[3:len(arg) - 1])
+                else:
+                    arg = int(arg[2:len(arg) - 1])
+            except:
+                arg = ''
+            theID = arg
+            if self.bot.get_guild(guild).get_member(arg) is None:
+                (findList, findIDList) = self.getUsers(ctx, user)
+                theID = ''
+                if len(findIDList) == 1:
+                    theID = findIDList[0]
+                else:
+                    await ctx.send('Multiple people found. Pick someone specific next time.') 
+                    userFindEmbed = discord.Embed(title='Users Found:', color=16742144)
+                    aNum = 0
+                    for human in findList:
+                        userFindEmbed.add_field(name=('#' + str(aNum + 1)) + ':', value=human, inline=True)
+                        aNum += 1
+                    await ctx.send(embed=userFindEmbed)
+                    return
+            
+            DJS = pickle.load(open(((('servers' + os.sep) + str(ctx.guild.id)) + os.sep) + 'setDJS.p', 'rb'))
+            
+            if ctx.guild.get_member(theID) == None:
+                await ctx.send("Invalid User!")
+            elif theID in DJS:
+                await ctx.send("User already a DJ!")
+            else:
+                DJS.append(theID)
+                await ctx.send("Added " + str(ctx.guild.get_member(theID)) + " to the DJ list!")
+                pickle.dump(DJS, open(((('servers' + os.sep) + str(ctx.guild.id)) + os.sep) + 'setDJS.p', 'wb'))
         
         
         
