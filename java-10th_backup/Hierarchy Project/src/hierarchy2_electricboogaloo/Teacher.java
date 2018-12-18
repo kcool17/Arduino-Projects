@@ -3,7 +3,7 @@ package hierarchy2_electricboogaloo;
 public abstract class Teacher implements Comparable<Teacher>{
 	
 	//Static variables
-	public static int teachersInExistence = 0;
+	private static int teachersInExistence = 0;
 	
 	//Instance variables
 	private String name;
