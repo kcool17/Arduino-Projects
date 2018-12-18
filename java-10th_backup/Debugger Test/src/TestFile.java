@@ -2,6 +2,13 @@ public class TestFile {
 
     public static void main(String[] args)
     {
+    	TestClass1 test = new TestClass1(4);
+    	System.out.println(test.getConst());
+    	
+    	
+    	
+    	
+    	/*
         int row = 3;
         int col = 5;
         int x = 0; int y = 0;
@@ -24,6 +31,7 @@ public class TestFile {
         
         System.out.println("TWO MORE MATRIX");
         printMatrix(matrix);
+        */
     }    
     
     static public void printMatrix(int[][] matrix)
