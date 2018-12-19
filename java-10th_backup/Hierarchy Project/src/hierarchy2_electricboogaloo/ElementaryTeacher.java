@@ -26,7 +26,7 @@ public class ElementaryTeacher extends Teacher{
 	@Override
 	public boolean equals(Object obj2) {
 		if (!(obj2 instanceof ElementaryTeacher)) return false;
-		if (getGradeLevel() == ((Teacher)obj2).getGradeLevel()) return true;
+		if (super.equals(obj2) && getGradeLevel() == ((Teacher)obj2).getGradeLevel()) return true;
 		else return false;
 	}
 }

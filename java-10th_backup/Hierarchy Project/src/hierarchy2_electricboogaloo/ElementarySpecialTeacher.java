@@ -27,6 +27,13 @@ public class ElementarySpecialTeacher extends ElementaryTeacher{
 	}
 	
 	@Override
+	public boolean equals(Object obj2) {
+		if (!(obj2 instanceof ElementarySpecialTeacher)) return false;
+		if (super.equals(obj2) && dayOfTheWeek == ((ElementarySpecialTeacher)obj2).getDayOfTheWeek()) return true;
+		else return false;
+	}
+	
+	@Override
 	public String toString() {
 		String dayOfTheWeekStr;
 		switch(dayOfTheWeek) {

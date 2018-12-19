@@ -29,6 +29,14 @@ public abstract class HighSchoolTeacher extends Teacher{
 	
 	//Overrides
 	@Override
+	public boolean equals(Object obj2) {
+		if (!(obj2 instanceof HighSchoolTeacher)) return false;
+		if (super.equals(obj2) && subjectCategory == ((HighSchoolTeacher)obj2).getSubjectCategory()) return true;
+		else return false;
+		
+	}
+	
+	@Override
 	public String toString() {
 		return super.toString() + "\nSubject Category: " + subjectCategory + "\nAmount of HW (1-10 scale): " + amountHW;
 	}
