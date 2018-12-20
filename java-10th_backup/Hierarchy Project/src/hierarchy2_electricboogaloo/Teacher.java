@@ -65,7 +65,7 @@ public abstract class Teacher implements Comparable<Teacher>{
 	//compareTo (Compares the difficulty of the teachers).
 	public int compareTo(Teacher obj2) {
 		if (this.getDifficulty() < obj2.getDifficulty()) return -1;
-		else if (this.getDifficulty() < obj2.getDifficulty()) return 1;
+		else if (this.getDifficulty() > obj2.getDifficulty()) return 1;
 		else return 0;
 	}
 	

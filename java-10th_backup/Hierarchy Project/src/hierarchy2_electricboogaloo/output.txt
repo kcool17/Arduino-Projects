@@ -1,0 +1,97 @@
+Kyle Sawicki's Hierarchy Project #2
+AP CS Period 1 | Mrs. Rodriguez
+Client Class Examples
+Hey, don't actually grade this project. It's meant to be a joke. You should still look at it, though. Just make sure to finish the other projects first!
+
+----------------------------------------------Inherited methods-------------------------------------------------------
+Subject Category: Science
+Type of Science: AP Biology
+--------------------------------------------Constants---------------------------------------------------------
+Language used in AP CS: Java
+---------------------------------------------CompareTo--------------------------------------------------------
+AP Bio is harder than AP CS!
+
+---------------------------------------------Equals--------------------------------------------------------
+elementary1 and elementary2: false
+elementary1 and elementary3: false
+elementary1 and drRyan: false
+--------------------------------------------------toString---------------------------------------------------
+Name: Mrs. Rodriguez
+Grade: 11
+Period: 1
+Class Difficulty Level: 5
+Teacher's Difficulty Factor: 0
+Overall Difficulty: 16
+Subject Category: Computer Science
+Amount of HW (1-10 scale): 4
+Days until project is due: 0
+----------------------------------------------Aliases-------------------------------------------------------
+13
+12
+---------------------------------------------Static methods--------------------------------------------------------
+Number of teachers in existence: 5
+-------------------------------------------------Polymorphism, Object array, for each loop, casting objects.----------------------------------------------------
+Creating project... The teacher gave a project due in 10 days! Don't forget about it!
+
+Name: Mrs. Robertson
+Grade: 5
+Period: None/All
+Class Difficulty Level: 0
+Teacher's Difficulty Factor: -1
+Overall Difficulty: 4
+
+Name: Mrs. Auen
+Grade: 6
+Period: None/All
+Class Difficulty Level: 0
+Teacher's Difficulty Factor: 1
+Overall Difficulty: 7
+
+Name: Mrs. Yablonski
+Grade: 4
+Period: None/All
+Class Difficulty Level: 0
+Teacher's Difficulty Factor: 0
+Overall Difficulty: 4
+
+Name: Mr. Mumby
+Grade: 5
+Period: None/All
+Class Difficulty Level: 0
+Teacher's Difficulty Factor: 0
+Overall Difficulty: 5
+Day of the Week: Monday
+
+Name: Mrs. Rodriguez
+Grade: 11
+Period: 1
+Class Difficulty Level: 5
+Teacher's Difficulty Factor: 0
+Overall Difficulty: 16
+Subject Category: Computer Science
+Amount of HW (1-10 scale): 4
+Days until project is due: 10
+
+Name: Dr. Ryan
+Grade: 11
+Period: 4
+Class Difficulty Level: 5
+Teacher's Difficulty Factor: 3
+Overall Difficulty: 19
+Subject Category: Science
+Amount of HW (1-10 scale): 2
+Type of Science: AP Biology
+
+-----------------------------------------------------------------------------------------------------
+Ok, the whole reason I made this project is for this part. This is really the only important part here.
+12
+0
+3
+0
+2
+0
+4
+Hey! Turn in the project! It's due/late.
+0
+Anyway, I hope you enjoyed this project. Hopefully the rest of the grading has been/is going smoothly!
+-----------------------------------------------------------------------------------------------------
