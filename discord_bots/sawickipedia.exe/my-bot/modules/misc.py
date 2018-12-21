@@ -260,6 +260,29 @@ class Misc():
 
         await ctx.send(embed=myEmbed)
 
+    @commands.command(name = "convert-to-owo", aliases = ["OWO", "OwO", "converttoowo", "convert-to-OwO", "converttoOwO", "owo"])
+    @commands.cooldown(1, 1, commands.BucketType.user)
+    async def convertToOwo(self, ctx, *, toConvert : str):
+        """A disgusting command. I don't even know why this needs to exist."""
+        newStr = ''
+        for letter in toConvert:
+            if letter == 'a' or letter == 'A':
+                newStr = newStr + 'awa'
+            elif letter == 'e' or letter == 'E':
+                newStr = newStr + 'ewe'
+            elif letter == 'i' or letter == 'I':
+                newStr = newStr + 'iwi'
+            elif letter == 'o' or letter == 'O':
+                newStr = newStr + 'owo'
+            elif letter == 'u' or letter == 'U':
+                newStr = newStr + 'uwu'
+            else:
+                newStr = newStr + letter
+        embed = discord.Embed(title=str(ctx.author) + "'s Horrible Translation", description = newStr, color=0xDC143C)
+        await ctx.send(embed = embed)
+    
+    
+
         
 
 def setup(bot):
