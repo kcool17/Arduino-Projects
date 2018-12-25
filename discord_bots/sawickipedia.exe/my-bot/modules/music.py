@@ -139,7 +139,7 @@ class MusicPlayer:
         self.searchArr =[]
         self.didSkip = False
         
-        self.loopQueue = True
+        self.loopQueue = False
         self.jumpTo = 0
         self.jumpLoop = False
         
