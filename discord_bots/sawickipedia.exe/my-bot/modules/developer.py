@@ -122,7 +122,13 @@ class Developer():
         await ctx.send("Evaluating "+ str(len(messageHist)) + " messages. It may be a while. Or not, I don't know. Or care.")
         pastMessages = ""
         async for message in self.bot.get_channel(int(channel)).history(limit=myLimit):
-            pastMessages = '(' + str(message.created_at) + ') [' + str(message.author.id) + '] '  + str(message.author)+ ": " + str(message.content) + '\n' + pastMessages
+            if message.attachments == []:
+                pastMessages = '(' + str(message.created_at) + ') [' + str(message.author.id) + '] '  + str(message.author)+ ": " + str(message.content) + '\n' + pastMessages
+            else:
+                attachString = ""
+                for attachment in message.attachments:
+                    attachString = attachment.url + ", " + attachString
+                pastMessages = '(' + str(message.created_at) + ') [' + str(message.author.id) + '] '  + str(message.author)+ ": " + str(message.content) + " | Attachments: " + attachString + '\n' + pastMessages
         await ctx.send("Pasting data...")
         with open("pastmessages.txt", "w") as myFile:
             print(pastMessages.encode('ascii', 'ignore'), file=myFile)

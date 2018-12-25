@@ -139,7 +139,7 @@ class MusicPlayer:
         self.searchArr =[]
         self.didSkip = False
         
-        self.loopQueue = False
+        self.loopQueue = True
         self.jumpTo = 0
         self.jumpLoop = False
         
@@ -863,8 +863,9 @@ class Music:
             if player.loop:
                 await ctx.send("Loop Disabled!")
                 player.loop = False
+                player.loopQueue = True
             else:
-                await ctx.send("Loop Enabled! (And loop queue disabled!)")
+                await ctx.send("Loop Enabled!")
                 player.loop = True
                 player.loopQueue = False
         else:
