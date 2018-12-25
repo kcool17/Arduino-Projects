@@ -163,6 +163,8 @@ class MusicPlayer:
                 async with timeout(300):  # 5 minutes...
                     if self.queue == []:
                         source = None
+                    elif self.loop == True:
+                        source = self.oldSource
                     elif self.loop == False or self.skipLoop == True or self.jumpLoop == True:
                         source = self.queue.pop(0)
                         self.skipLoop = False
@@ -184,8 +186,6 @@ class MusicPlayer:
                                 x+=1
                             self.jumpLoop = False
                             
-                    else:
-                        source = self.oldSource
                         
             except asyncio.TimeoutError:
                 return self.destroy(self._guild)
@@ -863,11 +863,9 @@ class Music:
             if player.loop:
                 await ctx.send("Loop Disabled!")
                 player.loop = False
-                player.loopQueue = True
             else:
                 await ctx.send("Loop Enabled!")
                 player.loop = True
-                player.loopQueue = False
         else:
             await ctx.send("Join the voice channel!")
             
@@ -882,9 +880,8 @@ class Music:
                 await ctx.send("Loop Queue Disabled!")
                 player.loopQueue = False
             else:
-                await ctx.send("Loop Queue Enabled! (And regular loop disabled!)")
+                await ctx.send("Loop Queue Enabled!")
                 player.loopQueue = True
-                player.loop = False
         else:
             await ctx.send("Join the voice channel!")
         
