@@ -161,8 +161,10 @@ class MusicPlayer:
             try:
                 # Wait for the next song. If we timeout cancel the player and disconnect...
                 async with timeout(300):  # 5 minutes...
-                    if self.queue == []:
+                    if self.queue == [] and self.loopQueue == False:
                         source = None
+                    elif self.loopQueue == True and len(self.queue) == 0:
+                        source = self.oldSource
                     elif self.loop == False or self.skipLoop == True or self.jumpLoop == True:
                         source = self.queue.pop(0)
                         self.skipLoop = False
@@ -209,7 +211,11 @@ class MusicPlayer:
                                                                             '```css\n[{e}]\n```'.format(e=e))
                     continue
 
-            
+            for thing in self.queue:
+                if thing == None:
+                    print("Hey, you wanted to see this error. Well, a None just appeared in a queue. Hopefully it's fixed! #3, BTW.")
+                    self.queue.remove(thing)
+                    
             source.volume = self.volume
 
             
@@ -731,7 +737,7 @@ class Music:
         m, s = divmod(totalLength, 60)
         h, m = divmod(m, 60)
         prettyTotalLength = "%d:%02d:%02d" % (h, m, s)
-        embed = discord.Embed(title= '{upcoming_len} Songs | Queue Length: '.format(upcoming_len=len(player.queue) - 1) + prettyTotalLength, description=fmt, color=0x0000FF)
+        embed = discord.Embed(title= '{upcoming_len} Songs | Queue Length: '.format(upcoming_len=len(player.queue)) + prettyTotalLength, description=fmt, color=0x0000FF)
         toFoot = ""
         if player.loop:
             toFoot = toFoot + "Looping Current Song"
