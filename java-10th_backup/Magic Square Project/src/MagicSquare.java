@@ -4,33 +4,6 @@ public class MagicSquare {
 	//Instance Data
 	private int[][] magicSquare; //The magic square array
 	
-	/**
-	 * Default Constructor; makes a 3x3 magic square.
-	 */
-	public MagicSquare() {
-		magicSquare = new int[3][3];
-		int magicNum = 1;
-		int x = 0;
-		int y = 1;
-		while (magicNum <= 9) {
-			magicSquare[x][y] = magicNum;
-			magicNum++;
-			x--;
-			y++;
-			//Goes to the opposite side if needed.
-			if (x < 0) x += 3;
-			if (y > 2) y -= 3;
-			//If the next square is already filled in, move down one square instead.
-			if (magicSquare[x][y] != 0) {
-				x+=2;
-				y--;
-				if (y < 0) y += 3;
-				if (x > 2) x -= 3;
-			}
-			
-		}
-			
-	}
 	
 	/**
 	 * Constructor that takes a specific size for the magic square as input, and then constructs one based on that.
@@ -62,6 +35,14 @@ public class MagicSquare {
 		}
 			
 	}
+	
+	/**
+	 * Default Constructor; makes a 3x3 magic square.
+	 */
+	public MagicSquare() {
+		this(3);	
+	}
+	
 	
 	/**
 	 * Gets the size of the magic square.
