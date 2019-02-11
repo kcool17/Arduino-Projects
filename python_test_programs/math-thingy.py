@@ -13,10 +13,16 @@ def mathThingy2(x, y, n):
     for myPow in range(0, n):
         total = total + (pow(x, n) * pow(y, myPow))
     return total
-        
+
+def mathThingy3(n):
+    total = 0
+    for num in range(1, n + 1):
+        print(pow(num, 4))
+        total = total + pow(num, 4)
+    return total
+
+
 for x in range(1, 10):
     print("____________________________")
-    for y in range(1, 10):
-        print("- - - - - - - - - - - - - - -")
-        for n in range(1, 10):
-            print(mathThingy2(x, y, n))
+    print(mathThingy3(x))
+
