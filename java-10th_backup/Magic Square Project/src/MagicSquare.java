@@ -1,8 +1,12 @@
 
 public class MagicSquare {
 	
-	private int[][] magicSquare;
+	//Instance Data
+	private int[][] magicSquare; //The magic square array
 	
+	/**
+	 * Default Constructor; makes a 3x3 magic square.
+	 */
 	public MagicSquare() {
 		magicSquare = new int[3][3];
 		int magicNum = 1;
@@ -13,8 +17,10 @@ public class MagicSquare {
 			magicNum++;
 			x--;
 			y++;
+			//Goes to the opposite side if needed.
 			if (x < 0) x += 3;
 			if (y > 2) y -= 3;
+			//If the next square is already filled in, move down one square instead.
 			if (magicSquare[x][y] != 0) {
 				x+=2;
 				y--;
@@ -26,6 +32,10 @@ public class MagicSquare {
 			
 	}
 	
+	/**
+	 * Constructor that takes a specific size for the magic square as input, and then constructs one based on that.
+	 * @param size The size of the magic square
+	 */
 	public MagicSquare(int size) {
 		if (size < 3) size = 3;
 		if (size % 2 == 0) size++;
@@ -38,8 +48,10 @@ public class MagicSquare {
 			magicNum++;
 			x--;
 			y++;
+			//Goes to the opposite side if needed.
 			if (x < 0) x += size;
 			if (y > size - 1) y -= size;
+			//If the next square is already filled in, move down one square instead.
 			if (magicSquare[x][y] != 0) {
 				x+=2;
 				y--;
@@ -51,10 +63,18 @@ public class MagicSquare {
 			
 	}
 	
+	/**
+	 * Gets the size of the magic square.
+	 * @return The size of the magic square
+	 */
 	public int getSize() {
 		return magicSquare.length;
 	}
 	
+	/**
+	 * Gets the magic sum of the square. (The sum of a row/column/diagonal.
+	 * @return The magic sum of the square.
+	 */
 	public int getSum() {
 		int sum = 0;
 		for (int num : magicSquare[0]) {
@@ -63,6 +83,10 @@ public class MagicSquare {
 		return sum;
 	}
 	
+	/**
+	 * Checks if the magic square is valid, by making sure all of the diagonals, rows, and columns add up to the same number.
+	 * @return Whether the square is valid or not.
+	 */
 	public boolean validSquare() {
 		int currentSum;
 		
@@ -97,6 +121,10 @@ public class MagicSquare {
 		return true;
 	}
 	
+	/**
+	 * ToString method, returning a formatted magic square.
+	 */
+	@Override
 	public String toString() {
 		String myString = "";
 		for (int[] x : magicSquare) {
