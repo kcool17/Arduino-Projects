@@ -14,7 +14,7 @@ import os
 
 SCOPES = 'https://www.googleapis.com/auth/classroom.courses.readonly'
 
-class Data():
+class Data(commands.Cog)):
     def __init__(self, bot):
         self.bot = bot
 

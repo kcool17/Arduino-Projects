@@ -14,7 +14,7 @@ from server import DEVS
 import io
 import sys
 
-class Developer():
+class Developer(commands.Cog)):
     def __init__(self, bot):
         self.bot = bot
         self.pasteURL = 'https://paste.lemonmc.com/api/json/create'
