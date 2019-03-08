@@ -1,6 +1,6 @@
 import java.util.Arrays;
 
-public class SortRunner {
+public class SortTest {
 
 	public static int[] bubbleSort(int[] arr) {
 		boolean done = false;
@@ -49,47 +49,70 @@ public class SortRunner {
 	}
 	
 	public static int[] mergeSort(int[] arr) {
-		if(arr.length == 0) return arr;
-		mergeSort(Arrays.copyOfRange(arr, 0, (arr.length)/2));
-		mergeSort(Arrays.copyOfRange(arr, (arr.length)/2, arr.length));
+		mergeSortHelper(arr, 0, arr.length - 1);
+		return arr;
+	}
+	private static void mergeSortHelper(int[] arr, int start, int end) {
+		if (start < end) {
+			int middle = (start + end) / 2;
+			mergeSortHelper(arr, start, middle);
+			mergeSortHelper(arr, middle + 1, end);
+			merge(arr, start, middle, end);
+		}
 		
 	}
-	
-	public static int[] quickSort(int[] arr, int pivotIndex) {
-		if (arr.length <= 1) return arr;
-		int tempCount = 0;
-		for(int x = 1; x < arr.length; x++) {
-			if (arr[x] < arr[pivotIndex]) tempCount++;
-		}
-		int[] beforeArr = new int[tempCount];
-		int[] afterArr = new int[arr.length-1-tempCount];
-		int beforeCount = 0;
-		int afterCount = 0;
+	private static void merge(int[] arr, int start, int middle, int end) {
+		int[] temp = new int[end - start + 1];
+		int x = start;
+		int y = middle + 1;
 		
-		for(int x = 1; x< arr.length; x++) {
-			if (arr[x] < arr[pivotIndex]) {
-				beforeArr[beforeCount] = arr[x];
-				beforeCount++;
-			} else {
-				afterArr[afterCount] = arr[x];
-				afterCount++;
+		for (int z = 0; z < temp.length; z++) {
+			if (x <= middle && (y > end || arr[x] <= arr[y])) {
+				temp[z] = arr[x];
+				x++;
+			} else if (y <= end && (x > middle || arr[y] < arr[x])) {
+				temp[z] = arr[y];
+				y++;
 			}
 		}
 		
-		return combine(quickSort(beforeArr), arr[pivotIndex], quickSort(afterArr));
-	}
-	public static int[] combine(int[] beforeArr, int pivotIndex, int[] afterArr) {
-		int[] newArr = new int[beforeArr.length + 1 + afterArr.length];
-		for(int x = 0; x < newArr.length; x++) {
-			if (x < beforeArr.length) newArr[x] = beforeArr[x];
-			else if (x == beforeArr.length) newArr[x] = pivotIndex;
-			else newArr[x] = afterArr[x - (beforeArr.length + 1)];
+		int a = start;
+		for (int z = 0; z < temp.length; z++) {
+			arr[a] = temp[z];
+			a++;
 		}
-		return newArr;
 	}
+	
 	public static int[] quickSort(int[] arr) {
-		return quickSort(arr, 0);
+		quickSortHelper(arr, 0, arr.length - 1);
+		return arr;
 	}
+	private static void quickSortHelper(int[] arr, int start, int end) {
+		if (start < end) {
+			int middle = partition(arr, start, end);
+			quickSortHelper(arr, start, middle);
+			quickSortHelper(arr, middle + 1, end);
+		}
+	}
+	private static int partition(int[] arr, int start, int end) {
+		int pivot = arr[start];
+		int x = start - 1;
+		int y = end + 1;
+		int temp;
+		while(x < y) {
+			x++;
+			while (arr[x] < pivot) x++;
+			y--;
+			while (arr[y] > pivot) y--;
+			if (x < y) {
+				temp = arr[x];
+				arr[x] = arr[y];
+				arr[y] = temp;
+			}
+		}
+		return y;
+	}
+	
 	
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
@@ -114,16 +137,15 @@ public class SortRunner {
 		for(int x : insertionSort(insertArr)) System.out.print(x+ " ");
 		System.out.println();
 		
-		/*
 		System.out.println("Merge Sort");
 		int[] mergeArr = {10, 0, 5, 3, 7, 103, 3, 1};
 		for(int x : mergeArr) System.out.print(x + " ");
 		System.out.println();
 		for(int x : mergeSort(mergeArr)) System.out.print(x+ " ");
-		*/
+		System.out.println();
 		
 		System.out.println("Quick Sort");
-		int[] quickArr = {10, 0, 5, 3, 7, 103, 3, 1};
+		int[] quickArr = {10, 0, 5, 3, 7, 103, 3, 1, 10};
 		for(int x : quickArr) System.out.print(x + " ");
 		System.out.println();
 		for(int x : quickSort(quickArr)) System.out.print(x+ " ");

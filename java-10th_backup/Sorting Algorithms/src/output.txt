@@ -1,0 +1,92 @@
+----------------------------------------------------Sort Testing---------------------------------------------------------
+
+Bubble Sort
+-18 -12 -18 17 -12 -5 -13 15 3 13 2 15 2 -18 0 18 -7 -1 16 19 
+-18 -18 -18 -13 -12 -12 -7 -5 -1 0 2 2 3 13 15 15 16 17 18 19 
+Selection Sort
+-9 14 -10 13 -9 -6 18 20 -20 -10 -17 8 -6 0 -17 16 18 11 16 10 
+-20 -17 -17 -10 -10 -9 -9 -6 -6 0 8 10 11 13 14 16 16 18 18 20 
+Insertion Sort
+1 -10 14 1 3 -15 1 -3 -20 17 -13 4 -6 -8 12 13 20 16 7 -18 
+-20 -18 -15 -13 -10 -8 -6 -3 1 1 1 3 4 7 12 13 14 16 17 20 
+Merge Sort
+8 -15 3 -10 -1 9 -10 -19 20 0 6 9 -1 -5 9 -9 17 -7 9 5 
+-19 -15 -10 -10 -9 -7 -5 -1 -1 0 3 5 6 8 9 9 9 9 17 20 
+Quick Sort
+-19 9 20 9 -13 0 -1 -9 3 -12 8 -1 -15 -20 13 18 14 -11 19 -2 
+-20 -19 -13 -12 20 -15 -1 -11 -9 -2 -1 0 3 8 13 9 9 14 18 19 
+---------------------------------------------------Search Testing----------------------------------------------------------
+Linear Search for 3   (QuickSort array) result: 12
+Linear Search for -12 (QuickSort array) result: 3
+Linear Search for 21  (QuickSort array) result: -1
+Binary Search for 3   (QuickSort array) result: 12
+Binary Search for -12 (QuickSort array) result: 3
+Binary Search for 21  (QuickSort array) result: -1
+---------------------------------------------------Sort Timing----------------------------------------------------------
+   Size |            Sort |       Time ms
+   1000 |     Bubble Sort |          5 ms
+   1000 |  Selection Sort |          2 ms
+   1000 |  Insertion Sort |          4 ms
+   1000 |      Merge Sort |          0 ms
+   1000 |      Quick Sort |          0 ms
+   5000 |     Bubble Sort |         27 ms
+   5000 |  Selection Sort |          6 ms
+   5000 |  Insertion Sort |         12 ms
+   5000 |      Merge Sort |          0 ms
+   5000 |      Quick Sort |          0 ms
+  10000 |     Bubble Sort |        126 ms
+  10000 |  Selection Sort |         22 ms
+  10000 |  Insertion Sort |         35 ms
+  10000 |      Merge Sort |          1 ms
+  10000 |      Quick Sort |          1 ms
+  50000 |     Bubble Sort |       3763 ms
+  50000 |  Selection Sort |        556 ms
+  50000 |  Insertion Sort |        848 ms
+  50000 |      Merge Sort |          6 ms
+  50000 |      Quick Sort |          3 ms
+ 100000 |  Selection Sort |       2227 ms
+ 100000 |  Insertion Sort |       4841 ms
+ 100000 |      Merge Sort |         14 ms
+ 100000 |      Quick Sort |          7 ms
+ 500000 |  Selection Sort |      55439 ms
+ 500000 |  Insertion Sort |      89257 ms
+ 500000 |      Merge Sort |         76 ms
+ 500000 |      Quick Sort |         35 ms
+1000000 |      Merge Sort |        128 ms
+1000000 |      Quick Sort |         69 ms
+5000000 |      Merge Sort |        726 ms
+5000000 |      Quick Sort |        383 ms
+---------------------------------------------------Sort Timing (Special Cases)----------------------------------------------------------
+Type   |   Size |            Sort |       Time ms
+1-200K | 200000 |  Selection Sort |       8884 ms
+ 200000 |  Insertion Sort |      13910 ms
+ 200000 |      Merge Sort |         22 ms
+ 200000 |      Quick Sort |         13 ms
+Sorted | 200000 |  Selection Sort |       8866 ms
+ 200000 |  Insertion Sort |      10921 ms
+ 200000 |      Merge Sort |         10 ms
+ 200000 |      Quick Sort |          4 ms
+Reverse| 200000 |  Selection Sort |      15586 ms
+ 200000 |  Insertion Sort |      17022 ms
+ 200000 |      Merge Sort |         11 ms
+ 200000 |      Quick Sort |          6 ms
+1-20   | 200000 |  Selection Sort |       8960 ms
+ 200000 |  Insertion Sort |      14124 ms
+ 200000 |      Merge Sort |         23 ms
+ 200000 |      Quick Sort |         13 ms
+---------------------------------------------------Search Timing----------------------------------------------------------
+Unsorted |   Linear Search |         14 ms
+Unsorted |   Linear Search |          3 ms
+Unsorted |   Linear Search |         14 ms
+Unsorted |   Linear Search |         13 ms
+Unsorted |   Linear Search |         13 ms
+  Sorted |   Linear Search |          2 ms
+  Sorted |   Linear Search |          1 ms
+  Sorted |   Linear Search |          1 ms
+  Sorted |   Linear Search |          0 ms
+  Sorted |   Linear Search |          2 ms
+  Sorted |   Binary Search |          0 ms
+  Sorted |   Binary Search |          0 ms
+  Sorted |   Binary Search |          0 ms
+  Sorted |   Binary Search |          0 ms
+  Sorted |   Binary Search |          0 ms
