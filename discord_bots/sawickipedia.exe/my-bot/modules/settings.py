@@ -7,7 +7,7 @@ import os
 import pickle
 
 
-class Settings(commands.Cog)):
+class Settings(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 

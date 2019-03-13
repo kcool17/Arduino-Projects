@@ -9,7 +9,7 @@ import random
 import re
 import asyncio
 
-class Misc(commands.Cog)):
+class Misc(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
 
@@ -266,16 +266,26 @@ class Misc(commands.Cog)):
         """A disgusting command. I don't even know why this needs to exist."""
         newStr = ''
         for letter in toConvert:
-            if letter == 'a' or letter == 'A':
+            if letter == 'a':
                 newStr = newStr + 'awa'
-            elif letter == 'e' or letter == 'E':
+            elif letter == 'e':
                 newStr = newStr + 'ewe'
-            elif letter == 'i' or letter == 'I':
+            elif letter == 'i':
                 newStr = newStr + 'iwi'
-            elif letter == 'o' or letter == 'O':
+            elif letter == 'o':
                 newStr = newStr + 'owo'
-            elif letter == 'u' or letter == 'U':
+            elif letter == 'u':
                 newStr = newStr + 'uwu'
+            elif letter == 'A':
+                newStr = newStr + 'AWA'
+            elif letter == 'E':
+                newStr = newStr + 'EWE'
+            elif letter == 'I':
+                newStr = newStr + 'IWI'
+            elif letter == 'O':
+                newStr = newStr + 'OWO'
+            elif letter == 'U':
+                newStr = newStr + 'UWU'
             else:
                 newStr = newStr + letter
         embed = discord.Embed(title=str(ctx.author) + "'s Horrible Translation", description = newStr, color=0xDC143C)

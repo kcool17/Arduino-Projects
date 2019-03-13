@@ -13,8 +13,9 @@ import inspect
 from server import DEVS
 import io
 import sys
+import operator
 
-class Developer(commands.Cog)):
+class Developer(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.pasteURL = 'https://paste.lemonmc.com/api/json/create'
@@ -264,6 +265,7 @@ class Developer(commands.Cog)):
             myLimit = int(myLimit)
         except:
             await ctx.send("TypeError! Use valid args!")
+            return
         server = self.bot.get_guild(serverid)
         if server == None:
             await ctx.send("Invalid server!")
@@ -298,7 +300,59 @@ class Developer(commands.Cog)):
         myHash = the_page[the_page.find('hash') + 8:the_page.find('"\\n\\t}\\n}')]
         await ctx.send((('https://paste.lemonmc.com/' + myID) + '/') + myHash + "/raw")
     
-    
+    @commands.command()
+    @commands.check(check_dev)
+    async def getstats(self, ctx, serverid=0, *, ignorechannels : str):
+        if ignorechannels[0].lower() == "none":
+            ignorechannels = []
+        try:
+            serverid = int(serverid)
+        except:
+            await ctx.send("TypeError! Use valid args!")
+            return
+        server = self.bot.get_guild(serverid)
+        if server == None:
+            await ctx.send("Invalid server!")
+            return
+        
+        totalMessages = 0
+        userMessageDict = {}
+        channelMessageDict = {}
+        await ctx.send("Getting data...")
+        for channel in server.channels:
+            if isinstance(channel, discord.TextChannel):
+                if str(channel.id) in ignorechannels:
+                    pass
+                else:
+                    channelMessageDict[channel.name] = 0
+                    async for message in channel.history(limit=None):
+                        totalMessages += 1
+                        channelMessageDict[channel.name] += 1
+                        try:
+                            userMessageDict[message.author] += 1
+                        except:
+                            userMessageDict[message.author] = 0
+        
+        channelStr = "```\nCHANNELS:\n"
+        memberStr = "```\nUSERS:\n"
+        userMessageDictSorted = sorted(userMessageDict.items(), key=lambda kv: kv[1], reverse=True)
+        channelMessageDictSorted = sorted(channelMessageDict.items(), key=lambda kv: kv[1], reverse=True)
+        x = 1
+        
+        await ctx.send("```\nTotal Messages: " + str(totalMessages) + "\n```")
+        for key, value in channelMessageDictSorted:
+            channelStr = channelStr + str(x) + ") #" + str(key) + "'s Messages: " + str(value) + "\n"
+            x+=1
+        x = 1
+        for key, value in userMessageDictSorted:
+            memberStr = memberStr + str(x) + ") " + str(key) + "'s Messages: " + str(value) + "\n"
+            x+=1
+            
+        await ctx.send(channelStr + "```")
+        await ctx.send(memberStr + "```")
+        await ctx.send("Done!")
+                    
+                    
     
     
             

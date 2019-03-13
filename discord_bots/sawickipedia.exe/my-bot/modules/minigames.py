@@ -12,7 +12,7 @@ import ast
 import urllib.request
 
 
-class Minigames(commands.Cog)):
+class Minigames(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
         self.trivURL = 'https://opentdb.com/api.php?amount=1'
