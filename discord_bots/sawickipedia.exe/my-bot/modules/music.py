@@ -532,10 +532,14 @@ class Music(commands.Cog):
                 await ctx.send("Not a playlist! Please use the link to a playlist here!")
                 return
             
-            if len(data['entries']) > 20:
+            if len(data['entries']) > 20 and ctx.author.id not in DEVS:
                 await ctx.send("Playlist too long! I will only play the first 20 songs in the playlist!")
                 data['entries'] = data['entries'][:20]
-            
+                
+            elif len(data['entries']) > 50 and ctx.author.id in DEVS:
+                await ctx.send("Playlist too long! I will only play the first 50 songs in the playlist!")
+                data['entries'] = data['entries'][:50]
+                
             for song in data['entries']:
                 try:
                     source = await YTDLSource.create_source(ctx, song['webpage_url'], loop=self.bot.loop, download=False)
