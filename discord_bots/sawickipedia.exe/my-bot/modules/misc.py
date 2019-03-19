@@ -195,8 +195,10 @@ class Misc(commands.Cog):
     @commands.cooldown(1, 1, commands.BucketType.user)
     async def help(self, ctx, *commands : str):
         """Shows this message."""
+        await ctx.send("Sorry, the `help` command is disabled for the time being! You'll have to wait for an update for that. In the meantime, check my GitHub if you *really* have to know a command name. Or just ask me, and I'll check GitHub.") 
+        """
         bot = self.bot
-        destination = ctx.message.author if bot.pm_help else ctx.message.channel
+        destination = ctx.message.author if bot.dm_help else ctx.message.channel
         pageNum = 1
         if len(commands) == 1:
             try:
@@ -248,7 +250,7 @@ class Misc(commands.Cog):
 
             pages = await bot.formatter.format_help_for(ctx, command)
 
-        if bot.pm_help is None:
+        if bot.dm_help is None:
             characters = sum(map(len, pages))
             # modify destination based on length of pages.
             if characters > 1000:
@@ -259,6 +261,7 @@ class Misc(commands.Cog):
         myEmbed.set_footer(text="Page " + str(pageNum+1) + "/" + str(len(pages)))
 
         await ctx.send(embed=myEmbed)
+        """
 
     @commands.command(name = "convert-to-owo", aliases = ["OWO", "OwO", "converttoowo", "convert-to-OwO", "converttoOwO", "owo"])
     @commands.cooldown(1, 1, commands.BucketType.user)

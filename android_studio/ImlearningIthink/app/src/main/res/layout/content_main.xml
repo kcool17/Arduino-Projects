@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    app:layout_behavior="@string/appbar_scrolling_view_behavior"
+    tools:context=".MainActivity"
+    tools:showIn="@layout/activity_main">
+
+    <TableLayout
+        android:id="@+id/tableLayout"
+        android:layout_width="395dp"
+        android:layout_height="370dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginLeft="8dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginRight="8dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent">
+
+        <TableRow
+            android:id="@+id/main_row"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center">
+
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="150dp"
+                android:layout_height="144dp"
+                android:layout_marginEnd="40dp"
+                android:layout_marginRight="40dp"
+                android:text="@string/mainText"
+                android:textColor="@android:color/black"
+                android:typeface="normal"
+                android:visibility="visible"
+                app:fontFamily="sans-serif-medium"
+                tools:layout_editor_absoluteX="245dp"
+                tools:layout_editor_absoluteY="236dp" />
+
+            <ImageView
+                android:id="@+id/mainPic"
+                android:layout_width="145dp"
+                android:layout_height="145dp"
+                android:background="@android:color/transparent"
+                android:contentDescription="@string/mainPic_description"
+                android:visibility="visible"
+                app:srcCompat="@drawable/d_e_s_k"
+                tools:layout_editor_absoluteX="16dp"
+                tools:layout_editor_absoluteY="250dp" />
+        </TableRow>
+
+        <TableRow
+            android:id="@+id/student_row"
+            style="?android:attr/buttonBarButtonStyle"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/student1"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:onClick="onStudentClick"
+                android:text="@string/student1"
+                android:textColor="@android:color/black"
+                android:textStyle="bold"
+                android:typeface="serif"
+                android:visibility="visible" />
+
+            <Button
+                android:id="@+id/student2"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:onClick="onStudentClick"
+                android:text="@string/student2"
+                android:textColor="@android:color/black"
+                android:textStyle="bold"
+                android:typeface="serif"
+                android:visibility="visible" />
+
+            <Button
+                android:id="@+id/student3"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:onClick="onStudentClick"
+                android:text="@string/student3"
+                android:textColor="@android:color/black"
+                android:textStyle="bold"
+                android:typeface="serif"
+                android:visibility="visible" />
+
+            <Button
+                android:id="@+id/student4"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:onClick="onStudentClick"
+                android:text="@string/student4"
+                android:textColor="@android:color/black"
+                android:textStyle="bold"
+                android:typeface="serif"
+                android:visibility="visible" />
+
+            <Button
+                android:id="@+id/student5"
+                style="?android:attr/buttonBarButtonStyle"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:onClick="onStudentClick"
+                android:text="@string/student5"
+                android:textColor="@android:color/black"
+                android:textStyle="bold"
+                android:typeface="serif"
+                android:visibility="visible" />
+
+        </TableRow>
+    </TableLayout>
+
+</android.support.constraint.ConstraintLayout>

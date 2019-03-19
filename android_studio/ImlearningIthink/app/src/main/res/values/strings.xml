@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">I\'m learning I think</string>
+    <string name="action_settings">Settings</string>
+    <string name="mainPic_description">Whatever I need it to be.</string>
+    <string name="mainText">Imagine remaking an ECS 2 project in something better than glorified Scratch. \n \n Imagine.</string>
+    <string name="student1">Student 1</string>
+    <string name="student2">Student 2</string>
+    <string name="student3">Student 3</string>
+    <string name="student4">Student 4</string>
+    <string name="student5">Student 5</string>
+</resources>

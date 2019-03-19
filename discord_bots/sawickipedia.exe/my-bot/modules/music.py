@@ -255,6 +255,7 @@ class MusicPlayer:
                 pickle.dump(newQueue, open('servers' + os.sep + str(self._guild.id) + os.sep + "queueBackup.p", "wb"))
             await self.next.wait()
             
+            
             # Make sure the FFmpeg process is cleaned up.
             source.cleanup()
             self.current = None

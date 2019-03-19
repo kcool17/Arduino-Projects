@@ -348,8 +348,25 @@ class Developer(commands.Cog):
             memberStr = memberStr + str(x) + ") " + str(key) + "'s Messages: " + str(value) + "\n"
             x+=1
             
-        await ctx.send(channelStr + "```")
-        await ctx.send(memberStr + "```")
+        if len(channelStr) < 1800:
+            await ctx.send(channelStr[:1500] + "```")
+        else:
+            await ctx.send(channelStr[:1500] + "```")
+            for x in range (0, len(channelStr) // 1500):
+                if (len(channelStr) < (2+x) * 1500):
+                    await ctx.send("```\n" + channelStr[1500 * (1+x): 1500 * (2+x)] + "```")
+                else:
+                    await ctx.send("```\n" + channelStr[1500 * (1+x):] + "```")
+                    
+        if len(memberStr) < 1800:
+            await ctx.send(memberStr[:1500] + "```")
+        else:
+            await ctx.send(memberStr[:1500] + "```")
+            for x in range (0, len(memberStr) // 1500):
+                if (len(memberStr) < (2+x) * 1500):
+                    await ctx.send("```\n" + memberStr[1500 * (1+x): 1500 * (2+x)] + "```")
+                else:
+                    await ctx.send("```\n" + memberStr[1500 * (1+x):] + "```")
         await ctx.send("Done!")
                     
                     
