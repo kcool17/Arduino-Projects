@@ -1,4 +1,4 @@
-from __future__ import print_function
+#from __future__ import print_function
 from PIL import Image
 import sys
 
@@ -40,16 +40,20 @@ def returnRGB(image_path, frame_delay): #Frame delay in ms
     image = Image.composite(image, Image.new('RGB', image.size, 'white'), image)
     z = 0
     for x in range(width):
+        newStr = ""
         for y in range(height):
-            z = matrixWireAdjust(x, y)
-            print("strip.setPixelColor("+ str(z) +", Color"+str(image.getpixel((x, y)))+")")
+            #z = matrixWireAdjust(x, y)
+            newStr += "matrix.Color"+str(image.getpixel((x, y)))+", "
             
+        print(newStr)
+     
+    """       
     print("time.sleep("+str(frame_delay/1000.0)+")")
     print("strip.show()")
     print("if mode_change == True:")
     print("    mode_change = False")
     print("    return 0")
-    
+    """
     
 
     
@@ -59,4 +63,4 @@ def processGif(image_path, frame_delay):
     for x in range(0, frameNum):
         returnRGB('process\image'+str(x)+'.png' ,frame_delay)
 
-processGif('image.gif', 100)
+returnRGB('image.png', 100)
