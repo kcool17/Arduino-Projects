@@ -8,7 +8,15 @@ public class DeckTester {
 	 *	@param args is not used.
 	 */
 	public static void main(String[] args) {
-		
-		Deck deck1 = new Deck({"King", "Queen", "Jack"} ,{"Diamond", "Spade"} , {1, 3, 6});
+		String[] cardNames = {"King", "Queen", "Jack"};
+		String[] suits = {"Diamond", "Spade"};
+		int[] cardValues = {1, 3, 6};
+		Deck deck1 = new Deck(cardNames , suits, cardValues);
+		System.out.println(deck1);
+		deck1.deal();
+		System.out.println(deck1);
+		deck1.shuffle();
+		System.out.println(deck1);
+		deck1.deal();
 	}
 }

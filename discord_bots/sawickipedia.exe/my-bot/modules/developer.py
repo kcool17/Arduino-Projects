@@ -52,7 +52,7 @@ class Developer(commands.Cog):
                             newStr = newStr.replace(":" + item + ":", "<:" + emote.name + ":" + str(emote.id) + ">")
                             emojiFound = True
                     
-            human = await self.bot.get_user_info(guildid)
+            human = await self.bot.fetch_user(guildid)
             await human.send(newStr)
             success = True
             await ctx.send('Success!')
