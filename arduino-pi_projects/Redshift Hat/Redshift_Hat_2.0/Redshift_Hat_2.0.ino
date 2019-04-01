@@ -185,10 +185,12 @@ void loop() {
   for(int x = 0; x < 32*16; x++){
     scrollLogo();
   }
+  /*
   snekColor(matrix.Color(255, 0, 0));
   for(int x = 0; x < 128; x++){
     mainCrossFade();
   }
   snekColor(matrix.Color(0, 0, 0));
   mainSnek();
+  */
 }
