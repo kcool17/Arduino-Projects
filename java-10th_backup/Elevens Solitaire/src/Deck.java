@@ -79,7 +79,7 @@ public class Deck {
 	public Card deal() {
 		if (size > 0) {
 			size--;
-			return cards.get(size - 1);
+			return cards.get(size);
 		}
 		return null;
 			
