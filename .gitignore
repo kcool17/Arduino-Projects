@@ -1,4 +1,5 @@
-discord_bots/sawickipedia.exe/my-bot/token.p
-discord_bots/sawickipedia.exe/my-bot/servers/
-discord_bots/sawickipedia.exe/my-bot/modules/data_files/
+discord_bots/sawickipedia.exe/bot-1.0/token.p
+discord_bots/sawickipedia.exe/bot-1.0/servers/
+discord_bots/sawickipedia.exe/bot-1.0/modules/data_files/
 *.pyc
+discord_bots/sawickipedia.exe/bot-2.0/serverdata/

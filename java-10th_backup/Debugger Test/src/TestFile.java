@@ -2,7 +2,12 @@ public class TestFile {
 
     public static void main(String[] args)
     {
-    	mystery(321);
+    	String data = "142";
+    	String[] process = data.split(",");
+    	String nullTest = null;
+    	
+    	double test = Double.parseDouble(process[0]);
+    	System.out.print(test);
     }    
     
     public static void mystery(int x) {
