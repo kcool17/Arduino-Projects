@@ -8,6 +8,9 @@ import os
 import random
 import re
 import asyncio
+import json
+import math
+from prettytable import PrettyTable
 
 class Misc(commands.Cog):
     def __init__(self, bot):
@@ -44,6 +47,32 @@ class Misc(commands.Cog):
                 findIDList.append(userIDList[pos])
             pos += 1
         return (findList, findIDList)
+    
+    def find_sigfigs(self, x):
+        '''Returns the number of significant digits in a number. This takes into account
+           strings formatted in 1.23e+3 format and even strings such as 123.450'''
+        # change all the 'E' to 'e'
+        x = x.lower()
+        if ('e' in x):
+            # return the length of the numbers before the 'e'
+            myStr = x.split('e')
+            return len( myStr[0] ) - 1 # to compenstate for the decimal point
+        else:
+            # put it in e format and return the result of that
+            ### NOTE: because of the 8 below, it may do crazy things when it parses 9 sigfigs
+            n = ('%.*e' %(8, float(x))).split('e')
+            # remove and count the number of removed user added zeroes. (these are sig figs)
+            if '.' in x:
+                s = x.replace('.', '')
+                #number of zeroes to add back in
+                l = len(s) - len(s.rstrip('0'))
+                #strip off the python added zeroes and add back in the ones the user added
+                n[0] = n[0].rstrip('0') + ''.join(['0' for num in range(l)])
+            else:
+                #the user had no trailing zeroes so just strip them all
+                n[0] = n[0].rstrip('0')
+            #pass it back to the beginning to be parsed
+        return self.find_sigfigs('e'.join(n))
 
     @commands.command(description='Add two numbers together. Change "num1" and "num2" to the numbers you wish to add together.')
     @commands.cooldown(1, 1, commands.BucketType.user)
@@ -295,8 +324,351 @@ class Misc(commands.Cog):
         await ctx.send(embed = embed)
     
     
-
+    @commands.command()
+    @commands.cooldown(1, 1, commands.BucketType.user)
+    async def makeBCA(self, ctx, *, userInput : str):
+        """Creates a BCA table based on your input. Use ?makeBCA help to see how to format it properly."""
         
+        if userInput != "help":
+            try:
+                #Load data & configure user input
+                pData = json.load(open("periodictable.json", "r"))
+                temp = userInput.split("|")
+                userMass = temp[1]
+                
+                #Sigfig rounding function
+                round_to_n = lambda x, n: round(x, -int(math.floor(math.log10(x))) + (n - 1))
+                
+                #Data configuration
+                temp = temp[0].split("->")
+                reactants = temp[0].split("+")
+                products = temp[1].split("+")
+                compounds = []
+                coefficients = []
+                molarmass = []
+          
+                #Split input into coefficient and compound lists
+                for item in reactants:
+                    item = item.strip()
+                    try:
+                        coefficients.append(int(item[0]))
+                        item = item[1:]
+                    except:
+                        coefficients.append(1)
+                    compounds.append(item)
+                for item in products:
+                    item = item.strip()
+                    try:
+                        coefficients.append(int(item[0]))
+                        item = item[1:]
+                    except:
+                        coefficients.append(1)
+                    compounds.append(item)
+                  
+                #Gets the molar mass of each compound, and adds that to the list
+                for compound in compounds:
+                    #Ensures that subscripts + parentheses work right (nested parentheses do NOT work)
+                    newStr = ""
+                    paren = False
+                    x = 0
+                    while x < len(compound):
+                        if compound[x] == "(":
+                            paren = True
+                            compound = compound[:x] + compound[x+1:]
+                            x -= 1
+                        elif paren:
+                            if compound[x] != ")":
+                                newStr += compound[x]
+                            else:
+                                paren = False
+                                compound = compound[:x] + (newStr * (int(compound[x+1])-1)) + compound[x+2:]
+                                print(compound)
+                                x -= 1
+                                x += len(newStr)
+                                newStr = ""
+                        x += 1
+                    elements = re.findall('[A-Z][^A-Z]*', compound)
+                    totalMass = 0.0
+                    for element in elements:
+                        head = element.rstrip('0123456789')
+                        tail = element[len(head):]
+                        items = head, tail
+                        
+                        for element in pData:
+                            if element["symbol"] == items[0]:
+                                mass = float(element["atomicMass"].split("(")[0])
+                        if items[1] == "":
+                            totalMass += mass
+                        else:
+                            totalMass += mass * int(items[1])
+                            
+                    molarmass.append(totalMass)
+                
+                #Changes the user-inputted mass into something more useful. Also finds the correct amount of sigfigs for later
+                userMass = userMass.split("->")
+                newMass = []
+                for item in userMass:
+                    for thing in item.split("+"):
+                        newMass.append(thing.strip())
+                temp = 0
+                for item in newMass:
+                    if item != "x" and item != "xs":
+                        temp += 1
+                
+                for thing in newMass:
+                    if thing != "x" and thing != "xs":
+                        sample = thing[:len(thing)-1]
+                        sigfigs = self.find_sigfigs(sample)
+                
+                #Creates data for later
+                known = ""
+                changes = [0] * len(coefficients)
+                before = list(changes)
+                after = list(changes)
+                limitingReactant = "None"
+                #Converts the known mass to moles
+                loc = 0
+                for item in newMass:
+                    if item != "x" and item != "xs":
+                        known = item
+                        limitingReactant = loc
+                        break
+                    loc += 1
+                if known[len(known)-1] == "g":
+                    known = float(known[:len(known)-1])
+                    known = known / molarmass[loc]
+                    known = round_to_n(known, sigfigs)
+                elif known[len(known)-1] == "m":
+                    known = float(known[:len(known)-1])
+                else:
+                    await ctx.send("Error! Make sure your given masses end in either g or m!")
+                    return
+                
+                
+                #Finds the proper data for the changes list
+                x = 0
+                for y in range(0, len(changes)):
+                    if x != loc:
+                        changes[y] = known * float(coefficients[x] / coefficients[loc])
+                    else:
+                        changes[y] = known
+                    x += 1
+                
+                #Rounds the changes list, and then puts the proper data in the before and after lists. Also makes changes negative if needed
+                for num in range(0, len(changes)):
+                    changes[num] = round_to_n(changes[num], sigfigs)
+                for num in range(0, len(reactants)):
+                    toAdd = newMass[num]
+                    if toAdd[len(toAdd)-1] == "g":
+                        toAdd = float(toAdd[:len(toAdd)-1])
+                        toAdd = toAdd / molarmass[num]
+                        toAdd = round_to_n(toAdd, sigfigs)
+                    elif toAdd[len(toAdd)-1] == "m":
+                        toAdd = float(toAdd[:len(toAdd)-1])
+                    elif toAdd != "x" and toAdd != "xs":
+                        await ctx.send("Error! Make sure your given masses end in either g or m!")
+                        return
+                    before[num] = toAdd
+                    changes[num] = -1 * changes[num]
+                for num in range(0, len(changes)):
+                    if before[num] != "xs":
+                        after[num] = before[num] + changes[num]
+                    else:
+                        after[num] = before[num] + str(changes[num])
+                for num in range(0, len(after)):
+                    try:
+                        after[num] = float(after[num])
+                        if after[num] > 0:
+                            after[num] = round_to_n(after[num], sigfigs)
+                    except:
+                        newStr = after[num][3:]
+                        after[num] = "xs-" + str(round_to_n(float(newStr), sigfigs))
+                
+                #If there are two givens, this repeats the earlier process (from converting mass to moles and down), but with the second given.
+                if temp == 2:
+                    loc = 0
+                    second = False
+                    for item in newMass:
+                        if item != "x" and item != "xs" and second:
+                            known = item
+                            limitingReactant = loc
+                            break
+                        elif item != "x" and item != "xs":
+                            second = True
+                        loc += 1
+                    if known[len(known)-1] == "g":
+                        known = float(known[:len(known)-1])
+                        known = known / molarmass[loc]
+                        known = round_to_n(known, sigfigs)
+                    elif known[len(known)-1] == "m":
+                        known = float(known[:len(known)-1])
+                    else:
+                        await ctx.send("Error! Make sure your given masses end in either g or m!")
+                        return
+                    
+                    if known + changes[loc] < 0:
+                        x = 0
+                        for y in range(0, len(changes)):
+                            if x != loc:
+                                changes[y] = known * float(coefficients[x] / coefficients[loc])
+                            else:
+                                changes[y] = known
+                            x += 1
+                            
+                        for num in range(0, len(changes)):
+                            changes[num] = round_to_n(changes[num], sigfigs)
+                        for num in range(0, len(reactants)):
+                            toAdd = newMass[num]
+                            if toAdd[len(toAdd)-1] == "g":
+                                toAdd = float(toAdd[:len(toAdd)-1])
+                                toAdd = toAdd / molarmass[num]
+                                toAdd = round_to_n(toAdd, sigfigs)
+                            elif toAdd[len(toAdd)-1] == "m":
+                                toAdd = float(toAdd[:len(toAdd)-1])
+                            elif toAdd != "x" and toAdd != "xs":
+                                await ctx.send("Error! Make sure your given masses end in either g or m!")
+                                return
+                            before[num] = toAdd
+                            changes[num] = -1 * changes[num]
+                        for num in range(0, len(changes)):
+                            if before[num] != "xs":
+                                after[num] = before[num] + changes[num]
+                            else:
+                                after[num] = before[num] + str(changes[num])
+                        for num in range(0, len(after)):
+                            try:
+                                after[num] = float(after[num])
+                                if after[num] > 0:
+                                    after[num] = round_to_n(after[num], sigfigs)
+                            except:
+                                newStr = after[num][3:]
+                                after[num] = "xs-" + str(round_to_n(float(newStr), sigfigs))
+               
+                #Error handling!
+                if temp > 2:
+                    await ctx.send("Error! Too many givens! Make sure you have a maximum of two given masses in your data! (The part after the '|') ")
+                    return
+               
+                #Puts the "xs" in the list, since we need that for the table
+                x = 0
+                for item in newMass:
+                    if item == "xs":
+                        before[x] = "xs"
+                        after[x] = "xs" + str(changes[x])
+                    x += 1
+                    
+                    
+                
+                #Formats things
+                prettyBefore  = []
+                prettyChanges = []
+                prettyAfter   = []
+                for x in range(0, len(before)):
+                    try:
+                        prettyBefore.append(str(float(before[x])))
+                        if self.find_sigfigs(prettyBefore[x]) < sigfigs:
+                            prettyBefore[x] += "0" * (sigfigs - self.find_sigfigs(prettyBefore[x]))
+                    except:
+                        pass
+                for x in range(0, len(changes)):
+                    try:
+                        prettyChanges.append(str(float(changes[x])))
+                        if self.find_sigfigs(prettyChanges[x]) < sigfigs:
+                            prettyChanges[x] += "0" * (sigfigs - self.find_sigfigs(prettyChanges[x]))
+                    except:
+                        pass
+                    if x >= len(reactants):
+                        prettyChanges[x] = "+" + prettyChanges[x]
+                for x in range(0, len(after)):
+                    try:
+                        prettyAfter.append(str(float(after[x])))
+                        if self.find_sigfigs(prettyAfter[x]) < sigfigs:
+                            prettyAfter[x] += "0" * (sigfigs - self.find_sigfigs(prettyAfter[x]))
+                    except:
+                        pass
+                  
+                gramsAfter = []
+                for x in range(0, len(after)):
+                    gramVal = float(after[x]) * molarmass[x] 
+                    if gramVal > 0:
+                        gramVal = round_to_n(gramVal, sigfigs)
+                    try:
+                        gramsAfter.append(str(float(gramVal)))
+                        if self.find_sigfigs(gramsAfter[x]) < sigfigs:
+                            gramsAfter[x] += "0" * (sigfigs - self.find_sigfigs(gramsAfter[x]))
+                    except:
+                        pass
+                          
+                    
+                #Data table
+                pTable = PrettyTable()
+                pTable.field_names = [""] + reactants + products
+                pTable.add_row(["Before:"] + prettyBefore)
+                pTable.add_row(["Change:"] + prettyChanges)
+                pTable.add_row(["After:"] + prettyAfter)
+                pTable.add_row(["", "", "", "", ""])
+                pTable.add_row(["After (g):"] + gramsAfter)
+                pTable.add_row(["Molar Mass:"] + molarmass)
+                pTable.align = "r"
+                
+                #Embed creation
+                BCAembed=discord.Embed(title="Equation: `" + userInput.split("|")[0] + "`", description="```\n" + str(pTable) + "\n```", color = 0x00FF00)
+                BCAembed.set_author(name=ctx.message.author.name + "'s BCA Table", icon_url=ctx.message.author.avatar_url)
+                BCAembed.set_footer(text="Make sure you entered information correctly! I can't check your work for you. Use ?makeBCA help for more information.")
+                if limitingReactant != "None":
+                    BCAembed.add_field(name="Limiting Reactant:", value=compounds[limitingReactant])
+                else:
+                    BCAembed.add_field(name="Limiting Reactant:", value=limitingReactant)
+                await ctx.send(embed=BCAembed)
+            except Exception as e:
+                await ctx.send("Uh oh! An error occurred! Make sure you inputted your data correctly! If you're 100% sure you didn't make a mistake, contact my master with this error code:")
+                await ctx.send("```css\n[" + str(e) + "]\n```")
+        else:
+            #Help function
+            descriptionStr = """
+                             Input a *balanced* chemical equation, along with the known masses, and this command will give you a BCA table for it!
+                             **Format:** `Reactant1 + Reactant2 -> Product1 + Product2 | 1stMass + 2ndMass -> 3rdMass + 4thMass`
+                             **Example:** `Cu + 2AgNO3 -> 2Ag + Cu(NO3)2 | 2.93g + 1.41g -> x + x`
+                             If you do not know a mass, put `x` instead of a mass. If it's the excess reactant, make it `xs` instead.
+                             **Advice:**
+                             -Don't forget to put `g` or `m` after the mass depending on if it's grams or moles!
+                             -Double check your input! I don't check your correctness when I calculate things.
+                             -If things aren't capitalized right, then this function will not work as expected.
+                             -Coefficients go at the beginning of each compound, and the subscripts go at the end/middle.
+                             -Use parentheses to signify nested coefficients.
+                             -This function works with any number of reactants and products!
+                             -Enter Sig Figs correctly; this function takes them into account.
+                             """
+            
+            BCAembed=discord.Embed(title="How to format this command:", description=descriptionStr, color = 0x00FF00)
+            BCAembed.set_author(name=ctx.message.author.name + "'s BCA Table Help", icon_url=ctx.message.author.avatar_url)
+            await ctx.send(embed=BCAembed)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 def setup(bot):
     bot.add_cog(Misc(bot))
