@@ -239,10 +239,8 @@ class Misc(commands.Cog):
         
         _mentions_transforms = {'@everyone': '@\u200beveryone','@here': '@\u200bhere'}
         _mention_pattern = re.compile('|'.join(_mentions_transforms.keys()))
-
         def repl(obj):
             return _mentions_transforms.get(obj.group(0), '')
-
         # help by itself just lists our own commands.
         if len(commands) == 0:
             pages = await bot.formatter.format_help_for(ctx, bot)
@@ -257,7 +255,6 @@ class Misc(commands.Cog):
                 if command is None:
                     await destination.send(bot.command_not_found.format(name))
                     return
-
             pages = await bot.formatter.format_help_for(ctx, command)
         else:
             name = _mention_pattern.sub(repl, commands[0])
@@ -265,7 +262,6 @@ class Misc(commands.Cog):
             if command is None:
                 await destination.send(bot.command_not_found.format(name))
                 return
-
             for key in commands[1:]:
                 try:
                     key = _mention_pattern.sub(repl, key)
@@ -276,19 +272,14 @@ class Misc(commands.Cog):
                 except AttributeError:
                     await destination.send(bot.command_has_no_subcommands.format(command, key))
                     return
-
             pages = await bot.formatter.format_help_for(ctx, command)
-
         if bot.dm_help is None:
             characters = sum(map(len, pages))
             # modify destination based on length of pages.
             if characters > 1000:
                 destination = ctx.message.author
-
-
         myEmbed = discord.Embed(title="sawickipedia.exe Help", description=str(pages[pageNum]))
         myEmbed.set_footer(text="Page " + str(pageNum+1) + "/" + str(len(pages)))
-
         await ctx.send(embed=myEmbed)
         """
 
@@ -564,12 +555,15 @@ class Misc(commands.Cog):
                 prettyChanges = []
                 prettyAfter   = []
                 for x in range(0, len(before)):
-                    try:
-                        prettyBefore.append(str(float(before[x])))
-                        if self.find_sigfigs(prettyBefore[x]) < sigfigs:
-                            prettyBefore[x] += "0" * (sigfigs - self.find_sigfigs(prettyBefore[x]))
-                    except:
-                        pass
+                    if before[x] == "xs":
+                        prettyBefore.append("xs")
+                    else:
+                        try:
+                            prettyBefore.append(str(float(before[x])))
+                            if self.find_sigfigs(prettyBefore[x]) < sigfigs:
+                                prettyBefore[x] += "0" * (sigfigs - self.find_sigfigs(prettyBefore[x]))
+                        except:
+                            pass
                 for x in range(0, len(changes)):
                     try:
                         prettyChanges.append(str(float(changes[x])))
@@ -580,33 +574,42 @@ class Misc(commands.Cog):
                     if x >= len(reactants):
                         prettyChanges[x] = "+" + prettyChanges[x]
                 for x in range(0, len(after)):
-                    try:
-                        prettyAfter.append(str(float(after[x])))
-                        if self.find_sigfigs(prettyAfter[x]) < sigfigs:
-                            prettyAfter[x] += "0" * (sigfigs - self.find_sigfigs(prettyAfter[x]))
-                    except:
-                        pass
+                    if str(after[x])[:2] == "xs":
+                        prettyAfter.append(after[x])
+                    else:
+                        try:
+                            prettyAfter.append(str(float(after[x])))
+                            if self.find_sigfigs(prettyAfter[x]) < sigfigs:
+                                prettyAfter[x] += "0" * (sigfigs - self.find_sigfigs(prettyAfter[x]))
+                        except:
+                            pass
                   
                 gramsAfter = []
                 for x in range(0, len(after)):
-                    gramVal = float(after[x]) * molarmass[x] 
-                    if gramVal > 0:
-                        gramVal = round_to_n(gramVal, sigfigs)
-                    try:
-                        gramsAfter.append(str(float(gramVal)))
-                        if self.find_sigfigs(gramsAfter[x]) < sigfigs:
-                            gramsAfter[x] += "0" * (sigfigs - self.find_sigfigs(gramsAfter[x]))
-                    except:
-                        pass
+                    if prettyAfter[:2] == "xs":
+                        gramsAfter.append("N/A")
+                    else:
+                        try:
+                            gramVal = float(after[x]) * molarmass[x] 
+                            if gramVal > 0:
+                                gramVal = round_to_n(gramVal, sigfigs)
+                            try:
+                                gramsAfter.append(str(float(gramVal)))
+                                if self.find_sigfigs(gramsAfter[x]) < sigfigs:
+                                    gramsAfter[x] += "0" * (sigfigs - self.find_sigfigs(gramsAfter[x]))
+                            except:
+                                gramsAfter.append("N/A")
+                        except:
+                            gramsAfter.append("N/A")
                           
-                    
+                print(gramsAfter)   
                 #Data table
                 pTable = PrettyTable()
                 pTable.field_names = [""] + reactants + products
                 pTable.add_row(["Before:"] + prettyBefore)
                 pTable.add_row(["Change:"] + prettyChanges)
                 pTable.add_row(["After:"] + prettyAfter)
-                pTable.add_row(["", "", "", "", ""])
+                pTable.add_row([""] + [""]*len(prettyBefore))
                 pTable.add_row(["After (g):"] + gramsAfter)
                 pTable.add_row(["Molar Mass:"] + molarmass)
                 pTable.align = "r"
