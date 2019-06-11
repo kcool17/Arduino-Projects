@@ -4,6 +4,8 @@
 import discord  
 from discord.ext import commands
 import os
+import json
+import asyncio
 
 
 
@@ -78,15 +80,149 @@ class Moderation(commands.Cog):
     
     
     
+    @commands.command()
+    @commands.check(check_owner)
+    @commands.cooldown(1, 1, commands.BucketType.user)
+    async def setcustomjoin(self, ctx, user, nickname, *roles):
+        """Allows customized roles and nicknames to be given to a user who previously left and rejoined. The bot must have a higher role than the highest role it will give. Note: Please only use the name of the role, with out the `@`. Also, use quotes if a nickname/role has multiple words."""
+        member = await self.get_users(ctx, user)
+        with open('serverdata' + os.sep + str(ctx.guild.id) + ".json") as guild_file:
+            guild_data = json.load(guild_file)
+            
+        try:
+            custom_join = []
+            custom_join.append(nickname)
+            for role in roles:
+                role_exists = False
+                for guildrole in ctx.guild.roles:
+                    if role == guildrole.name:
+                        custom_join.append(guildrole.id)
+                        role_exists = True
+                if not role_exists:
+                    await ctx.send("Invalid role! Please try again!")
+                    return
+            guild_data['userdata'][str(member.id)]['custom_join'] = custom_join
+            with open('serverdata' + os.sep + str(ctx.guild.id) + ".json", "w") as guild_file:
+                json.dump(guild_data, guild_file, indent=4)
+        except:
+            await ctx.send("An error occurred! Please try again, and use the right parameters!")
+            return
+        await ctx.send("Done!")
     
     
+    @commands.command()
+    @commands.check(check_owner)
+    @commands.cooldown(1, 1, commands.BucketType.user)
+    async def viewcustomjoin(self, ctx, *, user : str = 'list'):
+        """Views the customized join for the given user. If no user input, or the input is "list", it returns a list of all users with customized joins."""
+        if user == 'list':
+            with open('serverdata' + os.sep + str(ctx.guild.id) + ".json") as guild_file:
+                guild_data = json.load(guild_file)
+                
+            custom_join_users = []
+            for user, data in guild_data['user_data'].items():
+                try:
+                    if data['custom_join'] != []:
+                        custom_join_users.append[int(user)]
+                except KeyError:
+                    pass #No custom join exists
+            
+            custom_join_str = ""
+            for item in custom_join_users:
+                pass # NOT DONE FIX THIS
+            
+            
+            return
+        
+        
+        member = await self.get_users(ctx, user)
+        
+        with open('serverdata' + os.sep + str(ctx.guild.id) + ".json") as guild_file:
+            guild_data = json.load(guild_file)
+            
+        try:
+            custom_join = guild_data['user_data'][str(member.id)]['custom_join']
+        except:
+            custom_join = []
+        
+        if custom_join == []:
+            await ctx.send("No Custom Join found!")
+            return
+        
+        fmt = "**Nickname:** " + custom_join[0] + "\n**Roles:**\n"
+        for role in custom_join[1:]:
+            fmt = fmt + "<@&" + str(role) + ">\n"
+        my_embed=discord.Embed(title="Custom Join Settings:", description=fmt)
+        my_embed.set_author(name= str(ctx.guild.get_member(member)), icon_url= ctx.guild.get_member(member).avatar_url)
+        await ctx.send(embed=my_embed)
     
     
+    @commands.command()
+    @commands.check(check_dev_owner)
+    @commands.cooldown(1, 1, commands.BucketType.user)
+    async def deletecustomjoin(self, ctx, *, user : str):
+        """Deletes the customized join for the given user."""
+        member = await self.get_users(ctx, user)
+        
+        with open('serverdata' + os.sep + str(ctx.guild.id) + ".json") as guild_file:
+            guild_data = json.load(guild_file)
+            
+        guild_data["user_data"][str(member.id)]["custom_join"] = []
+        
+        with open('serverdata' + os.sep + str(ctx.guild.id) + ".json", "w") as guild_file:
+            json.dump(guild_data, guild_file, indent=4)
+                
+        await ctx.send("Removed Custom Join for: " + str(ctx.guild.get_member(member)))
     
     
-    
-    
-    
+    @commands.command()
+    @commands.check(check_dev_owner)
+    @commands.cooldown(1, 1, commands.BucketType.user)
+    async def viewcustomjoinid(self, ctx, *, user : str):
+        '''View the customized join for the given user ID.'''
+        member = int(user)
+        with open('serverdata' + os.sep + str(ctx.guild.id) + ".json") as guild_file:
+            guild_data = json.load(guild_file)
+            
+        try:
+            custom_join = guild_data['server_data'][str(member)]['custom_join']
+        except:
+            custom_join = []
+            
+        if custom_join == []:
+            await ctx.send("User ID not found, or Custom Join does not exist! Try again!")
+            return
+        
+        fmt = "**Nickname:** " + custom_join[0] + "\n**Roles:**\n"
+        for role in custom_join[1:]:
+            fmt = fmt + "<@&" + str(role) + ">\n"
+        my_embed=discord.Embed(title="Custom Join Settings:", description=fmt)
+        my_embed.set_author(name= user)
+        await ctx.send(embed=my_embed)
+        
+    @commands.command()
+    @commands.check(check_dev_owner)
+    @commands.cooldown(1, 1, commands.BucketType.user)
+    async def deletecustomjoinid(self, ctx, *, user : str):
+        """Deletes the customized join for the given user ID."""
+        with open('serverdata' + os.sep + str(ctx.guild.id) + ".json") as guild_file:
+            guild_data = json.load(guild_file)
+            
+        try:
+            custom_join = guild_data['server_data'][str(member)]['custom_join']
+        except:
+            custom_join = []
+            
+        if custom_join == []:
+            await ctx.send("User ID not found, or Custom Join does not exist! Try again!")
+            return
+        
+        guild_data['server_data'][str(member)]['custom_join'] = []
+        
+        with open('serverdata' + os.sep + str(ctx.guild.id) + ".json", "w") as guild_file:
+            json.dump(guild_data, guild_file, indent=4)
+            
+        await ctx.send("Removed Custom Join for: " + user)
     
 
     

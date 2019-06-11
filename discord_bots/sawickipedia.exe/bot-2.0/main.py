@@ -53,7 +53,7 @@ def get_prefix(bot, message):
 description = "A bot that can do things."
 startup_extensions = ["modules.developer",
                       "modules.misc",
-                      "modules.moderation"
+                      "modules.moderation",
                       "modules.transfer",
                       "modules.settings"
                     ]
@@ -138,7 +138,27 @@ async def on_guild_join(guild):
         json.dump({"server_data" : {}, "user_data": {}}, my_file, indent=4)
     except:
         pass #File exists, so no need to do anything
+
+@bot.event
+async def on_member_join(member):
+    #Automatically adds roles/nicknames for Custom Join
+    with open('serverdata' + os.sep + str(member.guild.id) + ".json") as guild_file:
+            guild_data = json.load(guild_file)
     
+    try:
+        custom_join = guild_data['user_data'][str(member.id)]['custom_join']
+    except:
+        custom_join = []
+    
+    if custom_join != []:
+        role_list = []
+        for role in custom_join[1:]:
+            try:
+                role_list.append(get(guild.roles, id=role))
+            except:
+                pass
+        await member.edit(nick=custom_join[0], roles = role_list)
+      
     
 @bot.event
 async def on_message(message):
