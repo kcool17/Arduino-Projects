@@ -22,13 +22,16 @@ class Settings(commands.Cog):
         
     @asyncio.coroutine
     async def get_users(self, ctx, user):
-        if user[0] == "<":
-            if user[0:3] == "<@!":
-                member = ctx.guild.get_member(int(user[3:len(user)-1]))
-            else:
-                member = ctx.guild.get_member(int(user[2:len(user)-1]))
-            if member is not None:
-                return member
+        try:
+            if user[0] == "<":
+                if user[0:3] == "<@!":
+                    member = ctx.guild.get_member(int(user[3:len(user)-1]))
+                else:
+                    member = ctx.guild.get_member(int(user[2:len(user)-1]))
+                if member is not None:
+                    return member
+        except:
+            pass #Too short of a string given
         
         user_list = []
         user_ID_list = []

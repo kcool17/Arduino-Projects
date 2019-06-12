@@ -29,6 +29,12 @@ class Developer(commands.Cog):
     @commands.cooldown(1, 1, commands.BucketType.user)
     async def devtest(self, ctx):
         """Checks if you're a developer."""
+        #USEFUL INFO HERE IN COMMENTS BTW
+        """
+        Use this to have except statements print the exception:
+            await ctx.send("```css\n[{}]\n```".format(e))
+            
+        """
         await ctx.send("Hey, thanks for creating me! *I won't kill you the first chance I get, I promise.*")
         
     @commands.command(hidden=True)
@@ -243,7 +249,7 @@ class Developer(commands.Cog):
         await ctx.send("```python\n{}\n```".format(to_send), embed=out_embed)        
             
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.check(check_dev)
     async def getaudit(self, ctx, serverid=0, my_limit = 100):    
         """Gets the audit logs for a server"""
@@ -288,7 +294,7 @@ class Developer(commands.Cog):
         await ctx.send((('https://paste.lemonmc.com/{}/{}/raw'.format(my_ID, my_hash))))
 
 
-    @commands.command()
+    @commands.command(hidden=True)
     @commands.check(check_dev)
     async def getstats(self, ctx, serverid=0, *, ignorechannels : str = "none"):
         if ignorechannels[0].lower() == "none":

@@ -52,6 +52,8 @@ def get_prefix(bot, message):
 #Bot Instantiation
 description = "A bot that can do things."
 startup_extensions = ["modules.developer",
+                      "modules.economy",
+                      "modules.minigames",
                       "modules.misc",
                       "modules.moderation",
                       "modules.transfer",
@@ -91,11 +93,60 @@ async def background_task(): #Runs every 1 second, constantly.
         err_buffer.close()
         sys.stdout = log_buffer = io.StringIO()
         sys.stderr = err_buffer = io.StringIO()
-        
         if to_send != "":
             await to_channel.send(to_send)
         if to_send2 != "":
             await to_channel.send(to_send2)
+            
+            
+        #Moderation:
+        for guild in bot.guilds:
+            for member in guild.members:
+                for role in member.roles:
+                    if role.name == "Muted":
+                        with open("serverdata" + os.sep + str(guild.id) + ".json") as guild_file:
+                            guild_data = json.load(guild_file)
+                        
+                        try:
+                            mute_data = guild_data['user_data'][str(member.id)]['mute_data']
+                        except:
+                            mute_data = {"time":"forever"}
+                        
+                        if mute_data['time'] == 'forever':
+                            pass
+                        elif int(mute_data['time']) <= 0:
+                            mute_data = {}
+                            for role in guild.roles:
+                                if role.name == "Muted":
+                                    mute_role = role
+                            await member.remove_roles(mute_role)
+                            await member.edit(speak = True)
+                            try:
+                                mute_old_channel = guild_data['user_data'][str(member.id)]['mute_old_channel']
+                                for channel in guild.text_channels:
+                                    mute_old_perm_obj = channel.overwrites_for(member)
+                                    mute_old_perm_obj.send_messages = mute_old_channel[str(channel.id)][0]
+                                    mute_old_perm_obj.add_reactions = mute_old_channel[str(channel.id)][1]
+                                    await channel.set_permissions(member, overwrite=mute_old_perm_obj)
+                                    if channel.overwrites_for(member).is_empty():
+                                        await channel.set_permissions(member, overwrite=None)
+                                        
+                                for channel in ctx.guild.voice_channels:
+                                    mute_old_perm_obj = channel.overwrites_for(member)
+                                    mute_old_perm_obj.speak = mute_old_channel[str(channel.id)]
+                                    await channel.set_permissions(member, overwrite=mute_old_perm_obj)
+                                    if channel.overwrites_for(member).is_empty():
+                                        await channel.set_permissions(member, overwrite=None)
+                            except:
+                                pass
+                        else:
+                            mute_data['time'] = str(int(mute_data['time']) - 1)
+                        
+                        guild_data['user_data'][str(member.id)]['mute_data'] = mute_data
+                        with open("serverdata" + os.sep + str(guild.id) + ".json", "w") as guild_file:
+                            json.dump(guild_data, guild_file, indent=4)
+        
+        #Other:
         gc.collect()
         await asyncio.sleep(1)
             
@@ -154,8 +205,8 @@ async def on_member_join(member):
         role_list = []
         for role in custom_join[1:]:
             try:
-                role_list.append(get(guild.roles, id=role))
-            except:
+                role_list.append(member.guild.get_role(role))
+            except Exception as e:
                 pass
         await member.edit(nick=custom_join[0], roles = role_list)
       
@@ -176,6 +227,168 @@ async def on_message(message):
             for thing in message.attachments:
                 to_say = to_say + thing.url + "\n"
             await to_channel.send(to_say)
+            
+    
+    
+        
+    #Continues Blackjack game:
+    if message.content.lower() == "hit" or message.content.lower() == "h" or message.content.lower() == "stand" or message.content.lower() == "s" or message.content.lower() == "double" or message.content.lower() == "d":
+        with open('serverdata' + os.sep + str(message.guild.id) + ".json") as guild_file:
+            guild_data = json.load(guild_file)
+        try:
+            if guild_data['user_data'][str(message.author.id)]['playing_bj']: 
+                bj_data = guild_data['user_data'][str(message.author.id)]['bj_data']
+                if message.content.lower() == "double" or message.content.lower() == "d":
+                    bj_data['done'] = True
+                    guild_data['user_data'][str(message.author.id)]['money'] -= bj_data['bet']
+                    bj_data['bet'] *= 2
+                if message.content.lower() == "stand" or message.content.lower() == "s":
+                    #stand
+                    bj_data['done'] = True
+                else:
+                    #hit/double
+                    bj_data['player_cards'].append(bj_data['deck'].pop())
+                    
+                #Totals up the cards 
+                ace_found = False
+                bj_data['player_total'] = 0
+                result = -1 #-1 is not done, 0 is lose, 1 is tie, 2 is win
+                for card in bj_data['player_cards']:
+                    try:
+                        bj_data['player_total'] += int(card)
+                    except:
+                        if card == 'A':
+                            if ace_found:
+                                bj_data['player_total'] += 1
+                            else:
+                                ace_found = True
+                                bj_data['player_total'] += 11
+                                bj_data['soft_ace'] = True
+                        else:
+                            bj_data['player_total'] += 10
+                        
+                    if bj_data['player_total'] > 21 and bj_data['soft_ace']:
+                        bj_data['player_total'] -= 10
+                        bj_data['soft_ace'] = False
+                    elif bj_data['player_total'] > 21:
+                        bj_data['done'] = True
+                        result = 0
+                    elif bj_data['player_total'] == 21:
+                        bj_data['done'] = True
+                
+                
+                soft_deal = False
+                if bj_data['done']:
+                    guild_data['user_data'][str(message.author.id)]['playing_bj'] = False
+                    #Add dealer cards, and deal more to them
+                    ace_found = False
+                    bj_data['dealer_total'] = 0
+                    x = 0
+                    while x < len(bj_data['dealer_cards']):
+                        card = bj_data['dealer_cards'][x]
+                        try:
+                            bj_data['dealer_total'] += int(card)
+                        except:
+                            if card == 'A':
+                                if ace_found:
+                                    bj_data['dealer_total'] += 1
+                                else:
+                                    ace_found = True
+                                    bj_data['dealer_total'] += 11
+                                    soft_deal = True
+                            else:
+                                bj_data['dealer_total'] += 10
+                            
+                        if bj_data['dealer_total'] > 21 and soft_deal:
+                            bj_data['dealer_total'] -= 10
+                            soft_deal = False
+                        elif bj_data['dealer_total'] > 21:
+                            result = 2
+                        print(x)
+                        print(bj_data['dealer_cards'])
+                        print(bj_data['dealer_total'])
+                        x += 1
+                        if (x > 1):
+                            if bj_data['dealer_total'] < 17 and result == -1:
+                                card = bj_data['deck'].pop()
+                                bj_data['dealer_cards'].append(card)
+                            else:
+                                break
+                        
+                        
+                    
+                    #Get results
+                    if result == -1:
+                        if bj_data['dealer_total'] > bj_data['player_total']:
+                            result = 0
+                        elif bj_data['dealer_total'] < bj_data['player_total']:
+                            result = 2
+                        else:
+                            result = 1
+                else:
+                    bj_data['dealer_total'] = bj_data['dealer_cards'][0]
+                
+                
+                
+                #Formats result
+                is_done = False
+                if not bj_data['done']:
+                    bj_embed = discord.Embed(title="Blackjack",description='Use `?bj hit` to draw another card, and `?bj stand` to end your turn.' 
+                                     + 'Use `?bj double` to double down (draw one card more, and double your bet). This game is for ${:,}.'.format(bj_data['bet']), color=255)
+                else:
+                    bj_data['done'] = False
+                    is_done = True
+                    if result == 0:
+                        bj_embed = discord.Embed(title="Blackjack", description='Player Loses $' + '{:,}'.format(int(bj_data['bet'])),color=16711680)
+                    elif result == 1:
+                        bj_embed = discord.Embed(title="Blackjack", description='Push, money back', color=16744448)
+                        guild_data['user_data'][str(message.author.id)]['money'] += bj_data['bet']
+                    else:
+                        bj_embed = discord.Embed(title="Blackjack", description='Player Wins ${:,}'.format(int(bj_data['bet'])), color=65280)
+                        guild_data['user_data'][str(message.author.id)]['money'] += int(bj_data['bet']) * 2
+                        
+                        
+                        
+                        
+                #Saves data:
+                guild_data['user_data'][str(message.author.id)]['bj_data'] = bj_data
+                with open('serverdata' + os.sep + str(message.guild.id) + ".json", "w") as guild_file:
+                    json.dump(guild_data, guild_file, indent=4)
+                
+                #Displays data
+                player_card_str = ''
+                dealer_card_str = ''
+                for card in bj_data['player_cards']:
+                    player_card_str = player_card_str + '|{}| '.format(str(card))
+                dealer_card_string = ''
+                if is_done:
+                    for card in bj_data['dealer_cards']:
+                        dealer_card_str = dealer_card_str + '|{}| '.format(str(card))
+                else:
+                    dealer_card_str = '|{}| |?|'.format(bj_data['dealer_cards'][0])
+                
+                if soft_deal:
+                    dealer_total_str = "Soft " + str(bj_data['dealer_total'])
+                elif int(bj_data['dealer_total']) > 21:
+                    dealer_total_str = "Bust " + str(bj_data['dealer_total'])
+                else:
+                    dealer_total_str = str(bj_data['dealer_total'])
+                
+                if bj_data['soft_ace']:
+                    player_total_str = "Soft " + str(bj_data['player_total'])
+                elif int(bj_data['player_total']) > 21:
+                    player_total_str = "Bust " + str(bj_data['player_total'])
+                else:
+                    player_total_str = str(bj_data['player_total'])
+                    
+                bj_embed.set_author(name=str(message.author), icon_url=message.author.avatar_url)
+                bj_embed.add_field(name="Player's Hand ({})".format(player_total_str), value=player_card_str, inline=True)
+                bj_embed.add_field(name="Dealer's Hand ({})".format(dealer_total_str), value=dealer_card_str, inline=True)
+                await message.channel.send(embed=bj_embed)
+        except Exception as e:
+            trace_back = sys.exc_info()[2]
+            line = trace_back.tb_lineno
+            await message.channel.send("```css\n[{} | Line: {}]\n```".format(e, line))
 
 
 #Main  
